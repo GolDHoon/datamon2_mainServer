@@ -4,8 +4,10 @@ import com.datamon.datamon2.dto.input.user.LoginInuptDto;
 import com.datamon.datamon2.servcie.logic.UserSignService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 import org.springframework.web.bind.annotation.*;
 
+@EnableJdbcHttpSession
 @RestController
 public class UserSignController {
     private UserSignService userSignService;
