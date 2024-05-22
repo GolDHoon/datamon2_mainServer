@@ -12,8 +12,8 @@ public class WebConfigurer implements WebMvcConfigurer {
 
         // 모든 client 접속 허가
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedOrigins("http://158.247.215.85:3000/")
+                .allowedOrigins("http://localhost:3000"
+                                , "http://158.247.215.85:3000")
                 .allowCredentials(true);
     }
 }
