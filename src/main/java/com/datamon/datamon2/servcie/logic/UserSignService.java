@@ -3,6 +3,7 @@ package com.datamon.datamon2.servcie.logic;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.*;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class UserSignService {
         JsonUtil jsonUtil = new JsonUtil();
         IpUtil ipUtil = new IpUtil(request);
 
+        Cookie[] cookies = request.getCookies();
         System.out.println(request.getSession().getId());
 
         Object jwt = httpSessionUtil.getSession("jwt");
