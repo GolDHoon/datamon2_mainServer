@@ -48,6 +48,8 @@ public class UserSignService {
         JsonUtil jsonUtil = new JsonUtil();
         IpUtil ipUtil = new IpUtil(request);
 
+        System.out.println(request.getSession().getId());
+
         Object jwt = httpSessionUtil.getSession("jwt");
         if(jwt == null){
             return "fail-token";
