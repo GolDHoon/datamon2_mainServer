@@ -7,13 +7,22 @@ public class HttpSessionUtil {
 
     public HttpSessionUtil(HttpSession session) {
         this.session = session;
+        session.setMaxInactiveInterval(30*60);
     }
 
-    public void setSession(String key, String value){
+    public void setSession(HttpSession session){
+        this.session = session;
+    }
+
+    public HttpSession getSession(){
+        return this.session;
+    }
+
+    public void setAttribute(String key, String value){
         session.setAttribute(key, value);
     }
 
-    public Object getSession(String key){
+    public Object getAttribute(String key){
         return session.getAttribute(key);
     }
 }

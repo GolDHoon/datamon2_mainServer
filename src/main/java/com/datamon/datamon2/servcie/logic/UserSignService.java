@@ -22,7 +22,7 @@ public class UserSignService {
 
     public String userLogin(String userId, String password, HttpServletRequest request) throws Exception{
         JsonUtil jsonUtil = new JsonUtil();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
         IpUtil ipUtil = new IpUtil(request);
 
         UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(userId);
@@ -36,33 +36,34 @@ public class UserSignService {
         if(encriptPw.equals(userBaseByUserId.getUserPw())){
             String token = jwtUtil.createToken(userId);
 
-            httpSessionUtil.setSession("jwt", token);
-            httpSessionUtil.setSession("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
-            return request.getSession().getId();
+            httpSessionUtil.setAttribute("jwt", token);
+            httpSessionUtil.setAttribute("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
+            return request.getSession(false).getId();
         }else {
             return "fail-password";
         }
     }
 
     public String sessionCheck(HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
-        
+        Cookie[] cookies = request.getCookies();
+        String sessionId = request.getSession().getId();
+        HttpSession session = request.getSession(false);
+        String httpSessionId = session.getId();
+
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
         JsonUtil jsonUtil = new JsonUtil();
         IpUtil ipUtil = new IpUtil(request);
 
-        Cookie[] cookies = request.getCookies();
-        String sessionId = request.getSession().getId();
-        HttpSession session = request.getSession();
-        String httpSessionId = session.getId();
 
-        Object jwt = httpSessionUtil.getSession("jwt");
+        Object jwt = httpSessionUtil.getAttribute("jwt");
         if(jwt == null){
             return "fail-token";
         }
 
         String token = jwt.toString();
 
-        Map loginIp = jsonUtil.toMapByJsonString(httpSessionUtil.getSession("loginIp").toString());
+        Map loginIp = jsonUtil.toMapByJsonString(httpSessionUtil.getAttribute("loginIp").toString());
         Map<String, String> ip = ipUtil.getIp();
 
         if(ip.get("ExtractingMethod").equals(loginIp.get("ExtractingMethod"))){
