@@ -5,6 +5,7 @@ import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class UserSignService {
         this.jwtUtil = jwtUtil;
     }
 
-    public String userLogin(String userId, String password, HttpServletRequest request) throws Exception{
+    public String userLogin(String userId, String password, HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonUtil jsonUtil = new JsonUtil();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
         IpUtil ipUtil = new IpUtil(request);
@@ -38,6 +39,10 @@ public class UserSignService {
 
             httpSessionUtil.setAttribute("jwt", token);
             httpSessionUtil.setAttribute("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
+
+            Cookie cookie = new Cookie("JSESSIONID", request.getSession(false).getId());
+            response.addCookie(cookie);
+
             return request.getSession(false).getId();
         }else {
             return "fail-password";

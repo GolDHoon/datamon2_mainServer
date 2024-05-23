@@ -20,7 +20,7 @@ public class UserSignController {
     public String login(@RequestBody LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response){
         String result;
         try {
-            result = userSignService.userLogin(loginInuptDto.getUserId(), loginInuptDto.getPassword(), request);
+            result = userSignService.userLogin(loginInuptDto.getUserId(), loginInuptDto.getPassword(), request, response);
 
         } catch (Exception e) {
             result = "error";
@@ -30,7 +30,7 @@ public class UserSignController {
     }
 
     @PostMapping("/sessionCheck")
-    public String sessionCheck(HttpServletRequest request, HttpServletResponse response, String sessionId){
+    public String sessionCheck(HttpServletRequest request, HttpServletResponse response){
         String result;
 
         try {
