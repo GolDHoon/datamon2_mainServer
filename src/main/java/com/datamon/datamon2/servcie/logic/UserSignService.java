@@ -52,6 +52,7 @@ public class UserSignService {
 
         Cookie[] cookies = request.getCookies();
         String sessionId = request.getSession().getId();
+        HttpSession session = request.getSession();
 
         Object jwt = httpSessionUtil.getSession("jwt");
         if(jwt == null){
