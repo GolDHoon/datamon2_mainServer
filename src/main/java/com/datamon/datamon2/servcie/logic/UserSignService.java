@@ -46,6 +46,7 @@ public class UserSignService {
 
     public String sessionCheck(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        
         JsonUtil jsonUtil = new JsonUtil();
         IpUtil ipUtil = new IpUtil(request);
 

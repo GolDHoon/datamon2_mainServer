@@ -30,7 +30,7 @@ public class UserSignController {
     }
 
     @PostMapping("/sessionCheck")
-    public String sessionCheck(HttpServletRequest request, HttpServletResponse response){
+    public String sessionCheck(HttpServletRequest request, HttpServletResponse response, String sessionId){
         String result;
 
         try {
