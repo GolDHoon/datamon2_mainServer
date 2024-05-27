@@ -1,10 +1,9 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.UserBaseDto;
-import com.datamon.datamon2.entity.UserBase;
+import com.datamon.datamon2.entity.UserBaseEntity;
 import com.datamon.datamon2.mapper.repository.UserBaseMapper;
 import com.datamon.datamon2.repository.jpa.UserBaseRepository;
-import com.datamon.datamon2.util.EncryptionUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,12 +20,12 @@ public class UserBaseService {
     }
 
     public UserBaseDto getUserBaseByUserId(String userId){
-        UserBase userBase = userBaseRepository.findByUserId(userId).orElse(new UserBase());
-        return userBaseMapper.toDto(userBase);
+        UserBaseEntity userBaseEntity = userBaseRepository.findByUserId(userId).orElse(new UserBaseEntity());
+        return userBaseMapper.toDto(userBaseEntity);
     }
 
     public List<UserBaseDto> getUserBaseList(){
-        List<UserBase> all = userBaseRepository.findAll();
+        List<UserBaseEntity> all = userBaseRepository.findAll();
         List<UserBaseDto> result = new ArrayList<>();
 
         all.forEach( (entity) -> {
@@ -38,11 +37,11 @@ public class UserBaseService {
     }
 
     public UserBaseDto getUserBaseById(int idx){
-        return userBaseMapper.toDto(userBaseRepository.findById(idx).orElse(new UserBase()));
+        return userBaseMapper.toDto(userBaseRepository.findById(idx).orElse(new UserBaseEntity()));
     }
 
     public UserBaseDto save (UserBaseDto userBaseDto){
-        UserBase entity = userBaseMapper.toEntity(userBaseDto);
+        UserBaseEntity entity = userBaseMapper.toEntity(userBaseDto);
         return userBaseMapper.toDto(userBaseRepository.save(entity));
     }
 }

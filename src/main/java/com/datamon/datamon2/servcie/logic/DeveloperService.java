@@ -1,7 +1,6 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.dto.repository.UserBaseDto;
-import com.datamon.datamon2.entity.UserBase;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.EncryptionUtil;
 import org.springframework.stereotype.Service;
