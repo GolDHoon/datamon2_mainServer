@@ -13,7 +13,7 @@ public class WebConfigurer implements WebMvcConfigurer {
         // 모든 client 접속 허가
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000"
-                                , "http://datamon2.xyz")
+                                , "https://datamon2.xyz")
                 .allowedOriginPatterns("*")
                 .allowedMethods("*")
                 .allowedHeaders("*")
