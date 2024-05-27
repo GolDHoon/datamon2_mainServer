@@ -9,14 +9,36 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class ServerConfig {
     @Value("${server.http.port}")
     private int httpPort;
+    @Value("${server.port}")
+    private int httpsPort;
 
     @Bean
-    public ServletWebServerFactory servletContainer() {
+    @Profile("dev")
+    public ServletWebServerFactory devServletContainer() {
+        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+            @Override
+            protected void postProcessContext(Context context) {
+                SecurityConstraint securityConstraint = new SecurityConstraint();
+                securityConstraint.setUserConstraint("CONFIDENTIAL");
+                SecurityCollection collection = new SecurityCollection();
+                collection.addPattern("/*");
+                securityConstraint.addCollection(collection);
+                context.addConstraint(securityConstraint);
+            }
+        };
+        tomcat.addAdditionalTomcatConnectors(redirectConnector());
+        return tomcat;
+    }
+
+    @Bean
+    @Profile("prod")
+    public ServletWebServerFactory prodServletContainer() {
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
             @Override
             protected void postProcessContext(Context context) {
@@ -33,11 +55,12 @@ public class ServerConfig {
     }
 
     private Connector redirectConnector() {
+        System.out.println();
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
         connector.setScheme("http");
         connector.setPort(httpPort);
         connector.setSecure(false);
-        connector.setRedirectPort(8443);
+        connector.setRedirectPort(httpsPort);
         return connector;
     }
 }
