@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.repository.PaatCodeDto;
 import com.datamon.datamon2.dto.repository.PageCodeDto;
 import com.datamon.datamon2.dto.repository.PagePermissionInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
@@ -25,13 +26,11 @@ import java.util.stream.Collectors;
 public class UserSignService {
     private UserBaseService userBaseService;
     private PagePermissionInfomationService pagePermissionInfomationService;
-    private PageCodeService pageCodeService;
     private JwtUtil jwtUtil;
 
-    public UserSignService(UserBaseService userBaseService, PagePermissionInfomationService pagePermissionInfomationService, PageCodeService pageCodeService, JwtUtil jwtUtil) {
+    public UserSignService(UserBaseService userBaseService, PagePermissionInfomationService pagePermissionInfomationService, JwtUtil jwtUtil) {
         this.userBaseService = userBaseService;
         this.pagePermissionInfomationService = pagePermissionInfomationService;
-        this.pageCodeService = pageCodeService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -100,6 +99,12 @@ public class UserSignService {
                             .collect(Collectors.toList());
 
                     if(pageAuth.size() == 0){
+                        return "auth-fail:page permission denied";
+                    }
+
+                    PaatCodeDto authX = CommonCodeCache.getPaatCodes().stream().filter(dto -> dto.getCodeValue().equals("X")).collect(Collectors.toList()).get(0);
+
+                    if(pageAuth.get(0).getPaatCode().equals(authX)){
                         return "auth-fail:page permission denied";
                     }
 
