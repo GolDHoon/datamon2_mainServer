@@ -1,14 +1,14 @@
 package com.datamon.datamon2.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "TB_PAGE_PERMISSION_INFOMATION")
 public class PagePermissionInfomationEntity {
