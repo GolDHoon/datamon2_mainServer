@@ -25,4 +25,9 @@ public class HttpSessionUtil {
     public Object getAttribute(String key){
         return session.getAttribute(key);
     }
+
+    public void sessionTimeReset(int minute){
+        int inervalTime = minute * 60;
+        session.setMaxInactiveInterval(inervalTime);
+    }
 }
