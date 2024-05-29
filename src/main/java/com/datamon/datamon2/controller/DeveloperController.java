@@ -2,9 +2,17 @@ package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.repository.UserBaseDto;
 import com.datamon.datamon2.servcie.logic.DeveloperService;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 
 @EnableJdbcHttpSession
@@ -18,8 +26,9 @@ public class DeveloperController {
     }
 
     @PostMapping("/userlist")
-    public List<UserBaseDto> retrieveUserList(){
-        return developerService.getUserList();
+    public List<UserBaseDto> retrieveUserList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        List<UserBaseDto> userList = developerService.getUserList();
+        return userList;
     }
 
     @GetMapping("/passwordsetting")

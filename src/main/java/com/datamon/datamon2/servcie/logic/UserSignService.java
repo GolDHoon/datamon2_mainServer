@@ -1,23 +1,37 @@
 package com.datamon.datamon2.servcie.logic;
 
+import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.repository.PageCodeDto;
+import com.datamon.datamon2.dto.repository.PagePermissionInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.servcie.repository.PageCodeService;
+import com.datamon.datamon2.servcie.repository.PagePermissionInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.*;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserSignService {
     private UserBaseService userBaseService;
+    private PagePermissionInfomationService pagePermissionInfomationService;
+    private PageCodeService pageCodeService;
     private JwtUtil jwtUtil;
 
-    public UserSignService(UserBaseService userBaseService, JwtUtil jwtUtil) {
+    public UserSignService(UserBaseService userBaseService, PagePermissionInfomationService pagePermissionInfomationService, PageCodeService pageCodeService, JwtUtil jwtUtil) {
         this.userBaseService = userBaseService;
+        this.pagePermissionInfomationService = pagePermissionInfomationService;
+        this.pageCodeService = pageCodeService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -28,14 +42,15 @@ public class UserSignService {
 
         UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(userId);
         if(userBaseByUserId.getIdx() == null){
-            return "fail-userId";
+            return "login-fail:userId";
         }
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String encriptPw = encryptionUtil.getSHA256WithSalt(password, userBaseByUserId.getSalt());
 
         if(encriptPw.equals(userBaseByUserId.getUserPw())){
-            String token = jwtUtil.createToken(userId);
+            List<Map<String, Object>> claimsList = setAuth(userBaseByUserId.getIdx());
+            String token = jwtUtil.createToken(String.valueOf(userBaseByUserId.getIdx()), claimsList);
 
             httpSessionUtil.setAttribute("jwt", token);
             httpSessionUtil.setAttribute("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
@@ -45,16 +60,11 @@ public class UserSignService {
 
             return request.getSession(false).getId();
         }else {
-            return "fail-password";
+            return "login-fail:password";
         }
     }
 
     public String sessionCheck(HttpServletRequest request) throws Exception{
-        Cookie[] cookies = request.getCookies();
-        String sessionId = request.getSession().getId();
-        HttpSession session = request.getSession(false);
-        String httpSessionId = session.getId();
-
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         JsonUtil jsonUtil = new JsonUtil();
@@ -63,7 +73,7 @@ public class UserSignService {
 
         Object jwt = httpSessionUtil.getAttribute("jwt");
         if(jwt == null){
-            return "fail-token";
+            return "session-fail:token";
         }
 
         String token = jwt.toString();
@@ -72,13 +82,65 @@ public class UserSignService {
         Map<String, String> ip = ipUtil.getIp();
 
         if(ip.get("ExtractingMethod").equals(loginIp.get("ExtractingMethod"))){
+            Claims claims = jwtUtil.getClaims(token);
             if(ip.get("ip").equals(loginIp.get("ip"))){
-                if(jwtUtil.validateToken(jwtUtil.getClaims(token))){
+                if(jwtUtil.validateToken(claims)){
+                    int userId = Integer.parseInt((String) claims.get("sub"));
+
+                    List<PageCodeDto> pageCode = CommonCodeCache.getPageCodes().stream()
+                            .filter(dto -> dto.getCodeValue().equals(request.getHeader("Path")))
+                            .collect(Collectors.toList());
+
+                    if(pageCode.size() == 0){
+                        return "auth-fail:page unregistered";
+                    }
+
+                    List<PagePermissionInfomationDto> pageAuth = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId).stream()
+                            .filter(dto -> dto.getPageCode().equals(pageCode.get(0).getCodeFullName()))
+                            .collect(Collectors.toList());
+
+                    if(pageAuth.size() == 0){
+                        return "auth-fail:page permission denied";
+                    }
+
                     return "success";
                 }
             }
         }
 
-        return "fail-time";
+        return "session-fail:time";
+    }
+
+    public void sessionTimeReset(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        httpSessionUtil.sessionTimeReset(30);
+
+        String token = httpSessionUtil.getAttribute("jwt").toString();
+        String userIdStr = (String) jwtUtil.getClaims(token).get("sub");
+        int userId = Integer.parseInt(userIdStr);
+        List<Map<String, Object>> claimsList = setAuth(userId);
+
+        String newToken = jwtUtil.createToken(userIdStr, claimsList);
+
+        httpSessionUtil.setAttribute("jwt", token);
+    }
+
+    private List<Map<String, Object>> setAuth(int userId){
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        List<PagePermissionInfomationDto> pagePermissionInfomationByUserId = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId);
+
+        Map<String, Object> pageAuth = new HashMap<>();
+        List<Map<String, Object>> pageAuthList = new ArrayList<>();
+        pagePermissionInfomationByUserId.forEach(dto -> {
+            Map<String, Object> claim = new HashMap<>();
+            claim.put(dto.getPageCode(), dto.getPaatCode());
+            pageAuthList.add(claim);
+        });
+        pageAuth.put("key", "pageAuth");
+        pageAuth.put("value", pageAuthList);
+        result.add(pageAuth);
+
+        return result;
     }
 }

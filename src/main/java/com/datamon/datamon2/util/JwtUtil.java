@@ -9,6 +9,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class JwtUtil {
@@ -18,9 +21,15 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String createToken(String userId) throws Exception{
-        Claims claims = Jwts.claims().setSubject(userId).build();
-//        claims.put("roles", roles);
+    public String createToken(String id, List<Map<String,Object>> claimsList) throws Exception{
+        Map<String, Object> claimsMap = new HashMap<>();
+        claimsMap.put("sub", id);
+
+        claimsList.forEach(map -> {
+            claimsMap.put((String) map.get("key"), map.get("value"));
+        });
+
+        Claims claims = Jwts.claims(claimsMap);
         Date now = new Date();
 
         SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
@@ -29,7 +38,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + expiration))
-                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
+                .signWith(SignatureAlgorithm.HS256, secretKeySpec)
                 .compact();
         return result;
     }
@@ -43,11 +52,7 @@ public class JwtUtil {
     public Claims getClaims(String token) throws Exception{
         SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
 
-        Jws<Claims> jws = Jwts.parser()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
 
-        return jws.getBody();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 }
