@@ -18,9 +18,9 @@ public class PagePermissionInfomationDto implements Serializable {
     Boolean useYn;
     Boolean delYn;
     Instant createDate;
-    Integer create;
+    Integer createId;
     Instant modifyDate;
-    Integer modify;
+    Integer modifyId;
     Instant deleteDate;
     Integer deleteId;
 }

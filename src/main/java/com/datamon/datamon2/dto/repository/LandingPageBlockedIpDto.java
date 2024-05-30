@@ -1,21 +1,22 @@
 package com.datamon.datamon2.dto.repository;
 
+import com.datamon.datamon2.entity.LandingPageBlockedIpEntity;
 import lombok.Data;
-import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * DTO for {@link com.datamon.datamon2.entity.PageCodeEntity}
+ * DTO for {@link LandingPageBlockedIpEntity}
  */
 @Data
-public class PageCodeDto implements Serializable {
+public class LandingPageBlockedIpDto implements Serializable {
     Integer idx;
-    Integer codeName;
-    String codeFullName;
-    String codeValue;
-    String codeDescript;
+    String lpgeCode;
+    Short ip1;
+    Short ip2;
+    Short ip3;
+    Short ip4;
     Boolean useYn;
     Boolean delYn;
     Instant createDate;

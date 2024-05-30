@@ -7,20 +7,17 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * DTO for {@link com.datamon.datamon2.entity.PageCodeEntity}
+ * DTO for {@link com.datamon.datamon2.entity.CustomerBasicConsultationEntity}
  */
 @Data
-public class PageCodeDto implements Serializable {
+public class CustomerBasicConsultationDto implements Serializable {
     Integer idx;
-    Integer codeName;
-    String codeFullName;
-    String codeValue;
-    String codeDescript;
-    Boolean useYn;
-    Boolean delYn;
+    Long custId;
+    String key;
+    String value;
     Instant createDate;
     Integer createId;
-    Instant modifyDate;
+    Instant modiftyDate;
     Integer modifyId;
     Instant deleteDate;
     Integer deleteId;
