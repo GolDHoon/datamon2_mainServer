@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.Inet4Address;
+import java.net.UnknownHostException;
 
 @EnableJdbcHttpSession
 @RestController
@@ -15,7 +16,7 @@ import java.net.Inet4Address;
 public class LandingPageController {
 
     @GetMapping("/getIp")
-    public String getIp(HttpServletRequest request, HttpServletResponse response){
+    public String getIp(HttpServletRequest request, HttpServletResponse response) throws UnknownHostException {
         String xfHeader = request.getHeader("X-Forwarded-For");
         String clientIp = request.getRemoteAddr();
         String hostAddress = Inet4Address.getLocalHost().getHostAddress();
