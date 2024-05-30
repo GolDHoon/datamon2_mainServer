@@ -18,7 +18,7 @@ public class LandingPageController {
     public String getIp(HttpServletRequest request, HttpServletResponse response){
         String xfHeader = request.getHeader("X-Forwarded-For");
         String clientIp = request.getRemoteAddr();
-        Inet4Address.getLocalHost().getHostAddress()
+        String hostAddress = Inet4Address.getLocalHost().getHostAddress();
         System.out.println("백엔드 진입");
         return "S";
     }
