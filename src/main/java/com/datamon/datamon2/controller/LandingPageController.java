@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.Inet4Address;
+
 @EnableJdbcHttpSession
 @RestController
 @RequestMapping("/landingpage")
@@ -16,6 +18,7 @@ public class LandingPageController {
     public String getIp(HttpServletRequest request, HttpServletResponse response){
         String xfHeader = request.getHeader("X-Forwarded-For");
         String clientIp = request.getRemoteAddr();
+        Inet4Address.getLocalHost().getHostAddress()
         System.out.println("백엔드 진입");
         return "S";
     }
