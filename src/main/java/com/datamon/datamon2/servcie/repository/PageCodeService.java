@@ -7,6 +7,7 @@ import com.datamon.datamon2.mapper.repository.PageCodeMapper;
 import com.datamon.datamon2.repository.jpa.PageCodeRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class PageCodeService {
         CommonCodeCache.setPageCodes(pageCodes);
     }
 
+    @Transactional(readOnly = true)
     public List<PageCodeDto> getPageCodeAll(){
         List<PageCodeEntity> all = pageCodeRepository.findAll();
         List<PageCodeDto> result = new ArrayList<>();

@@ -5,6 +5,8 @@ import com.datamon.datamon2.entity.UserBaseEntity;
 import com.datamon.datamon2.mapper.repository.UserBaseMapper;
 import com.datamon.datamon2.repository.jpa.UserBaseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +38,13 @@ public class UserBaseService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public UserBaseDto getUserBaseById(int idx){
         return userBaseMapper.toDto(userBaseRepository.findById(idx).orElse(new UserBaseEntity()));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserBaseDto save (UserBaseDto userBaseDto){
-        UserBaseEntity entity = userBaseMapper.toEntity(userBaseDto);
-        return userBaseMapper.toDto(userBaseRepository.save(entity));
+        return userBaseMapper.toDto(userBaseRepository.save(userBaseMapper.toEntity(userBaseDto)));
     }
 }

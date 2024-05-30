@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ public class UserSignService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String userLogin(String userId, String password, HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonUtil jsonUtil = new JsonUtil();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
@@ -63,6 +66,7 @@ public class UserSignService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String sessionCheck(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
@@ -116,6 +120,7 @@ public class UserSignService {
         return "session-fail:time";
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sessionTimeReset(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         httpSessionUtil.sessionTimeReset(30);
@@ -130,7 +135,8 @@ public class UserSignService {
         httpSessionUtil.setAttribute("jwt", token);
     }
 
-    private List<Map<String, Object>> setAuth(int userId){
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected List<Map<String, Object>> setAuth(int userId){
         List<Map<String, Object>> result = new ArrayList<>();
 
         List<PagePermissionInfomationDto> pagePermissionInfomationByUserId = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId);

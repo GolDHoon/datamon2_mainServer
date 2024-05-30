@@ -15,10 +15,10 @@ public class CustomerInformationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Long id;
+    private Long idx;
 
     @Column(name = "lpge_code", nullable = false)
-    private Integer lpgeCode;
+    private String lpgeCode;
 
     @Column(name = "utm_sourse", length = 20)
     private String utmSourse;
@@ -46,19 +46,19 @@ public class CustomerInformationEntity {
     @Column(name = "del_yn")
     private Boolean delYn;
 
-    @ColumnDefault("(now())")
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
 
     @Column(name = "create_id")
-    private Integer create;
+    private Integer createId;
 
-    @ColumnDefault("(now())")
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "modify_date", nullable = false)
     private Instant modifyDate;
 
     @Column(name = "modify_id")
-    private Integer modify;
+    private Integer modifyId;
 
     @Column(name = "delete_date")
     private Instant deleteDate;

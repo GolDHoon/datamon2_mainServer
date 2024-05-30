@@ -8,6 +8,7 @@ import com.datamon.datamon2.mapper.repository.PaatCodeMapper;
 import com.datamon.datamon2.repository.jpa.PaatCodeRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class PaatCodeService {
         CommonCodeCache.setPaatCodes(paatCodes);
     }
 
+    @Transactional(readOnly = true)
     public List<PaatCodeDto> getPaatCodeAll(){
         List<PaatCodeEntity> all = paatCodeRepository.findAll();
         List<PaatCodeDto> result = new ArrayList<>();
