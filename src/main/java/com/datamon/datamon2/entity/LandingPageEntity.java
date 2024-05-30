@@ -6,50 +6,47 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "TB_PAGE_PERMISSION_INFOMATION")
-public class PagePermissionInfomationEntity {
+@Table(name = "TB_LANDING_PAGE")
+public class LandingPageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Long idx;
+    private Integer idx;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @Column(name = "lpge_code", nullable = false)
+    private String lpgeCode;
 
-    @Column(name = "page_code", nullable = false)
-    private String pageCode;
-
-    @Column(name = "paat_code", nullable = false)
-    private String paatCode;
+    @Column(name = "domain", nullable = false, length = 300)
+    private String domain;
 
     @ColumnDefault("1")
-    @Column(name = "useYn", nullable = false)
+    @Column(name = "use_yn", nullable = false)
     private Boolean useYn = false;
 
     @ColumnDefault("0")
-    @Column(name = "delYn", nullable = false)
+    @Column(name = "del_yn", nullable = false)
     private Boolean delYn = false;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @ColumnDefault("(now())")
     @Column(name = "create_date", nullable = false)
-    private Instant createDate;
+    private LocalDate createDate;
 
     @Column(name = "create_id", nullable = false)
     private Integer createId;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @ColumnDefault("(now())")
     @Column(name = "modify_date", nullable = false)
-    private Instant modifyDate;
+    private LocalDate modifyDate;
 
     @Column(name = "modify_id", nullable = false)
     private Integer modifyId;
 
     @Column(name = "delete_date")
-    private Instant deleteDate;
+    private LocalDate deleteDate;
 
     @Column(name = "delete_id")
     private Integer deleteId;

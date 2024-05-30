@@ -1,5 +1,6 @@
 package com.datamon.datamon2.dto.repository;
 
+import com.datamon.datamon2.entity.LpgeCodeEntity;
 import lombok.Data;
 import lombok.Value;
 
@@ -7,10 +8,10 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * DTO for {@link com.datamon.datamon2.entity.PageCodeEntity}
+ * DTO for {@link LpgeCodeEntity}
  */
 @Data
-public class PageCodeDto implements Serializable {
+public class LpgeCodeDto implements Serializable {
     Integer idx;
     Integer codeName;
     String codeFullName;

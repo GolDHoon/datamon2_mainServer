@@ -10,29 +10,21 @@ import java.time.Instant;
 
 @Data
 @Entity
-@Table(name = "TB_PAGE_PERMISSION_INFOMATION")
-public class PagePermissionInfomationEntity {
+@Table(name = "TB_CUSTOMER_BASIC_CONSULTATION")
+public class CustomerBasicConsultationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Long idx;
+    private Integer idx;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @Column(name = "cust_id", nullable = false)
+    private Long custId;
 
-    @Column(name = "page_code", nullable = false)
-    private String pageCode;
+    @Column(name = "`key`", nullable = false, length = 100)
+    private String key;
 
-    @Column(name = "paat_code", nullable = false)
-    private String paatCode;
-
-    @ColumnDefault("1")
-    @Column(name = "useYn", nullable = false)
-    private Boolean useYn = false;
-
-    @ColumnDefault("0")
-    @Column(name = "delYn", nullable = false)
-    private Boolean delYn = false;
+    @Column(name = "value", nullable = false, length = 5000)
+    private String value;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "create_date", nullable = false)
@@ -42,8 +34,8 @@ public class PagePermissionInfomationEntity {
     private Integer createId;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "modify_date", nullable = false)
-    private Instant modifyDate;
+    @Column(name = "modifty_date", nullable = false)
+    private Instant modiftyDate;
 
     @Column(name = "modify_id", nullable = false)
     private Integer modifyId;

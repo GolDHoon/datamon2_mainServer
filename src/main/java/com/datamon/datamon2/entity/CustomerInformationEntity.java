@@ -2,35 +2,45 @@ package com.datamon.datamon2.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
 @Data
 @Entity
-@Table(name = "TB_PAGE_CODE")
-public class PageCodeEntity {
+@Table(name = "TB_CUSTOMER_INFORMATION")
+public class CustomerInformationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Integer idx;
+    private Long idx;
 
-    @Column(name = "code_name", nullable = false)
-    private Integer codeName;
+    @Column(name = "lpge_code", nullable = false)
+    private String lpgeCode;
 
-    @ColumnDefault("(concat(`parent_code_full_name`,_utf8mb3'_',convert(lpad(`code_name`,10,_utf8mb4'0') using utf8mb3)))")
-    @Column(name = "code_full_name", nullable = false, length = 15)
-    private String codeFullName;
+    @Column(name = "utm_sourse", length = 20)
+    private String utmSourse;
 
-    @Column(name = "code_value", nullable = false, length = 100)
-    private String codeValue;
+    @Column(name = "utm_medium", length = 20)
+    private String utmMedium;
 
-    @Column(name = "code_descript", length = 200)
-    private String codeDescript;
+    @Column(name = "utm_campaign", length = 200)
+    private String utmCampaign;
+
+    @Column(name = "utm_term", length = 50)
+    private String utmTerm;
+
+    @Column(name = "utm_content", length = 200)
+    private String utmContent;
+
+    @Column(name = "ip", length = 15)
+    private String ip;
 
     @ColumnDefault("1")
-    @Column(name = "use_yn")
-    private Boolean useYn;
+    @Column(name = "use_yn", nullable = false)
+    private Boolean useYn = false;
 
     @ColumnDefault("0")
     @Column(name = "del_yn")

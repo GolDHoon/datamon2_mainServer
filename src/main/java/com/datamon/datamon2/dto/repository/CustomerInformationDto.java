@@ -1,20 +1,24 @@
 package com.datamon.datamon2.dto.repository;
 
+import com.datamon.datamon2.entity.CustomerInformationEntity;
 import lombok.Data;
-import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * DTO for {@link com.datamon.datamon2.entity.PagePermissionInfomationEntity}
+ * DTO for {@link CustomerInformationEntity}
  */
 @Data
-public class PagePermissionInfomationDto implements Serializable {
+public class CustomerInformationDto implements Serializable {
     Long idx;
-    Integer userId;
-    String pageCode;
-    String paatCode;
+    String lpgeCode;
+    String utmSourse;
+    String utmMedium;
+    String utmCampaign;
+    String utmTerm;
+    String utmContent;
+    String ip;
     Boolean useYn;
     Boolean delYn;
     Instant createDate;

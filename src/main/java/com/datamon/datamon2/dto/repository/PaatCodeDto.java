@@ -19,7 +19,9 @@ public class PaatCodeDto implements Serializable {
     Boolean useYn;
     Boolean delYn;
     Instant createDate;
+    Integer createId;
     Instant modifyDate;
+    Integer modifyId;
     Instant deleteDate;
     Integer deleteId;
 }

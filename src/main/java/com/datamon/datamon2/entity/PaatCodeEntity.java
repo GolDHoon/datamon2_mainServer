@@ -40,9 +40,15 @@ public class PaatCodeEntity {
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
 
+    @Column(name = "create_id")
+    private Integer createId;
+
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "modify_date", nullable = false)
     private Instant modifyDate;
+
+    @Column(name = "modify_id")
+    private Integer modifyId;
 
     @Column(name = "delete_date")
     private Instant deleteDate;
