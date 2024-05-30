@@ -20,17 +20,9 @@ public class LandingPageController {
         String xfHeader = request.getHeader("X-Forwarded-For");
         String clientIp = request.getRemoteAddr();
         String hostAddress = Inet4Address.getLocalHost().getHostAddress();
-        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-        while (networkInterfaces.hasMoreElements()) {
-            NetworkInterface networkInterface = networkInterfaces.nextElement();
-            Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-            while (inetAddresses.hasMoreElements()) {
-                InetAddress inetAddress = inetAddresses.nextElement();
-                if (inetAddress.isSiteLocalAddress()) {
-                    System.out.println("내부 IP 주소: " + inetAddress.getHostAddress());
-                }
-            }
-        }
+
+        String hostAddress1 = InetAddress.getLocalHost().getHostAddress();
+        byte[] address = InetAddress.getLocalHost().getAddress();
         System.out.println("백엔드 진입");
         return "S";
     }
