@@ -30,6 +30,7 @@ public class LandingPageController {
                     System.out.println("내부 IP 주소: " + inetAddress.getHostAddress());
                 }
             }
+        }
         System.out.println("백엔드 진입");
         return "S";
     }
