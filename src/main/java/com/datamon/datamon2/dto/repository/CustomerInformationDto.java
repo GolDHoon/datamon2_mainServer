@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 @Data
 public class CustomerInformationDto implements Serializable {
-    Long idx;
+    Long  idx;
     String lpgeCode;
     String utmSourse;
     String utmMedium;
