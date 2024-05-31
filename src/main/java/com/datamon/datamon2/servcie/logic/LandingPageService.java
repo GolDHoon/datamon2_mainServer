@@ -70,6 +70,8 @@ public class LandingPageService {
             newLpgeCodeDto.setCodeFullName("LPGE_" + String.format("%010d", newLpgeCodeDto.getCodeName()));
             newLpgeCodeDto.setCodeValue(domain);
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
+            newLpgeCodeDto.setUseYn(true);
+            newLpgeCodeDto.setDelYn(false);
             newLpgeCodeDto.setCreateId(createUser.getIdx());
             newLpgeCodeDto.setCreateDate(Instant.now());
             newLpgeCodeDto.setModifyId(createUser.getIdx());
@@ -80,6 +82,8 @@ public class LandingPageService {
                 LandingPageDto landingPageDto = new LandingPageDto();
                 landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
                 landingPageDto.setDomain(domain);
+                landingPageDto.setUseYn(true);
+                landingPageDto.setDelYn(false);
                 landingPageDto.setCreateId(createUser.getIdx());
                 landingPageDto.setCreateDate(Instant.now());
                 landingPageDto.setModifyId(createUser.getIdx());
@@ -147,6 +151,8 @@ public class LandingPageService {
             customerInformationDto.setUtmTerm(custDataDto.getUtmTerm());
             customerInformationDto.setUtmContent(custDataDto.getUtmContent());
             customerInformationDto.setIp(ip);
+            customerInformationDto.setUseYn(true);
+            customerInformationDto.setDelYn(false);
             customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
             customerInformationDto.setCreateDate(Instant.now());
             customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
