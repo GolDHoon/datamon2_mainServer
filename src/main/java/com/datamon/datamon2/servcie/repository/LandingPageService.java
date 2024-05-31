@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.LandingPageDto;
+import com.datamon.datamon2.entity.LandingPageEntity;
 import com.datamon.datamon2.mapper.repository.LandingPageMapper;
 import com.datamon.datamon2.repository.jpa.LandingPageRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,18 @@ public class LandingPageService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LandingPageDto saveLandingPage(LandingPageDto landingPageDto){
+        LandingPageEntity landingPageEntity = new LandingPageEntity();
+        landingPageEntity.setLpgeCode(landingPageDto.getLpgeCode());
+        landingPageEntity.setDomain(landingPageDto.getDomain());
+        landingPageEntity.setUseYn(landingPageDto.getUseYn());
+        landingPageEntity.setDelYn(landingPageDto.getDelYn());
+        landingPageEntity.setCreateDate(landingPageDto.getCreateDate());
+        landingPageEntity.setCreateId(landingPageDto.getCreateId());
+        landingPageEntity.setModifyDate(landingPageDto.getModifyDate());
+        landingPageEntity.setModifyId(landingPageDto.getModifyId());
+        landingPageEntity.setDeleteDate(landingPageDto.getDeleteDate());
+        landingPageEntity.setDeleteId(landingPageDto.getDeleteId());
+
         return landingPageMapper.toDto(landingPageRepository.save(landingPageMapper.toEntity(landingPageDto)));
     }
 

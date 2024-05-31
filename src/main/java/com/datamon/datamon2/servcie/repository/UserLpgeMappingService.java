@@ -1,6 +1,8 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.UserLpgeMappingDto;
+import com.datamon.datamon2.entity.UserLpgeMappingEntity;
+import com.datamon.datamon2.entity.embeddable.UserLpgeMappingEntityId;
 import com.datamon.datamon2.mapper.repository.UserLpgeMappingMapper;
 import com.datamon.datamon2.repository.jpa.UserLpgeMappingRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,13 @@ public class UserLpgeMappingService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserLpgeMappingDto saveUserLpgeMapping(UserLpgeMappingDto userLpgeMappingDto) throws Exception{
-        return userLpgeMappingMapper.toDto(userLpgeMappingRepository.save(userLpgeMappingMapper.toEntity(userLpgeMappingDto)));
+        UserLpgeMappingEntity userLpgeMappingEntity = new UserLpgeMappingEntity();
+        UserLpgeMappingEntityId userLpgeMappingEntityId = new UserLpgeMappingEntityId();
+        userLpgeMappingEntityId.setLpgeCode(userLpgeMappingDto.getLpgeCode());
+        userLpgeMappingEntityId.setUserId(userLpgeMappingDto.getUserId());
+        userLpgeMappingEntity.setId(userLpgeMappingEntityId);
+        userLpgeMappingEntity.setLpgeCode(userLpgeMappingDto.getLpgeCode());
+        userLpgeMappingEntity.setUserId(userLpgeMappingDto.getUserId());
+        return userLpgeMappingMapper.toDto(userLpgeMappingRepository.save(userLpgeMappingEntity));
     }
 }
