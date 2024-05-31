@@ -29,10 +29,10 @@ public class LandingPageController {
     }
 
     @GetMapping("/getInitialData")
-    public ResponseEntity<?> getInitialData(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<?> getInitialData(HttpServletRequest request, HttpServletResponse response,@RequestParam String domain){
         InitalDataDto result;
         try {
-            result = landingPageService.getInitialData(request.getServerName());
+            result = landingPageService.getInitialData(domain);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

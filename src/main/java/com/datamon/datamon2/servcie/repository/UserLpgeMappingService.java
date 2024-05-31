@@ -24,11 +24,11 @@ public class UserLpgeMappingService {
         UserLpgeMappingEntity userLpgeMappingEntity = new UserLpgeMappingEntity();
         UserLpgeMappingEntityId userLpgeMappingEntityId = new UserLpgeMappingEntityId();
 
-//        userLpgeMappingEntityId.setLpgeCode(userLpgeMappingDto.getLpgeCode());
-//        userLpgeMappingEntityId.setUserId(userLpgeMappingDto.getUserId());
-//        userLpgeMappingEntity.setId(userLpgeMappingEntityId);
-        userLpgeMappingEntity.setLpgeCode(userLpgeMappingDto.getLpgeCode());
-        userLpgeMappingEntity.setUserId(userLpgeMappingDto.getUserId());
+        userLpgeMappingEntityId.setLpgeCode(userLpgeMappingDto.getLpgeCode());
+        userLpgeMappingEntityId.setUserId(userLpgeMappingDto.getUserId());
+        userLpgeMappingEntity.setId(userLpgeMappingEntityId);
+//        userLpgeMappingEntity.setLpgeCode(userLpgeMappingDto.getLpgeCode());
+//        userLpgeMappingEntity.setUserId(userLpgeMappingDto.getUserId());
 
         return userLpgeMappingMapper.toDto(userLpgeMappingRepository.save(userLpgeMappingEntity));
     }
