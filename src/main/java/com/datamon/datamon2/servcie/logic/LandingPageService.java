@@ -10,6 +10,8 @@ import com.datamon.datamon2.util.EncryptionUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service("LandingPageLogicService")
@@ -69,7 +71,9 @@ public class LandingPageService {
             newLpgeCodeDto.setCodeValue(domain);
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
             newLpgeCodeDto.setCreateId(createUser.getIdx());
+            newLpgeCodeDto.setCreateDate(Instant.now());
             newLpgeCodeDto.setModifyId(createUser.getIdx());
+            newLpgeCodeDto.setModifyDate(Instant.now());
             if(!"local".equals(createDto.getInputMode())){
                 lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
 
@@ -77,7 +81,9 @@ public class LandingPageService {
                 landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
                 landingPageDto.setDomain(domain);
                 landingPageDto.setCreateId(createUser.getIdx());
+                landingPageDto.setCreateDate(Instant.now());
                 landingPageDto.setModifyId(createUser.getIdx());
+                landingPageDto.setModifyDate(Instant.now());
                 landingPageRepositoryService.saveLandingPage(landingPageDto);
             }
 
@@ -142,7 +148,9 @@ public class LandingPageService {
             customerInformationDto.setUtmContent(custDataDto.getUtmContent());
             customerInformationDto.setIp(ip);
             customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
+            customerInformationDto.setCreateDate(Instant.now());
             customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
+            customerInformationDto.setModifyDate(Instant.now());
 
             CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
@@ -153,7 +161,9 @@ public class LandingPageService {
                 customerBasicConsultationDto.setKey(map.get("key"));
                 customerBasicConsultationDto.setValue(map.get("value"));
                 customerBasicConsultationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
+                customerBasicConsultationDto.setCreateDate(Instant.now());
                 customerBasicConsultationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
+                customerBasicConsultationDto.setModiftyDate(Instant.now());
 
                 customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
             });
