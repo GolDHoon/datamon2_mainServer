@@ -12,7 +12,9 @@ import java.util.Objects;
 @Embeddable
 public class UserLpgeMappingEntityId implements Serializable {
     private static final long serialVersionUID = 4390051703617524859L;
+    @Column(name = "lpge_code", nullable = false, length = 15)
     private String lpgeCode;
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
 
     @Override
