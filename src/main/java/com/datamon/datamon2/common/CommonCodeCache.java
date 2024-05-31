@@ -3,6 +3,7 @@ package com.datamon.datamon2.common;
 import com.datamon.datamon2.dto.repository.LpgeCodeDto;
 import com.datamon.datamon2.dto.repository.PaatCodeDto;
 import com.datamon.datamon2.dto.repository.PageCodeDto;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -10,13 +11,14 @@ import java.util.List;
 
 public class CommonCodeCache {
     @Value("${system.Id.idx}")
-    static String systemIdIdxStr;
+    String systemIdIdxStr;
     private static int systemIdIdx;
     private static List<PageCodeDto> pageCodes;
     private static List<PaatCodeDto> paatCodes;
     private static List<LpgeCodeDto> lpgeCodes;
 
-    static {
+    @PostConstruct
+    public void init() {
         try {
             systemIdIdx = Integer.parseInt(systemIdIdxStr);   // value를 가져와서 형변환
         } catch(NumberFormatException e) {
