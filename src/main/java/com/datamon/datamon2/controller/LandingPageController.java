@@ -46,7 +46,7 @@ public class LandingPageController {
         Map<String, String> result = new HashMap<>();
         String resultStr = "";
         try {
-            resultStr = landingPageService.registerLandingPage(request.getServerName(), createDto);
+            resultStr = landingPageService.registerLandingPage(createDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -76,11 +76,11 @@ public class LandingPageController {
     }
 
     @PostMapping("/inputCustData")
-    public ResponseEntity<?> registerLandingPage(HttpServletRequest request, HttpServletResponse response, @RequestBody CustDataDto custDataDto){
+    public ResponseEntity<?> registerCustData(HttpServletRequest request, HttpServletResponse response, @RequestBody CustDataDto custDataDto){
         Map<String, String> result = new HashMap<>();
         String resultStr = "";
         try {
-            resultStr = landingPageService.registerLandingPage(request.getHeader("X-Forwarded-For"), custDataDto);
+            resultStr = landingPageService.registerCustData(request.getHeader("X-Forwarded-For"), custDataDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -47,12 +47,12 @@ public class LandingPageService {
     }
 
     @Transactional
-    public String registerLandingPage(String domain, CreateDto createDto) throws Exception {
+    public String registerLandingPage(CreateDto createDto) throws Exception {
         UserBaseDto createUser = userBaseService.getUserBaseById(createDto.getCreateId());
         UserBaseDto companyUser = userBaseService.getUserBaseById(createDto.getUserId());
         List<LpgeCodeDto> lpgeCodes = CommonCodeCache.getLpgeCodes();
 
-        LpgeCodeDto lpgeCodeDto = lpgeCodes.stream().filter(dto -> domain.equals(dto.getCodeValue())).findFirst().orElse(null);
+        LpgeCodeDto lpgeCodeDto = lpgeCodes.stream().filter(dto -> createDto.getDomain().equals(dto.getCodeValue())).findFirst().orElse(null);
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String encriptPw = encryptionUtil.getSHA256WithSalt(createDto.getPassword(), createUser.getSalt());
@@ -68,7 +68,7 @@ public class LandingPageService {
             LpgeCodeDto newLpgeCodeDto = new LpgeCodeDto();
             newLpgeCodeDto.setCodeName(lpgeCodes.stream().mapToInt(LpgeCodeDto::getCodeName).max().orElse(0)+1);
             newLpgeCodeDto.setCodeFullName("LPGE_" + String.format("%010d", newLpgeCodeDto.getCodeName()));
-            newLpgeCodeDto.setCodeValue(domain);
+            newLpgeCodeDto.setCodeValue(createDto.getDomain());
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
             newLpgeCodeDto.setUseYn(true);
             newLpgeCodeDto.setDelYn(false);
@@ -81,7 +81,7 @@ public class LandingPageService {
 
                 LandingPageDto landingPageDto = new LandingPageDto();
                 landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
-                landingPageDto.setDomain(domain);
+                landingPageDto.setDomain(createDto.getDomain());
                 landingPageDto.setUseYn(true);
                 landingPageDto.setDelYn(false);
                 landingPageDto.setCreateId(createUser.getIdx());
@@ -119,7 +119,7 @@ public class LandingPageService {
     }
 
     @Transactional
-    public String registerLandingPage(String ip, CustDataDto custDataDto) throws Exception{
+    public String registerCustData(String ip, CustDataDto custDataDto) throws Exception{
         boolean ipChecker = false;
 
         List<LandingPageBlockedIpDto> landingPageBlockedIpByLpgeCode = landingPageBlockedIpService.getLandingPageBlockedIpByLpgeCode(custDataDto.getLpgeCode()).stream()

@@ -10,4 +10,5 @@ public class CreateDto {
     String mode;
     String password;
     String pageDescription;
+    String domain;
 }
