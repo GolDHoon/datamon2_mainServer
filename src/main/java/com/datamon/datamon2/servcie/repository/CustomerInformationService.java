@@ -21,6 +21,7 @@ public class CustomerInformationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CustomerInformationDto saveCustomerInformation(CustomerInformationDto customerInformationDto){
         CustomerInformationEntity customerInformationEntity = new CustomerInformationEntity();
+
         customerInformationEntity.setLpgeCode(customerInformationDto.getLpgeCode());
         customerInformationEntity.setUtmSourse(customerInformationDto.getUtmSourse());
         customerInformationEntity.setUtmMedium(customerInformationDto.getUtmMedium());
