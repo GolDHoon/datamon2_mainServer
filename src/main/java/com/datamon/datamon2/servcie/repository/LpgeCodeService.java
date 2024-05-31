@@ -41,22 +41,22 @@ public class LpgeCodeService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LpgeCodeDto saveLpgeCode(LpgeCodeDto lpgeCodeDto){
-        LpgeCodeEntity lpgeCodeEntity = new LpgeCodeEntity();
+//        LpgeCodeEntity lpgeCodeEntity = new LpgeCodeEntity();
+//
+//        lpgeCodeEntity.setCodeName(lpgeCodeDto.getCodeName());
+//        lpgeCodeEntity.setCodeFullName(lpgeCodeDto.getCodeFullName());
+//        lpgeCodeEntity.setCodeValue(lpgeCodeDto.getCodeValue());
+//        lpgeCodeEntity.setCodeDescript(lpgeCodeDto.getCodeDescript());
+//        lpgeCodeEntity.setUseYn(lpgeCodeDto.getUseYn());
+//        lpgeCodeEntity.setDelYn(lpgeCodeDto.getDelYn());
+//        lpgeCodeEntity.setCreateDate(lpgeCodeDto.getCreateDate());
+//        lpgeCodeEntity.setCreateId(lpgeCodeDto.getCreateId());
+//        lpgeCodeEntity.setModifyDate(lpgeCodeDto.getModifyDate());
+//        lpgeCodeEntity.setModifyId(lpgeCodeDto.getModifyId());
+//        lpgeCodeEntity.setDeleteDate(lpgeCodeDto.getDeleteDate());
+//        lpgeCodeEntity.setDeleteId(lpgeCodeDto.getDeleteId());
 
-        lpgeCodeEntity.setCodeName(lpgeCodeDto.getCodeName());
-        lpgeCodeEntity.setCodeFullName(lpgeCodeDto.getCodeFullName());
-        lpgeCodeEntity.setCodeValue(lpgeCodeDto.getCodeValue());
-        lpgeCodeEntity.setCodeDescript(lpgeCodeDto.getCodeDescript());
-        lpgeCodeEntity.setUseYn(lpgeCodeDto.getUseYn());
-        lpgeCodeEntity.setDelYn(lpgeCodeDto.getDelYn());
-        lpgeCodeEntity.setCreateDate(lpgeCodeDto.getCreateDate());
-        lpgeCodeEntity.setCreateId(lpgeCodeDto.getCreateId());
-        lpgeCodeEntity.setModifyDate(lpgeCodeDto.getModifyDate());
-        lpgeCodeEntity.setModifyId(lpgeCodeDto.getModifyId());
-        lpgeCodeEntity.setDeleteDate(lpgeCodeDto.getDeleteDate());
-        lpgeCodeEntity.setDeleteId(lpgeCodeDto.getDeleteId());
-
-        LpgeCodeDto save = lpgeCodeMapper.toDto(lpgeCodeRepository.save(lpgeCodeEntity));
+        LpgeCodeDto save = lpgeCodeMapper.toDto(lpgeCodeRepository.save(lpgeCodeMapper.toEntity(lpgeCodeDto)));
         List<LpgeCodeDto> lpgeCodes = CommonCodeCache.getLpgeCodes();
         lpgeCodes.add(save);
         return save;

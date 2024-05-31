@@ -20,18 +20,18 @@ public class CustomerBasicConsultationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CustomerBasicConsultationDto saveCustomerBasicConsultation(CustomerBasicConsultationDto customerBasicConsultationDto){
-        CustomerBasicConsultationEntity customerBasicConsultationEntity = new CustomerBasicConsultationEntity();
-
-        customerBasicConsultationEntity.setCustId(customerBasicConsultationDto.getCustId());
-        customerBasicConsultationEntity.setKey(customerBasicConsultationDto.getKey());
-        customerBasicConsultationEntity.setValue(customerBasicConsultationDto.getValue());
-        customerBasicConsultationEntity.setCreateDate(customerBasicConsultationDto.getCreateDate());
-        customerBasicConsultationEntity.setCreateId(customerBasicConsultationDto.getCreateId());
-        customerBasicConsultationEntity.setModiftyDate(customerBasicConsultationDto.getModiftyDate());
-        customerBasicConsultationEntity.setModifyId(customerBasicConsultationDto.getModifyId());
-        customerBasicConsultationEntity.setDeleteDate(customerBasicConsultationDto.getDeleteDate());
-        customerBasicConsultationEntity.setDeleteId(customerBasicConsultationDto.getDeleteId());
+//        CustomerBasicConsultationEntity customerBasicConsultationEntity = new CustomerBasicConsultationEntity();
+//
+//        customerBasicConsultationEntity.setCustId(customerBasicConsultationDto.getCustId());
+//        customerBasicConsultationEntity.setKey(customerBasicConsultationDto.getKey());
+//        customerBasicConsultationEntity.setValue(customerBasicConsultationDto.getValue());
+//        customerBasicConsultationEntity.setCreateDate(customerBasicConsultationDto.getCreateDate());
+//        customerBasicConsultationEntity.setCreateId(customerBasicConsultationDto.getCreateId());
+//        customerBasicConsultationEntity.setModiftyDate(customerBasicConsultationDto.getModiftyDate());
+//        customerBasicConsultationEntity.setModifyId(customerBasicConsultationDto.getModifyId());
+//        customerBasicConsultationEntity.setDeleteDate(customerBasicConsultationDto.getDeleteDate());
+//        customerBasicConsultationEntity.setDeleteId(customerBasicConsultationDto.getDeleteId());
         
-        return customerBasicConsultationMapper.toDto(customerBasicConsultationRepository.save(customerBasicConsultationEntity));
+        return customerBasicConsultationMapper.toDto(customerBasicConsultationRepository.save(customerBasicConsultationMapper.toEntity(customerBasicConsultationDto)));
     }
 }
