@@ -7,28 +7,22 @@ import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 public class CommonCodeCache {
-    @Value("${system.Id.idx}")
-    String systemIdIdxStr;
     private static int systemIdIdx;
     private static List<PageCodeDto> pageCodes;
     private static List<PaatCodeDto> paatCodes;
     private static List<LpgeCodeDto> lpgeCodes;
 
-    @PostConstruct
-    public void init() {
-        try {
-            systemIdIdx = Integer.parseInt(systemIdIdxStr);   // value를 가져와서 형변환
-        } catch(NumberFormatException e) {
-            systemIdIdx = 0;     // 형변환에 실패한 경우 기본값 설정
-        }
+    public static void setSystemIdIdx(int systemIdIdx) {
+        CommonCodeCache.systemIdIdx = systemIdIdx;
     }
 
-    public static int getSystemIdIdx() {
-        return systemIdIdx;
-    }
+    public static int getSystemIdIdx() {return systemIdIdx;}
 
     public static List<LpgeCodeDto> getLpgeCodes() {
         return lpgeCodes;

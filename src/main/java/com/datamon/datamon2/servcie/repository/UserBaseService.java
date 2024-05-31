@@ -1,9 +1,13 @@
 package com.datamon.datamon2.servcie.repository;
 
+import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.repository.LpgeCodeDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
 import com.datamon.datamon2.entity.UserBaseEntity;
 import com.datamon.datamon2.mapper.repository.UserBaseMapper;
 import com.datamon.datamon2.repository.jpa.UserBaseRepository;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,8 @@ import java.util.List;
 
 @Service
 public class UserBaseService {
+    @Value("${system.Id}")
+    String systemId;
     private UserBaseRepository userBaseRepository;
     private UserBaseMapper userBaseMapper;
 
@@ -36,6 +42,12 @@ public class UserBaseService {
         });
 
         return result;
+    }
+
+    @PostConstruct
+    public void init() {
+        UserBaseDto userBaseByUserId = getUserBaseByUserId(systemId);
+        CommonCodeCache.setSystemIdIdx(userBaseByUserId.getIdx());
     }
 
     @Transactional(readOnly = true)
