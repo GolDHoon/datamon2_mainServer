@@ -4,6 +4,7 @@ import com.datamon.datamon2.entity.LandingPageEntity;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 
 /**
@@ -16,10 +17,10 @@ public class LandingPageDto implements Serializable {
     String domain;
     Boolean useYn;
     Boolean delYn;
-    LocalDate createDate;
+    Instant createDate;
     Integer createId;
-    LocalDate modifyDate;
+    Instant modifyDate;
     Integer modifyId;
-    LocalDate deleteDate;
+    Instant deleteDate;
     Integer deleteId;
 }
