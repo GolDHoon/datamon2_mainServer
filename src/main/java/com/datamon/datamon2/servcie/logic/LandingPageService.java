@@ -54,7 +54,7 @@ public class LandingPageService {
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String encriptPw = encryptionUtil.getSHA256WithSalt(createDto.getPassword(), createUser.getSalt());
-        if(encriptPw.equals(createUser.getUserPw())){
+        if(!encriptPw.equals(createUser.getUserPw())){
             return "fail - Password is different";
         }
 

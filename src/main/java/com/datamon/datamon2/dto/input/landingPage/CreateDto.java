@@ -7,6 +7,7 @@ public class CreateDto {
     int createId;
     int userId;
     String inputMode;
+    String mode;
     String password;
     String pageDescription;
 }
