@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 public class CommonCodeCache {
-    @Value("{system.Id.idx}")
+    @Value("${system.Id.idx}")
     static String systemIdIdxStr;
     private static int systemIdIdx;
     private static List<PageCodeDto> pageCodes;
