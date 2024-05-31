@@ -65,6 +65,7 @@ public class LandingPageService {
 
             LpgeCodeDto newLpgeCodeDto = new LpgeCodeDto();
             newLpgeCodeDto.setCodeName(lpgeCodes.stream().mapToInt(LpgeCodeDto::getCodeName).max().orElse(0)+1);
+            newLpgeCodeDto.setCodeFullName("LPGE_" + String.format("%010d", newLpgeCodeDto.getCodeName()));
             newLpgeCodeDto.setCodeValue(domain);
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
             newLpgeCodeDto.setCreateId(createUser.getIdx());
