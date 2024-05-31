@@ -21,6 +21,7 @@ public class LandingPageService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LandingPageDto saveLandingPage(LandingPageDto landingPageDto){
         LandingPageEntity landingPageEntity = new LandingPageEntity();
+
         landingPageEntity.setLpgeCode(landingPageDto.getLpgeCode());
         landingPageEntity.setDomain(landingPageDto.getDomain());
         landingPageEntity.setUseYn(landingPageDto.getUseYn());
