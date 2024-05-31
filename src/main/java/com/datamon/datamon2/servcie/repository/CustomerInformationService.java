@@ -20,25 +20,25 @@ public class CustomerInformationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CustomerInformationDto saveCustomerInformation(CustomerInformationDto customerInformationDto){
-        CustomerInformationEntity customerInformationEntity = new CustomerInformationEntity();
+//        CustomerInformationEntity customerInformationEntity = new CustomerInformationEntity();
+//
+//        customerInformationEntity.setLpgeCode(customerInformationDto.getLpgeCode());
+//        customerInformationEntity.setUtmSourse(customerInformationDto.getUtmSourse());
+//        customerInformationEntity.setUtmMedium(customerInformationDto.getUtmMedium());
+//        customerInformationEntity.setUtmCampaign(customerInformationDto.getUtmCampaign());
+//        customerInformationEntity.setUtmTerm(customerInformationDto.getUtmTerm());
+//        customerInformationEntity.setUtmContent(customerInformationDto.getUtmContent());
+//        customerInformationEntity.setIp(customerInformationDto.getIp());
+//        customerInformationEntity.setUseYn(customerInformationDto.getUseYn());
+//        customerInformationEntity.setDelYn(customerInformationDto.getDelYn());
+//        customerInformationEntity.setCreateDate(customerInformationDto.getCreateDate());
+//        customerInformationEntity.setCreateId(customerInformationDto.getCreateId());
+//        customerInformationEntity.setModifyDate(customerInformationDto.getModifyDate());
+//        customerInformationEntity.setModifyId(customerInformationDto.getModifyId());
+//        customerInformationEntity.setDeleteDate(customerInformationDto.getDeleteDate());
+//        customerInformationEntity.setDeleteId(customerInformationDto.getDeleteId());
 
-        customerInformationEntity.setLpgeCode(customerInformationDto.getLpgeCode());
-        customerInformationEntity.setUtmSourse(customerInformationDto.getUtmSourse());
-        customerInformationEntity.setUtmMedium(customerInformationDto.getUtmMedium());
-        customerInformationEntity.setUtmCampaign(customerInformationDto.getUtmCampaign());
-        customerInformationEntity.setUtmTerm(customerInformationDto.getUtmTerm());
-        customerInformationEntity.setUtmContent(customerInformationDto.getUtmContent());
-        customerInformationEntity.setIp(customerInformationDto.getIp());
-        customerInformationEntity.setUseYn(customerInformationDto.getUseYn());
-        customerInformationEntity.setDelYn(customerInformationDto.getDelYn());
-        customerInformationEntity.setCreateDate(customerInformationDto.getCreateDate());
-        customerInformationEntity.setCreateId(customerInformationDto.getCreateId());
-        customerInformationEntity.setModifyDate(customerInformationDto.getModifyDate());
-        customerInformationEntity.setModifyId(customerInformationDto.getModifyId());
-        customerInformationEntity.setDeleteDate(customerInformationDto.getDeleteDate());
-        customerInformationEntity.setDeleteId(customerInformationDto.getDeleteId());
-
-        return customerInformationMapper.toDto(customerInformationRepository.save(customerInformationEntity));
+        return customerInformationMapper.toDto(customerInformationRepository.save(customerInformationMapper.toEntity(customerInformationDto)));
     }
 
 }
