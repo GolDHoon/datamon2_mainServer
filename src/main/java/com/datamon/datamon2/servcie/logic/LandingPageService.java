@@ -39,7 +39,7 @@ public class LandingPageService {
     @Transactional
     public InitalDataDto getInitialData(String domain) throws Exception{
         InitalDataDto result = new InitalDataDto();
-        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> domain.equals(dto.getCodeValue())).findFirst().orElse(null);
+        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> domain.contains(dto.getCodeValue())).findFirst().orElse(null);
         if(lpgeCodeDto == null) result.setLpgeCode("Registration required");
         else result.setLpgeCode(lpgeCodeDto.getCodeFullName());
 
