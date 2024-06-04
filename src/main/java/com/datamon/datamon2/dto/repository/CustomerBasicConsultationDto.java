@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 @Data
 public class CustomerBasicConsultationDto implements Serializable {
-    Integer idx;
+    Long idx;
     Long custId;
     String key;
     String value;

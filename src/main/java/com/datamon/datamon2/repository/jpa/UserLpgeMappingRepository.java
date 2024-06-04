@@ -5,7 +5,9 @@ import com.datamon.datamon2.entity.embeddable.UserLpgeMappingEntityId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserLpgeMappingRepository extends JpaRepository<UserLpgeMappingEntity, UserLpgeMappingEntityId> {
-
+    List<UserLpgeMappingEntity> findById_UserId(int userId);
 }

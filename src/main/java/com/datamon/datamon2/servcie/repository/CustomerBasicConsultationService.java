@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CustomerBasicConsultationService {
     private CustomerBasicConsultationRepository customerBasicConsultationRepository;
@@ -20,18 +23,15 @@ public class CustomerBasicConsultationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CustomerBasicConsultationDto saveCustomerBasicConsultation(CustomerBasicConsultationDto customerBasicConsultationDto){
-//        CustomerBasicConsultationEntity customerBasicConsultationEntity = new CustomerBasicConsultationEntity();
-//
-//        customerBasicConsultationEntity.setCustId(customerBasicConsultationDto.getCustId());
-//        customerBasicConsultationEntity.setKey(customerBasicConsultationDto.getKey());
-//        customerBasicConsultationEntity.setValue(customerBasicConsultationDto.getValue());
-//        customerBasicConsultationEntity.setCreateDate(customerBasicConsultationDto.getCreateDate());
-//        customerBasicConsultationEntity.setCreateId(customerBasicConsultationDto.getCreateId());
-//        customerBasicConsultationEntity.setModiftyDate(customerBasicConsultationDto.getModiftyDate());
-//        customerBasicConsultationEntity.setModifyId(customerBasicConsultationDto.getModifyId());
-//        customerBasicConsultationEntity.setDeleteDate(customerBasicConsultationDto.getDeleteDate());
-//        customerBasicConsultationEntity.setDeleteId(customerBasicConsultationDto.getDeleteId());
-        
         return customerBasicConsultationMapper.toDto(customerBasicConsultationRepository.save(customerBasicConsultationMapper.toEntity(customerBasicConsultationDto)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationBycustIdList(List<Long> custIds){
+        List<CustomerBasicConsultationDto> result = new ArrayList<>();
+        customerBasicConsultationRepository.findByCustIdIn(custIds).forEach(entity -> {
+            result.add(customerBasicConsultationMapper.toDto(entity));
+        });
+        return result;
     }
 }

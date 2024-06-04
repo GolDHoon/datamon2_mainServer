@@ -15,7 +15,7 @@ public class CustomerBasicConsultationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Integer idx;
+    private Long idx;
 
     @Column(name = "cust_id", nullable = false)
     private Long custId;

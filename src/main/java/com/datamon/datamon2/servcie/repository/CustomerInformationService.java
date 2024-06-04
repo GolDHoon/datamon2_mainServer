@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CustomerInformationService {
     private CustomerInformationRepository customerInformationRepository;
@@ -20,25 +23,18 @@ public class CustomerInformationService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CustomerInformationDto saveCustomerInformation(CustomerInformationDto customerInformationDto){
-//        CustomerInformationEntity customerInformationEntity = new CustomerInformationEntity();
-//
-//        customerInformationEntity.setLpgeCode(customerInformationDto.getLpgeCode());
-//        customerInformationEntity.setUtmSourse(customerInformationDto.getUtmSourse());
-//        customerInformationEntity.setUtmMedium(customerInformationDto.getUtmMedium());
-//        customerInformationEntity.setUtmCampaign(customerInformationDto.getUtmCampaign());
-//        customerInformationEntity.setUtmTerm(customerInformationDto.getUtmTerm());
-//        customerInformationEntity.setUtmContent(customerInformationDto.getUtmContent());
-//        customerInformationEntity.setIp(customerInformationDto.getIp());
-//        customerInformationEntity.setUseYn(customerInformationDto.getUseYn());
-//        customerInformationEntity.setDelYn(customerInformationDto.getDelYn());
-//        customerInformationEntity.setCreateDate(customerInformationDto.getCreateDate());
-//        customerInformationEntity.setCreateId(customerInformationDto.getCreateId());
-//        customerInformationEntity.setModifyDate(customerInformationDto.getModifyDate());
-//        customerInformationEntity.setModifyId(customerInformationDto.getModifyId());
-//        customerInformationEntity.setDeleteDate(customerInformationDto.getDeleteDate());
-//        customerInformationEntity.setDeleteId(customerInformationDto.getDeleteId());
-
         return customerInformationMapper.toDto(customerInformationRepository.save(customerInformationMapper.toEntity(customerInformationDto)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerInformationDto> getCustomerInformationByLpgeCode(String lpgeCode){
+        List<CustomerInformationDto> result = new ArrayList<>();
+
+        customerInformationRepository.findByLpgeCode(lpgeCode).forEach(entity -> {
+            result.add(customerInformationMapper.toDto(entity));
+        });
+
+        return result;
     }
 
 }
