@@ -7,6 +7,7 @@ import com.datamon.datamon2.dto.output.landingPage.InitalDataDto;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.EncryptionUtil;
+import com.datamon.datamon2.util.InstantUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class LandingPageService {
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
+    private InstantUtil instantUtil = new InstantUtil();
 
     public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserLpgeMappingService userLpgeMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
         this.userBaseService = userBaseService;
@@ -73,9 +75,9 @@ public class LandingPageService {
             newLpgeCodeDto.setUseYn(true);
             newLpgeCodeDto.setDelYn(false);
             newLpgeCodeDto.setCreateId(createUser.getIdx());
-            newLpgeCodeDto.setCreateDate(Instant.now());
+            newLpgeCodeDto.setCreateDate(instantUtil.getNow());
             newLpgeCodeDto.setModifyId(createUser.getIdx());
-            newLpgeCodeDto.setModifyDate(Instant.now());
+            newLpgeCodeDto.setModifyDate(instantUtil.getNow());
             if(!"local".equals(createDto.getInputMode())){
                 lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
 
@@ -85,9 +87,9 @@ public class LandingPageService {
                 landingPageDto.setUseYn(true);
                 landingPageDto.setDelYn(false);
                 landingPageDto.setCreateId(createUser.getIdx());
-                landingPageDto.setCreateDate(Instant.now());
+                landingPageDto.setCreateDate(instantUtil.getNow());
                 landingPageDto.setModifyId(createUser.getIdx());
-                landingPageDto.setModifyDate(Instant.now());
+                landingPageDto.setModifyDate(instantUtil.getNow());
                 landingPageRepositoryService.saveLandingPage(landingPageDto);
             }
 
@@ -154,9 +156,9 @@ public class LandingPageService {
             customerInformationDto.setUseYn(true);
             customerInformationDto.setDelYn(false);
             customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setCreateDate(Instant.now());
+            customerInformationDto.setCreateDate(instantUtil.getNow());
             customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setModifyDate(Instant.now());
+            customerInformationDto.setModifyDate(instantUtil.getNow());
 
             CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
@@ -167,9 +169,9 @@ public class LandingPageService {
                 customerBasicConsultationDto.setKey(map.get("key"));
                 customerBasicConsultationDto.setValue(map.get("value"));
                 customerBasicConsultationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setCreateDate(Instant.now());
+                customerBasicConsultationDto.setCreateDate(instantUtil.getNow());
                 customerBasicConsultationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setModiftyDate(Instant.now());
+                customerBasicConsultationDto.setModiftyDate(instantUtil.getNow());
 
                 customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
             });
