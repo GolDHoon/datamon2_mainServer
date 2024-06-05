@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service("LandingPageLogicService")
@@ -75,9 +76,9 @@ public class LandingPageService {
             newLpgeCodeDto.setUseYn(true);
             newLpgeCodeDto.setDelYn(false);
             newLpgeCodeDto.setCreateId(createUser.getIdx());
-            newLpgeCodeDto.setCreateDate(LocalDateTime.now());
+            newLpgeCodeDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
             newLpgeCodeDto.setModifyId(createUser.getIdx());
-            newLpgeCodeDto.setModifyDate(LocalDateTime.now());
+            newLpgeCodeDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
             if(!"local".equals(createDto.getInputMode())){
                 lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
 
@@ -87,9 +88,9 @@ public class LandingPageService {
                 landingPageDto.setUseYn(true);
                 landingPageDto.setDelYn(false);
                 landingPageDto.setCreateId(createUser.getIdx());
-                landingPageDto.setCreateDate(LocalDateTime.now());
+                landingPageDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
                 landingPageDto.setModifyId(createUser.getIdx());
-                landingPageDto.setModifyDate(LocalDateTime.now());
+                landingPageDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
                 landingPageRepositoryService.saveLandingPage(landingPageDto);
             }
 
@@ -156,9 +157,9 @@ public class LandingPageService {
             customerInformationDto.setUseYn(true);
             customerInformationDto.setDelYn(false);
             customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setCreateDate(LocalDateTime.now());
+            customerInformationDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
             customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setModifyDate(LocalDateTime.now());
+            customerInformationDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
 
             CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
@@ -169,9 +170,9 @@ public class LandingPageService {
                 customerBasicConsultationDto.setKey(map.get("key"));
                 customerBasicConsultationDto.setValue(map.get("value"));
                 customerBasicConsultationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setCreateDate(LocalDateTime.now());
+                customerBasicConsultationDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
                 customerBasicConsultationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setModiftyDate(LocalDateTime.now());
+                customerBasicConsultationDto.setModiftyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
 
                 customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
             });
