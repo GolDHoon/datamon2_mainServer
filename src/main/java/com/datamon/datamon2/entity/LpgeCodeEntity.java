@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -40,20 +41,20 @@ public class LpgeCodeEntity {
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "create_date", nullable = false)
-    private Instant createDate;
+    private LocalDateTime createDate;
 
     @Column(name = "create_id", nullable = false)
     private Integer createId;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "modify_date", nullable = false)
-    private Instant modifyDate;
+    private LocalDateTime modifyDate;
 
     @Column(name = "modify_id", nullable = false)
     private Integer modifyId;
 
     @Column(name = "delete_date")
-    private Instant deleteDate;
+    private LocalDateTime deleteDate;
 
     @Column(name = "delete_id")
     private Integer deleteId;

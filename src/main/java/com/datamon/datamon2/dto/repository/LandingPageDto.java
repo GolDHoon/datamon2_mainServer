@@ -6,6 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * DTO for {@link LandingPageEntity}
@@ -17,10 +18,10 @@ public class LandingPageDto implements Serializable {
     String domain;
     Boolean useYn;
     Boolean delYn;
-    Instant createDate;
+    LocalDateTime createDate;
     Integer createId;
-    Instant modifyDate;
+    LocalDateTime modifyDate;
     Integer modifyId;
-    Instant deleteDate;
+    LocalDateTime deleteDate;
     Integer deleteId;
 }

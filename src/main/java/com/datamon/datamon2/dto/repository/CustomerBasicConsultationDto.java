@@ -5,6 +5,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO for {@link com.datamon.datamon2.entity.CustomerBasicConsultationEntity}
@@ -15,10 +16,10 @@ public class CustomerBasicConsultationDto implements Serializable {
     Long custId;
     String key;
     String value;
-    Instant createDate;
+    LocalDateTime createDate;
     Integer createId;
-    Instant modiftyDate;
+    LocalDateTime modiftyDate;
     Integer modifyId;
-    Instant deleteDate;
+    LocalDateTime deleteDate;
     Integer deleteId;
 }

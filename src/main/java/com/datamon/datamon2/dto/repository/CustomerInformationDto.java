@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO for {@link CustomerInformationEntity}
@@ -21,10 +22,10 @@ public class CustomerInformationDto implements Serializable {
     String ip;
     Boolean useYn;
     Boolean delYn;
-    Instant createDate;
+    LocalDateTime createDate;
     Integer createId;
-    Instant modifyDate;
+    LocalDateTime modifyDate;
     Integer modifyId;
-    Instant deleteDate;
+    LocalDateTime deleteDate;
     Integer deleteId;
 }

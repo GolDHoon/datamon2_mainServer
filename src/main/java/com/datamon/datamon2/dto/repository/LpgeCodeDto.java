@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO for {@link LpgeCodeEntity}
@@ -19,10 +20,10 @@ public class LpgeCodeDto implements Serializable {
     String codeDescript;
     Boolean useYn;
     Boolean delYn;
-    Instant createDate;
+    LocalDateTime createDate;
     Integer createId;
-    Instant modifyDate;
+    LocalDateTime modifyDate;
     Integer modifyId;
-    Instant deleteDate;
+    LocalDateTime deleteDate;
     Integer deleteId;
 }

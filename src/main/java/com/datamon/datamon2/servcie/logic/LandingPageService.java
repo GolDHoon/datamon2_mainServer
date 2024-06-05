@@ -75,9 +75,9 @@ public class LandingPageService {
             newLpgeCodeDto.setUseYn(true);
             newLpgeCodeDto.setDelYn(false);
             newLpgeCodeDto.setCreateId(createUser.getIdx());
-            newLpgeCodeDto.setCreateDate(instantUtil.getNow());
+            newLpgeCodeDto.setCreateDate(LocalDateTime.now());
             newLpgeCodeDto.setModifyId(createUser.getIdx());
-            newLpgeCodeDto.setModifyDate(instantUtil.getNow());
+            newLpgeCodeDto.setModifyDate(LocalDateTime.now());
             if(!"local".equals(createDto.getInputMode())){
                 lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
 
@@ -87,9 +87,9 @@ public class LandingPageService {
                 landingPageDto.setUseYn(true);
                 landingPageDto.setDelYn(false);
                 landingPageDto.setCreateId(createUser.getIdx());
-                landingPageDto.setCreateDate(instantUtil.getNow());
+                landingPageDto.setCreateDate(LocalDateTime.now());
                 landingPageDto.setModifyId(createUser.getIdx());
-                landingPageDto.setModifyDate(instantUtil.getNow());
+                landingPageDto.setModifyDate(LocalDateTime.now());
                 landingPageRepositoryService.saveLandingPage(landingPageDto);
             }
 
@@ -156,9 +156,9 @@ public class LandingPageService {
             customerInformationDto.setUseYn(true);
             customerInformationDto.setDelYn(false);
             customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setCreateDate(instantUtil.getNow());
+            customerInformationDto.setCreateDate(LocalDateTime.now());
             customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setModifyDate(instantUtil.getNow());
+            customerInformationDto.setModifyDate(LocalDateTime.now());
 
             CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
@@ -169,9 +169,9 @@ public class LandingPageService {
                 customerBasicConsultationDto.setKey(map.get("key"));
                 customerBasicConsultationDto.setValue(map.get("value"));
                 customerBasicConsultationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setCreateDate(instantUtil.getNow());
+                customerBasicConsultationDto.setCreateDate(LocalDateTime.now());
                 customerBasicConsultationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setModiftyDate(instantUtil.getNow());
+                customerBasicConsultationDto.setModiftyDate(LocalDateTime.now());
 
                 customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
             });
