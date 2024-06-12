@@ -41,6 +41,13 @@ public class WebConfigurer implements WebMvcConfigurer {
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+
+        registry.addMapping("/developer/checkServer")
+                .allowedOrigins("-")
+                .allowedOriginPatterns("*")
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
     @Override
