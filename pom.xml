@@ -46,9 +46,37 @@
             </build>
         </profile>
         <profile>
+            <id>dev2</id>
+            <properties>
+                <activatedProperties>dev2</activatedProperties>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
             <id>prod</id>
             <properties>
                 <activatedProperties>prod</activatedProperties>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <id>prod2</id>
+            <properties>
+                <activatedProperties>prod2</activatedProperties>
             </properties>
             <build>
                 <resources>
@@ -94,9 +122,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
-            <version>3.3.0</version>
+            <artifactId>spring-session-data-redis</artifactId>
         </dependency>
 
         <dependency>
