@@ -23,6 +23,11 @@ public class DeveloperController {
         return userList;
     }
 
+    @GetMapping("/checkServer")
+    public Boolean checkServer(){
+        return true;
+    }
+
     @GetMapping("/passwordsetting")
     public String setPassword(@RequestParam int idx, @RequestParam String userPw){
         String result = developerService.setPassword(idx, userPw);
