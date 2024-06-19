@@ -20,6 +20,10 @@ public class CommonController {
     private static final Logger logger = LogManager.getLogger(CommonController.class);
     private CommonService commonService;
 
+    public CommonController(CommonService commonService) {
+        this.commonService = commonService;
+    }
+
     @GetMapping("/DBList")
     public ResponseEntity<?> getDBList(HttpServletRequest request, HttpServletResponse response){
         List<Map<String, String>> result;
