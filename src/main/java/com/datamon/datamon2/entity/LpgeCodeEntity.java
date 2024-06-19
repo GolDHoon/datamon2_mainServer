@@ -25,7 +25,6 @@ public class LpgeCodeEntity extends DrivenCommonCheckUserEntity implements Seria
     @Column(name = "code_name", nullable = false)
     private Integer codeName;
 
-    @ColumnDefault("(concat(`parent_code_full_name`,_utf8mb3'_',convert(lpad(`code_name`,10,_utf8mb4'0') using utf8mb3)))")
     @Column(name = "code_full_name", nullable = false, length = 15)
     private String codeFullName;
 
@@ -34,7 +33,4 @@ public class LpgeCodeEntity extends DrivenCommonCheckUserEntity implements Seria
 
     @Column(name = "code_descript", length = 200)
     private String codeDescript;
-
-
-
 }
