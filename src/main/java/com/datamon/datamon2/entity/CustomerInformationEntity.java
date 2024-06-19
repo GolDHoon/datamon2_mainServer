@@ -1,18 +1,17 @@
 package com.datamon.datamon2.entity;
 
+import com.datamon.datamon2.entity.common.DrivenCommonCheckUserEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 @Data
 @Entity
 @Table(name = "TB_CUSTOMER_INFORMATION")
-public class CustomerInformationEntity {
+public class CustomerInformationEntity extends DrivenCommonCheckUserEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
@@ -38,33 +37,4 @@ public class CustomerInformationEntity {
 
     @Column(name = "ip", length = 15)
     private String ip;
-
-    @ColumnDefault("1")
-    @Column(name = "use_yn", nullable = false)
-    private Boolean useYn = false;
-
-    @ColumnDefault("0")
-    @Column(name = "del_yn")
-    private Boolean delYn;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate;
-
-    @Column(name = "create_id")
-    private Integer createId;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "modify_date", nullable = false)
-    private LocalDateTime modifyDate;
-
-    @Column(name = "modify_id")
-    private Integer modifyId;
-
-    @Column(name = "delete_date")
-    private LocalDateTime deleteDate;
-
-    @Column(name = "delete_id")
-    private Integer deleteId;
-
 }

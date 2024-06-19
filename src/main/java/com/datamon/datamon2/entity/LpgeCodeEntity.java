@@ -1,18 +1,22 @@
 package com.datamon.datamon2.entity;
 
+import com.datamon.datamon2.entity.common.DrivenCommonCheckUserEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "TB_LPGE_CODE")
-public class LpgeCodeEntity {
+public class LpgeCodeEntity extends DrivenCommonCheckUserEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
@@ -31,32 +35,6 @@ public class LpgeCodeEntity {
     @Column(name = "code_descript", length = 200)
     private String codeDescript;
 
-    @ColumnDefault("1")
-    @Column(name = "use_yn")
-    private Boolean useYn;
 
-    @ColumnDefault("0")
-    @Column(name = "del_yn")
-    private Boolean delYn;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate;
-
-    @Column(name = "create_id", nullable = false)
-    private Integer createId;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "modify_date", nullable = false)
-    private LocalDateTime modifyDate;
-
-    @Column(name = "modify_id", nullable = false)
-    private Integer modifyId;
-
-    @Column(name = "delete_date")
-    private LocalDateTime deleteDate;
-
-    @Column(name = "delete_id")
-    private Integer deleteId;
 
 }

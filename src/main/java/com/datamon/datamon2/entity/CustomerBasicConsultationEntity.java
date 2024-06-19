@@ -1,18 +1,17 @@
 package com.datamon.datamon2.entity;
 
+import com.datamon.datamon2.entity.common.DrivenCommonUserEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 @Data
 @Entity
 @Table(name = "TB_CUSTOMER_BASIC_CONSULTATION")
-public class CustomerBasicConsultationEntity {
+public class CustomerBasicConsultationEntity extends DrivenCommonUserEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
@@ -26,25 +25,4 @@ public class CustomerBasicConsultationEntity {
 
     @Column(name = "value", nullable = false, length = 5000)
     private String value;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate;
-
-    @Column(name = "create_id", nullable = false)
-    private Integer createId;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "modifty_date", nullable = false)
-    private LocalDateTime modiftyDate;
-
-    @Column(name = "modify_id", nullable = false)
-    private Integer modifyId;
-
-    @Column(name = "delete_date")
-    private LocalDateTime deleteDate;
-
-    @Column(name = "delete_id")
-    private Integer deleteId;
-
 }
