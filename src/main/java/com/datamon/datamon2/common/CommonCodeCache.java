@@ -3,6 +3,7 @@ package com.datamon.datamon2.common;
 import com.datamon.datamon2.dto.repository.LpgeCodeDto;
 import com.datamon.datamon2.dto.repository.PaatCodeDto;
 import com.datamon.datamon2.dto.repository.PageCodeDto;
+import com.datamon.datamon2.dto.repository.UstyCodeDto;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,15 @@ public class CommonCodeCache {
     private static List<PageCodeDto> pageCodes;
     private static List<PaatCodeDto> paatCodes;
     private static List<LpgeCodeDto> lpgeCodes;
+    private static List<UstyCodeDto> ustyCodes;
+
+    public static List<UstyCodeDto> getUstyCodes() {
+        return ustyCodes;
+    }
+
+    public static void setUstyCodes(List<UstyCodeDto> ustyCodes) {
+        CommonCodeCache.ustyCodes = ustyCodes;
+    }
 
     public static void setSystemIdIdx(int systemIdIdx) {
         CommonCodeCache.systemIdIdx = systemIdIdx;

@@ -32,9 +32,7 @@ public class LandingPageManageService {
     public List<Map<String, String>> getListByUserIdForSession(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
 
-        String token = httpSessionUtil.getAttribute("jwt").toString();
-        String userIdStr = (String) jwtUtil.getClaims(token).get("sub");
-        int userId = Integer.parseInt(userIdStr);
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
         List<String> lpgeCodeList = userLpgeMappingService.getUserLpgeMappingByUserId(userId).stream()
                 .map(UserLpgeMappingEntityIdDto::getLpgeCode)
