@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class MemberInfomationService {
     private MemberInfomationRepository memberInfomationRepository;
@@ -20,6 +23,15 @@ public class MemberInfomationService {
     @Transactional(readOnly = true)
     public MemberInfomationDto getMemberInfomationByUserId(int userId){
         return memberInfomationRepository.findByUserId(userId).map(memberInfomationMapper::toDto).orElse(new MemberInfomationDto());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberInfomationDto> getMemberInfomationDtoListByCompanyId(int companyId){
+        List<MemberInfomationDto> result = new ArrayList<>();
+        memberInfomationRepository.findByCompanyId(companyId).forEach(entity -> {
+            result.add(memberInfomationMapper.toDto(entity));
+        });
+        return result;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

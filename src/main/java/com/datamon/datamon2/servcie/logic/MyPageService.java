@@ -49,6 +49,8 @@ public class MyPageService {
 
         List<UstyCodeDto> ustyCodes = CommonCodeCache.getUstyCodes();
         List<UstyCodeDto> memberCode = ustyCodes.stream()
+                .filter(UstyCodeDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
                 .filter(dto -> dto.getCodeValue().contains("Meber") || dto.getCodeValue().contains("Developer"))
                 .collect(Collectors.toList());
 
@@ -67,8 +69,13 @@ public class MyPageService {
         }else{
             CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(userId);
             result.put("companyName", companyInfo.getName());
-            result.put("corporateNumber", companyInfo.getCorporateNumber());
             result.put("ceo", companyInfo.getCeo());
+            result.put("corporateNumber", companyInfo.getCorporateNumber());
+            result.put("corporateMail", companyInfo.getCorporateMail());
+            result.put("corporateAddress", companyInfo.getCorporateAddress());
+            result.put("businessItem", companyInfo.getBusinessItem());
+            result.put("businessStatus", companyInfo.getBusinessStatus());
+
         }
 
         return result;
