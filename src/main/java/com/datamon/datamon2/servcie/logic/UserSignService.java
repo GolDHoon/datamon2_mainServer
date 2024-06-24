@@ -101,7 +101,6 @@ public class UserSignService {
 //                    if(pageAuth.get(0).getPaatCode().equals(authX)){
 //                        return "auth-fail:page permission denied";
 //                    }
-//
                     return "success";
 //                }
             }
