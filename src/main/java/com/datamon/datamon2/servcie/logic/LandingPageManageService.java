@@ -4,12 +4,9 @@ import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
 import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
 import com.datamon.datamon2.dto.repository.*;
-import com.datamon.datamon2.dto.repository.common.DrivenCommonCheckUserDto;
-import com.datamon.datamon2.dto.repository.embeddable.UserLpgeMappingEntityIdDto;
 import com.datamon.datamon2.servcie.repository.LandingPageBlockedIpService;
 import com.datamon.datamon2.servcie.repository.LandingPageBlockedKeywordService;
-import com.datamon.datamon2.servcie.repository.UserBaseService;
-import com.datamon.datamon2.servcie.repository.UserLpgeMappingService;
+import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,13 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class LandingPageManageService {
     private JwtUtil jwtUtil;
-    private UserLpgeMappingService userLpgeMappingService;
+    private UserCdbtMappingService userCdbtMappingService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
 
-    public LandingPageManageService(JwtUtil jwtUtil, UserLpgeMappingService userLpgeMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService) {
+    public LandingPageManageService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService) {
         this.jwtUtil = jwtUtil;
-        this.userLpgeMappingService = userLpgeMappingService;
+        this.userCdbtMappingService = userCdbtMappingService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
     }
@@ -39,8 +36,9 @@ public class LandingPageManageService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        List<String> lpgeCodeList = userLpgeMappingService.getUserLpgeMappingByUserId(userId).stream()
-                .map(UserLpgeMappingEntityIdDto::getLpgeCode)
+        List<String> lpgeCodeList = userCdbtMappingService.getuserCdbtListByUserId(userId).stream()
+                .filter(dto-> dto.getCdbtCode().equals("LPGE"))
+                .map(UserCdbtMappingDto::getCdbtLowCode)
                 .collect(Collectors.toList());
 
         return CommonCodeCache.getLpgeCodes().stream()

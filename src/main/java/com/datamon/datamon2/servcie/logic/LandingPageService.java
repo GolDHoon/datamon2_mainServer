@@ -19,17 +19,17 @@ public class LandingPageService {
     private UserBaseService userBaseService;
     private LpgeCodeService lpgeCodeService;
     private com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService;
-    private UserLpgeMappingService userLpgeMappingService;
+    private UserCdbtMappingService userCdbtMappingService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
 
-    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserLpgeMappingService userLpgeMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
+    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
         this.userBaseService = userBaseService;
         this.lpgeCodeService = lpgeCodeService;
         this.landingPageRepositoryService = landingPageRepositoryService;
-        this.userLpgeMappingService = userLpgeMappingService;
+        this.userCdbtMappingService = userCdbtMappingService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
         this.customerInformationService = customerInformationService;
@@ -81,12 +81,13 @@ public class LandingPageService {
 
         }
 
-        UserLpgeMappingDto userLpgeMappingDto = new UserLpgeMappingDto();
-        userLpgeMappingDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
+        UserCdbtMappingDto userLpgeMappingDto = new UserCdbtMappingDto();
+        userLpgeMappingDto.setCdbtLowCode(lpgeCodeDto.getCodeFullName());
         userLpgeMappingDto.setUserId(companyUser.getIdx());
+        userLpgeMappingDto.setCdbtCode("LPGE");
 
         try {
-            userLpgeMappingService.saveUserLpgeMapping(userLpgeMappingDto);
+            userCdbtMappingService.saveUserCdbtMapping(userLpgeMappingDto);
         } catch (Exception e) {
             return "fail - CustUserMapping fail";
         }
