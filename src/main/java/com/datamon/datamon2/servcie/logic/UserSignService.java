@@ -1,19 +1,12 @@
 package com.datamon.datamon2.servcie.logic;
 
-import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.repository.PaatCodeDto;
-import com.datamon.datamon2.dto.repository.PageCodeDto;
-import com.datamon.datamon2.dto.repository.PagePermissionInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
-import com.datamon.datamon2.servcie.repository.PageCodeService;
-import com.datamon.datamon2.servcie.repository.PagePermissionInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,17 +15,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class UserSignService {
     private UserBaseService userBaseService;
-    private PagePermissionInfomationService pagePermissionInfomationService;
     private JwtUtil jwtUtil;
 
-    public UserSignService(UserBaseService userBaseService, PagePermissionInfomationService pagePermissionInfomationService, JwtUtil jwtUtil) {
+    public UserSignService(UserBaseService userBaseService, JwtUtil jwtUtil) {
         this.userBaseService = userBaseService;
-        this.pagePermissionInfomationService = pagePermissionInfomationService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -51,7 +41,7 @@ public class UserSignService {
         String encriptPw = encryptionUtil.getSHA256WithSalt(password, userBaseByUserId.getSalt());
 
         if(encriptPw.equals(userBaseByUserId.getUserPw())){
-            List<Map<String, Object>> claimsList = setAuth(userBaseByUserId.getIdx());
+            List<Map<String, Object>> claimsList = new ArrayList<>();
             String token = jwtUtil.createToken(String.valueOf(userBaseByUserId.getIdx()), claimsList);
 
             httpSessionUtil.setAttribute("jwt", token);
@@ -87,33 +77,33 @@ public class UserSignService {
         if(ip.get("ExtractingMethod").equals(loginIp.get("ExtractingMethod"))){
             Claims claims = jwtUtil.getClaims(token);
             if(ip.get("ip").equals(loginIp.get("ip"))){
-                if(jwtUtil.validateToken(claims)){
-                    int userId = Integer.parseInt((String) claims.get("sub"));
-
-                    List<PageCodeDto> pageCode = CommonCodeCache.getPageCodes().stream()
-                            .filter(dto -> dto.getCodeValue().equals(request.getHeader("Path")))
-                            .collect(Collectors.toList());
-
-                    if(pageCode.size() == 0){
-                        return "auth-fail:page unregistered";
-                    }
-
-                    List<PagePermissionInfomationDto> pageAuth = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId).stream()
-                            .filter(dto -> dto.getPageCode().equals(pageCode.get(0).getCodeFullName()))
-                            .collect(Collectors.toList());
-
-                    if(pageAuth.size() == 0){
-                        return "auth-fail:page permission denied";
-                    }
-
-                    PaatCodeDto authX = CommonCodeCache.getPaatCodes().stream().filter(dto -> dto.getCodeValue().equals("X")).collect(Collectors.toList()).get(0);
-
-                    if(pageAuth.get(0).getPaatCode().equals(authX)){
-                        return "auth-fail:page permission denied";
-                    }
-
+//                if(jwtUtil.validateToken(claims)){
+//                    int userId = Integer.parseInt((String) claims.get("sub"));
+//
+//                    List<PageCodeDto> pageCode = CommonCodeCache.getPageCodes().stream()
+//                            .filter(dto -> dto.getCodeValue().equals(request.getHeader("Path")))
+//                            .collect(Collectors.toList());
+//
+//                    if(pageCode.size() == 0){
+//                        return "auth-fail:page unregistered";
+//                    }
+//
+//                    List<PagePermissionInfomationDto> pageAuth = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId).stream()
+//                            .filter(dto -> dto.getPageCode().equals(pageCode.get(0).getCodeFullName()))
+//                            .collect(Collectors.toList());
+//
+//                    if(pageAuth.size() == 0){
+//                        return "auth-fail:page permission denied";
+//                    }
+//
+//                    PaatCodeDto authX = CommonCodeCache.getPaatCodes().stream().filter(dto -> dto.getCodeValue().equals("X")).collect(Collectors.toList()).get(0);
+//
+//                    if(pageAuth.get(0).getPaatCode().equals(authX)){
+//                        return "auth-fail:page permission denied";
+//                    }
+//
                     return "success";
-                }
+//                }
             }
         }
 
@@ -128,30 +118,30 @@ public class UserSignService {
         String token = httpSessionUtil.getAttribute("jwt").toString();
         String userIdStr = (String) jwtUtil.getClaims(token).get("sub");
         int userId = Integer.parseInt(userIdStr);
-        List<Map<String, Object>> claimsList = setAuth(userId);
+        List<Map<String, Object>> claimsList = new ArrayList<>();
 
         String newToken = jwtUtil.createToken(userIdStr, claimsList);
 
-        httpSessionUtil.setAttribute("jwt", token);
+        httpSessionUtil.setAttribute("jwt", newToken);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected List<Map<String, Object>> setAuth(int userId){
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        List<PagePermissionInfomationDto> pagePermissionInfomationByUserId = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId);
-
-        Map<String, Object> pageAuth = new HashMap<>();
-        List<Map<String, Object>> pageAuthList = new ArrayList<>();
-        pagePermissionInfomationByUserId.forEach(dto -> {
-            Map<String, Object> claim = new HashMap<>();
-            claim.put(dto.getPageCode(), dto.getPaatCode());
-            pageAuthList.add(claim);
-        });
-        pageAuth.put("key", "pageAuth");
-        pageAuth.put("value", pageAuthList);
-        result.add(pageAuth);
-
-        return result;
-    }
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    protected List<Map<String, Object>> setAuth(int userId){
+//        List<Map<String, Object>> result = new ArrayList<>();
+//
+//        List<PagePermissionInfomationDto> pagePermissionInfomationByUserId = pagePermissionInfomationService.getPagePermissionInfomationByUserId(userId);
+//
+//        Map<String, Object> pageAuth = new HashMap<>();
+//        List<Map<String, Object>> pageAuthList = new ArrayList<>();
+//        pagePermissionInfomationByUserId.forEach(dto -> {
+//            Map<String, Object> claim = new HashMap<>();
+//            claim.put(dto.getPageCode(), dto.getPaatCode());
+//            pageAuthList.add(claim);
+//        });
+//        pageAuth.put("key", "pageAuth");
+//        pageAuth.put("value", pageAuthList);
+//        result.add(pageAuth);
+//
+//        return result;
+//    }
 }
