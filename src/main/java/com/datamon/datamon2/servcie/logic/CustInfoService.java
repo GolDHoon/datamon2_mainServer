@@ -41,7 +41,7 @@ public class CustInfoService {
                 .map(dto -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("custId", dto.getIdx());
-                    map.put("lpgeCode", dto.getLpgeCode());
+                    map.put("cdbtLowCode", dto.getCdbtLowCode());
                     map.put("utmSourse", dto.getUtmSourse());
                     map.put("utmMedium", dto.getUtmMedium());
                     map.put("utmCampaign", dto.getUtmCampaign());

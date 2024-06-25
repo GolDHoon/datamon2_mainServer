@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 public class CustomerInformationDto extends DrivenCommonCheckUserDto implements Serializable {
     Long  idx;
-    String lpgeCode;
+    String cdbtLowCode;
     String utmSourse;
     String utmMedium;
     String utmCampaign;

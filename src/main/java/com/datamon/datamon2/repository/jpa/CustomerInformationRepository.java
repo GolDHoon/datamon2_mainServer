@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface CustomerInformationRepository extends JpaRepository<CustomerInformationEntity, Long> {
-    List<CustomerInformationEntity> findByLpgeCode(String lpgeCode);
+    List<CustomerInformationEntity> findByCdbtLowCode(String cdbtLowCode);
 }

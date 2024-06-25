@@ -27,10 +27,10 @@ public class CustomerInformationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerInformationDto> getCustomerInformationByLpgeCode(String lpgeCode){
+    public List<CustomerInformationDto> getCustomerInformationByLpgeCode(String cdbtLowCode){
         List<CustomerInformationDto> result = new ArrayList<>();
 
-        customerInformationRepository.findByLpgeCode(lpgeCode).forEach(entity -> {
+        customerInformationRepository.findByCdbtLowCode(cdbtLowCode).forEach(entity -> {
             result.add(customerInformationMapper.toDto(entity));
         });
 
