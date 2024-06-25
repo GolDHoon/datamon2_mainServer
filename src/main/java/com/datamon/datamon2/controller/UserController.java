@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/User")
+@RequestMapping("/user")
 public class UserController {
     private static final Logger logger = LogManager.getLogger(UserController.class);
 
@@ -28,7 +28,7 @@ public class UserController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response, @RequestParam("listType") String listType) throws Exception{
-        List<Map<String, String>> result;
+        Map<String, ?> result;
 
         try {
             if(listType.equals("user")){
