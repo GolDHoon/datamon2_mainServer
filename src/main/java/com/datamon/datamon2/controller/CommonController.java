@@ -29,13 +29,26 @@ public class CommonController {
         List<Map<String, String>> result;
 
         try {
-            result = commonService.getDBListByUserIdForSession(request);
+            result = commonService.getDBList(request);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
-
     }
+
+    @GetMapping("/routingInfo")
+    public ResponseEntity<?> getRoutingInfo(HttpServletRequest request, HttpServletResponse response){
+        Map<String, String> result;
+        try {
+            result = commonService.getRoutingInfo(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }

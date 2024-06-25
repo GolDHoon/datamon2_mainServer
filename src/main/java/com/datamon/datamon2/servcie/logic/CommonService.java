@@ -2,6 +2,8 @@ package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.repository.LpgeCodeDto;
+import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
@@ -19,20 +21,20 @@ import java.util.stream.Collectors;
 public class CommonService {
     private JwtUtil jwtUtil;
     private UserCdbtMappingService userCdbtMappingService;
+    private UserBaseService userBaseService;
 
-    public CommonService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService) {
+    public CommonService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, UserBaseService userBaseService) {
         this.jwtUtil = jwtUtil;
         this.userCdbtMappingService = userCdbtMappingService;
+        this.userBaseService = userBaseService;
     }
 
     @Transactional
-    public List<Map<String, String>> getDBListByUserIdForSession(HttpServletRequest request) throws Exception{
+    public List<Map<String, String>> getDBList(HttpServletRequest request) throws Exception{
         List<Map<String, String>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
 
-        String token = httpSessionUtil.getAttribute("jwt").toString();
-        String userIdStr = (String) jwtUtil.getClaims(token).get("sub");
-        int userId = Integer.parseInt(userIdStr);
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
         userCdbtMappingService.getuserCdbtListByUserId(userId).forEach(dto -> {
             Map<String, String> map = new HashMap<>();
@@ -52,6 +54,23 @@ public class CommonService {
                     break;
             }
         });
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, String> getRoutingInfo (HttpServletRequest request) throws Exception{
+        Map<String, String> result = new HashMap<>();
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        Object jwt = httpSessionUtil.getAttribute("jwt");
+
+        if(jwt != null){
+            int userId = jwtUtil.getUserId(jwt.toString());
+
+            UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
+
+            result.put("userType", userBaseById.getUserType());
+        }
 
         return result;
     }
