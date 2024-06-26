@@ -36,7 +36,7 @@ public class LandingPageManageService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        List<String> lpgeCodeList = userCdbtMappingService.getuserCdbtListByUserId(userId).stream()
+        List<String> lpgeCodeList = userCdbtMappingService.getUserCdbtListByUserId(userId).stream()
                 .filter(dto-> dto.getCdbtCode().equals("LPGE"))
                 .map(UserCdbtMappingDto::getCdbtLowCode)
                 .collect(Collectors.toList());

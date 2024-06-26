@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface UserCdbtMappingRepository extends JpaRepository<UserCdbtMappingEntity, Long> {
     List<UserCdbtMappingEntity> findByUserId(int userId);
+    List<UserCdbtMappingEntity> findByCdbtLowCode(String cdbtLowCode);
 }

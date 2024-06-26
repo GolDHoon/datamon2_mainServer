@@ -2,6 +2,7 @@ package com.datamon.datamon2.dto.repository;
 
 import com.datamon.datamon2.dto.repository.common.DrivenCommonCheckUserDto;
 import com.datamon.datamon2.entity.UserPermissionInfomationEntity;
+import lombok.Data;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -9,11 +10,11 @@ import java.io.Serializable;
 /**
  * DTO for {@link UserPermissionInfomationEntity}
  */
-@Value
+@Data
 public class UserPermissionInfomationDto extends DrivenCommonCheckUserDto implements Serializable {
     Long idx;
     Integer userId;
-    Integer usatCode;
+    String usatCode;
     String cdbtLowCode;
-    Integer cdbtCode;
+    String cdbtCode;
 }

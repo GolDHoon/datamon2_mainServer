@@ -21,7 +21,7 @@ public class UserCdbtMappingService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserCdbtMappingDto> getuserCdbtListByUserId(int userId){
+    public List<UserCdbtMappingDto> getUserCdbtListByUserId(int userId){
         List<UserCdbtMappingDto> result = new ArrayList<>();
         userCdbtMappingRepository.findByUserId(userId).forEach(entity -> {
             result.add(userCdbtMappingMapper.toDto(entity));
@@ -29,7 +29,15 @@ public class UserCdbtMappingService {
         return result;
     }
 
-    @Transactional
+    public List<UserCdbtMappingDto> getUserCdbtListByCdbtLowCode(String cdbtLowCode){
+        List<UserCdbtMappingDto> result = new ArrayList<>();
+        userCdbtMappingRepository.findByCdbtLowCode(cdbtLowCode).forEach(entity -> {
+            result.add(userCdbtMappingMapper.toDto(entity));
+        });
+        return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserCdbtMappingDto saveUserCdbtMapping(UserCdbtMappingDto userCdbtMappingDto){
         return userCdbtMappingMapper.toDto(userCdbtMappingRepository.save(userCdbtMappingMapper.toEntity(userCdbtMappingDto)));
     }

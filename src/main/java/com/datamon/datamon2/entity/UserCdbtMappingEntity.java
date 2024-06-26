@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Data
 @Entity
-@Table(name = "TB_USER_CDBT_MAPPING", schema = "DATAMON2_DEV")
+@Table(name = "TB_USER_CDBT_MAPPING")
 public class UserCdbtMappingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

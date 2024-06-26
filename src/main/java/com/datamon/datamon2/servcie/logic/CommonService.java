@@ -36,7 +36,7 @@ public class CommonService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        userCdbtMappingService.getuserCdbtListByUserId(userId).forEach(dto -> {
+        userCdbtMappingService.getUserCdbtListByUserId(userId).forEach(dto -> {
             Map<String, String> map = new HashMap<>();
             switch (dto.getCdbtCode()){
                 case "LPGE":

@@ -23,11 +23,11 @@ public class UserPermissionInfomationEntity extends DrivenCommonCheckUserEntity 
     private Integer userId;
 
     @Column(name = "usat_code", nullable = false)
-    private Integer usatCode;
+    private String usatCode;
 
     @Column(name = "cdbt_low_code", nullable = false, length = 20)
     private String cdbtLowCode;
 
     @Column(name = "cdbt_code", nullable = false)
-    private Integer cdbtCode;
+    private String cdbtCode;
 }
