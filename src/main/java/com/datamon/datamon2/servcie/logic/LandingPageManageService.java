@@ -31,7 +31,8 @@ public class LandingPageManageService {
     }
 
     @Transactional
-    public List<Map<String, String>> getList(HttpServletRequest request) throws Exception{
+    public Map<String, List> getList(HttpServletRequest request) throws Exception{
+        Map<String, List> result = new HashMap<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -41,17 +42,28 @@ public class LandingPageManageService {
                 .map(UserCdbtMappingDto::getCdbtLowCode)
                 .collect(Collectors.toList());
 
-        return CommonCodeCache.getLpgeCodes().stream()
+        List<Map<String, String>> rows = CommonCodeCache.getLpgeCodes().stream()
                 .filter(dto -> lpgeCodeList.contains(dto.getCodeFullName()))
                 .map(dto -> {
                     Map<String, String> map = new HashMap<>();
-                    map.put("domain", dto.getCodeValue());
-                    map.put("description", dto.getCodeDescript());
-                    map.put("useYn", dto.getUseYn().toString());
+                    map.put("도메인", dto.getCodeValue());
+                    map.put("도메인 설명", dto.getCodeDescript());
+                    map.put("사용유무", dto.getUseYn().toString());
                     map.put("code", dto.getCodeFullName());
                     return map;
                 })
                 .collect(Collectors.toList());
+
+        List<String> keyList = new ArrayList<>();
+
+        keyList.add("도메인");
+        keyList.add("도메인 설명");
+        keyList.add("사용유무");
+
+        result.put("rows",rows);
+        result.put("keyList", keyList);
+
+        return result;
     }
 
     @Transactional

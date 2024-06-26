@@ -26,7 +26,7 @@ public class LandingPageManageController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response){
-        List<Map<String, String>> result;
+        Map<String, List> result;
 
         try {
             result = landingPageManageService.getList(request);
