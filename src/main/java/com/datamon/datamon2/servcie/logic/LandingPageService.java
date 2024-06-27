@@ -71,7 +71,7 @@ public class LandingPageService {
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
             newLpgeCodeDto.create(createUser.getIdx());
 
-            lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
+            lpgeCodeDto = lpgeCodeService.save(newLpgeCodeDto);
 
             LandingPageDto landingPageDto = new LandingPageDto();
             landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());

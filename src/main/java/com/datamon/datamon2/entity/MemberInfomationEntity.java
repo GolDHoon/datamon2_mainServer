@@ -26,7 +26,7 @@ public class MemberInfomationEntity {
     @Column(name = "role", length = 100)
     private String role;
 
-    @Column(name = "contact_phone", length = 10)
+    @Column(name = "contact_phone", length = 11)
     private String contactPhone;
 
     @Column(name = "contact_mail", length = 50)

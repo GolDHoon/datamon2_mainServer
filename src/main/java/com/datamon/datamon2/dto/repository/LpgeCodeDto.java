@@ -23,6 +23,6 @@ public class LpgeCodeDto extends DrivenCommonCheckUserDto implements Serializabl
     @Override
     public void create(int userId) {
         super.create(userId);
-        codeFullName = "LPGE_" + String.format("%010d", codeName);
+        codeFullName = "CDBT_LPGE_" + String.format("%010d", codeName);
     }
 }

@@ -3,13 +3,13 @@ package com.datamon.datamon2.servcie.logic;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
 import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
+import com.datamon.datamon2.dto.input.landingPageManage.LandingPageCreateDto;
 import com.datamon.datamon2.dto.repository.*;
-import com.datamon.datamon2.servcie.repository.LandingPageBlockedIpService;
-import com.datamon.datamon2.servcie.repository.LandingPageBlockedKeywordService;
-import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
+import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +19,21 @@ import java.util.stream.Collectors;
 @Service
 public class LandingPageManageService {
     private JwtUtil jwtUtil;
+    private UserBaseService userBaseService;
+    private CompanyInfomationService companyInfomationService;
+    private MemberInfomationService memberInfomationService;
     private UserCdbtMappingService userCdbtMappingService;
+    private LpgeCodeService lpgeCodeService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
 
-    public LandingPageManageService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService) {
+    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService) {
         this.jwtUtil = jwtUtil;
+        this.userBaseService = userBaseService;
+        this.companyInfomationService = companyInfomationService;
+        this.memberInfomationService = memberInfomationService;
         this.userCdbtMappingService = userCdbtMappingService;
+        this.lpgeCodeService = lpgeCodeService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
     }
@@ -67,6 +75,48 @@ public class LandingPageManageService {
     }
 
     @Transactional
+    public String createLpge(HttpServletRequest request, LandingPageCreateDto landingPageCreateDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        List<String> companyUserCode = new ArrayList<>();
+        companyUserCode.add("USTY_MAST");
+        companyUserCode.add("USTY_CLNT");
+        companyUserCode.add("USTY_ADAC");
+        companyUserCode.add("USTY_CRAC");
+
+        LpgeCodeDto lpgeCodeDto = new LpgeCodeDto();
+        lpgeCodeDto.setCodeName(CommonCodeCache.getLpgeCodes().size()+1);
+        lpgeCodeDto.setCodeValue(landingPageCreateDto.getDomain());
+        lpgeCodeDto.setCodeDescript(landingPageCreateDto.getDescription());
+        lpgeCodeDto.create(userId);
+
+        LpgeCodeDto save = lpgeCodeService.save(lpgeCodeDto);
+
+        UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
+
+        userCdbtMappingDto.setCdbtLowCode(save.getCodeFullName());
+        userCdbtMappingDto.setCdbtCode("LPGE");
+        userCdbtMappingDto.setUserId(userId);
+        userCdbtMappingService.save(userCdbtMappingDto);
+
+        userCdbtMappingDto.setUserId(1);
+        userCdbtMappingService.save(userCdbtMappingDto);
+
+        UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
+
+        if(!companyUserCode.contains(userBaseById.getUserType())){
+            MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
+            CompanyInfomationDto companyInfomationById = companyInfomationService.getCompanyInfomationById(memberInfomationByUserId.getCompanyId());
+            userCdbtMappingDto.setUserId(companyInfomationById.getUserId());
+            userCdbtMappingService.save(userCdbtMappingDto);
+        }
+
+        return "success";
+    }
+
+    @Transactional
     public List<String> getBlockedIpList(String lpgeCode) throws Exception{
         List<String> result = new ArrayList<>();
         landingPageBlockedIpService.getLandingPageBlockedIpByLpgeCode(lpgeCode).stream()
@@ -76,9 +126,9 @@ public class LandingPageManageService {
                 .forEach(dto -> {
                     String blokedIp = "";
                     blokedIp = blokedIp + String.valueOf(dto.getIp1());
-                    blokedIp = blokedIp + String.valueOf(dto.getIp2());
-                    blokedIp = blokedIp + String.valueOf(dto.getIp3());
-                    blokedIp = blokedIp + String.valueOf(dto.getIp4());
+                    blokedIp = blokedIp + "." + String.valueOf(dto.getIp2());
+                    blokedIp = blokedIp + "." + String.valueOf(dto.getIp3());
+                    blokedIp = blokedIp + "." + String.valueOf(dto.getIp4());
 
                     result.add(blokedIp);
                 });

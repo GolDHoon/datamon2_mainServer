@@ -2,6 +2,7 @@ package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
 import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
+import com.datamon.datamon2.dto.input.landingPageManage.LandingPageCreateDto;
 import com.datamon.datamon2.servcie.logic.LandingPageManageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,12 +39,26 @@ public class LandingPageManageController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PostMapping("/createLpge")
+    public ResponseEntity<?> createLpge(HttpServletRequest request, HttpServletResponse response, @RequestBody LandingPageCreateDto landingPageCreateDto){
+        String result;
+
+        try {
+            result = landingPageManageService.createLpge(request, landingPageCreateDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
     @GetMapping("/blockedIpList")
-    public ResponseEntity<?> getBlockedIpList(HttpServletRequest request, HttpServletResponse response, @RequestParam("rpgeCode") String rpgeCode){
+    public ResponseEntity<?> getBlockedIpList(HttpServletRequest request, HttpServletResponse response, @RequestParam("lpgeCode") String lpgeCode){
         List<String> result;
 
         try {
-            result = landingPageManageService.getBlockedIpList(rpgeCode);
+            result = landingPageManageService.getBlockedIpList(lpgeCode);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -87,11 +102,11 @@ public class LandingPageManageController {
     }
 
     @GetMapping("/blockedKeywordList")
-    public ResponseEntity<?> getBlockedKeywordList(HttpServletRequest request, HttpServletResponse response, @RequestParam("rpgeCode") String rpgeCode){
+    public ResponseEntity<?> getBlockedKeywordList(HttpServletRequest request, HttpServletResponse response, @RequestParam("lpgeCode") String lpgeCode){
         List<String> result;
 
         try {
-            result = landingPageManageService.getBlockedKeywordList(rpgeCode);
+            result = landingPageManageService.getBlockedKeywordList(lpgeCode);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

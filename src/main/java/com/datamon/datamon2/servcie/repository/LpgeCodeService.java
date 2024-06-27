@@ -40,7 +40,7 @@ public class LpgeCodeService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public LpgeCodeDto saveLpgeCode(LpgeCodeDto lpgeCodeDto){
+    public LpgeCodeDto save(LpgeCodeDto lpgeCodeDto){
         LpgeCodeDto save = lpgeCodeMapper.toDto(lpgeCodeRepository.save(lpgeCodeMapper.toEntity(lpgeCodeDto)));
         List<LpgeCodeDto> lpgeCodes = CommonCodeCache.getLpgeCodes();
         lpgeCodes.add(save);
