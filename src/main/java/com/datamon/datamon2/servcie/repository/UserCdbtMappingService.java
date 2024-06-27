@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.UserCdbtMappingDto;
+import com.datamon.datamon2.entity.UserCdbtMappingEntity;
 import com.datamon.datamon2.mapper.repository.UserCdbtMappingMapper;
 import com.datamon.datamon2.repository.jpa.UserCdbtMappingRepository;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,14 @@ public class UserCdbtMappingService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public UserCdbtMappingDto saveUserCdbtMapping(UserCdbtMappingDto userCdbtMappingDto){
-        return userCdbtMappingMapper.toDto(userCdbtMappingRepository.save(userCdbtMappingMapper.toEntity(userCdbtMappingDto)));
+    public UserCdbtMappingDto save(UserCdbtMappingDto userCdbtMappingDto){
+        UserCdbtMappingEntity entity = userCdbtMappingMapper.toEntity(userCdbtMappingDto);
+        UserCdbtMappingEntity save = userCdbtMappingRepository.save(entity);
+        return userCdbtMappingMapper.toDto(save);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void delete(UserCdbtMappingDto UserCdbtMappingDto){
+        userCdbtMappingRepository.delete(userCdbtMappingMapper.toEntity(UserCdbtMappingDto));
     }
 }

@@ -87,7 +87,7 @@ public class LandingPageService {
         userLpgeMappingDto.setCdbtCode("LPGE");
 
         try {
-            userCdbtMappingService.saveUserCdbtMapping(userLpgeMappingDto);
+            userCdbtMappingService.save(userLpgeMappingDto);
         } catch (Exception e) {
             return "fail - CustUserMapping fail";
         }
