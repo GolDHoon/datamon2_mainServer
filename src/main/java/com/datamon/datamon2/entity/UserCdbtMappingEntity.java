@@ -11,7 +11,7 @@ import lombok.Setter;
 public class UserCdbtMappingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idx", nullable = false)
+    @Column(name = "idx")
     private Long idx;
 
     @Column(name = "user_id", nullable = false)
@@ -20,7 +20,7 @@ public class UserCdbtMappingEntity {
     @Column(name = "cdbt_low_code", nullable = false, length = 20)
     private String cdbtLowCode;
 
-    @Column(name = "cdbt_code", nullable = false)
+    @Column(name = "cdbt_code", nullable = false, length= 4)
     private String cdbtCode;
 
 }

@@ -64,8 +64,18 @@ public class UserBaseService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public List<UserBaseDto> getUserBaseByIdxList(List<Integer> idxs){
+        List<UserBaseDto> result = new ArrayList<>();
+        userBaseRepository.findByIdxIn(idxs).forEach(entity -> {
+            result.add(userBaseMapper.toDto(entity));
+        });
+        return result;
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserBaseDto save (UserBaseDto userBaseDto){
         return userBaseMapper.toDto(userBaseRepository.save(userBaseMapper.toEntity(userBaseDto)));
     }
+
 }

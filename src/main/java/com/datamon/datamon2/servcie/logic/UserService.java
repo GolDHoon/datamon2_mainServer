@@ -1,13 +1,13 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
-import com.datamon.datamon2.dto.repository.MemberInfomationDto;
-import com.datamon.datamon2.dto.repository.UserBaseDto;
-import com.datamon.datamon2.dto.repository.UstyCodeDto;
+import com.datamon.datamon2.dto.input.user.*;
+import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.MemberInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
+import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
+import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,10 +67,14 @@ public class UserService {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        userBaseService.getUserBaseByUserTypeList(userCode).forEach(dto->{
+        userBaseService.getUserBaseByUserTypeList(userCode).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .collect(Collectors.toList())
+                .forEach(dto->{
             Map<String, String> resultRow = new HashMap<>();
             resultRow.put("Id", dto.getUserId());
-            resultRow.put("useIdx", String.valueOf(dto.getIdx()));
+            resultRow.put("userIdx", String.valueOf(dto.getIdx()));
             resultRow.put("최종수정일시", dateTimeFormatter.format(dto.getModifyDate()));
 
             CompanyInfomationDto companyInfomationById = companyInfomationService.getCompanyInfomationByUserId(dto.getIdx());
@@ -108,23 +112,23 @@ public class UserService {
         List<Map<String, String>> rows = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
 
+        List<String> companyUserCode = new ArrayList<>();
+        companyUserCode.add("USTY_MAST");
+        companyUserCode.add("USTY_CLNT");
+        companyUserCode.add("USTY_ADAC");
+        companyUserCode.add("USTY_CRAC");
+
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
-        UstyCodeDto ustyCodeDto = CommonCodeCache.getUstyCodes().stream()
-                .filter(UstyCodeDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> dto.getCodeFullName().equals(userBaseById.getUserType()))
-                .findFirst().orElse(new UstyCodeDto());
-
         int companyId = 0;
 
-        if(ustyCodeDto.getCodeValue().contains("Member")){
+        if(companyUserCode.contains(userBaseById.getUserType())){
             MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
             companyId = memberInfomationByUserId.getCompanyId();
         }else{
-            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
+            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationById(userId);
             companyId = companyInfomationByUserId.getIdx();
         }
 
@@ -134,14 +138,16 @@ public class UserService {
             Map<String, String> resultRow = new HashMap<>();
             UserBaseDto userDto = userBaseService.getUserBaseById(dto.getUserId());
 
-            resultRow.put("담당자명", dto.getName());
-            resultRow.put("소속", dto.getRole());
-            resultRow.put("연락처", dto.getContactPhone());
-            resultRow.put("이메일", dto.getContactMail());
+            if(userDto.getUseYn() && !userDto.getDelYn()){
+                resultRow.put("담당자명", dto.getName());
+                resultRow.put("소속", dto.getRole());
+                resultRow.put("연락처", dto.getContactPhone());
+                resultRow.put("이메일", dto.getContactMail());
 
-            resultRow.put("최종수정일시", dateTimeFormatter.format(userDto.getModifyDate()));
-            resultRow.put("userIdx", String.valueOf(dto.getIdx()));
-            rows.add(resultRow);
+                resultRow.put("최종수정일시", dateTimeFormatter.format(userDto.getModifyDate()));
+                resultRow.put("userIdx", String.valueOf(userDto.getIdx()));
+                rows.add(resultRow);
+            }
         });
 
         List<String> keyList = new ArrayList<>();
@@ -154,5 +160,117 @@ public class UserService {
         result.put("keyList", (Object) keyList);
 
         return result;
+    }
+
+    @Transactional
+    public String createCompanyUser (HttpServletRequest request, CreateCompanyUserDto createCompanyUserDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        UserBaseDto userBaseDto = new UserBaseDto();
+        userBaseDto.setUserId(createCompanyUserDto.getUserId());
+        String salt = encryptionUtil.getSalt();
+        String encryptPw = encryptionUtil.getSHA256WithSalt(createCompanyUserDto.getPw(), salt);
+        userBaseDto.setSalt(salt);
+        userBaseDto.setUserPw(encryptPw);
+        userBaseDto.setUserType("USTY_CLNT");
+        userBaseDto.create(userId);
+
+        UserBaseDto save = userBaseService.save(userBaseDto);
+
+        CompanyInfomationDto companyInfomationDto = new CompanyInfomationDto();
+        companyInfomationDto.setUserId(save.getIdx());
+        companyInfomationDto.setCeo(createCompanyUserDto.getCeo());
+        companyInfomationDto.setName(createCompanyUserDto.getName());
+        companyInfomationDto.setBusinessItem(createCompanyUserDto.getBusinessItem());
+        companyInfomationDto.setBusinessStatus(createCompanyUserDto.getBusinessStatus());
+        companyInfomationDto.setCorporateNumber(createCompanyUserDto.getCorporateNumber());
+        companyInfomationDto.setCorporateAddress(createCompanyUserDto.getCorporateAddress());
+        companyInfomationDto.setCorporateMail(createCompanyUserDto.getCorporateMail());
+        companyInfomationService.save(companyInfomationDto);
+
+        return "success";
+    }
+
+    @Transactional
+    public String deleteCompanyUser(HttpServletRequest request, DeleteCompanyUserDto deleteCompanyUserDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseById = userBaseService.getUserBaseById(deleteCompanyUserDto.getIdx());
+        userBaseById.setDelYn(true);
+        userBaseById.delete(userId);
+
+        userBaseService.save(userBaseById);
+
+        return "success";
+    }
+
+    @Transactional
+    public String createMemberUser(HttpServletRequest request, CreateMemberUserDto createMemberUserDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
+
+
+        UserBaseDto userBaseDto = new UserBaseDto();
+        userBaseDto.setUserId(createMemberUserDto.getUserId());
+        String salt = encryptionUtil.getSalt();
+        String encryptPw = encryptionUtil.getSHA256WithSalt(createMemberUserDto.getPw(), salt);
+        userBaseDto.setSalt(salt);
+        userBaseDto.setUserPw(encryptPw);
+        switch (userBaseById.getUserType()){
+            case "USTY_MAST":
+            userBaseDto.setUserType("USTY_INME");
+            break;
+            case "USTY_CLNT":
+            userBaseDto.setUserType("USTY_CLME");
+            break;
+            case "USTY_ADAC":
+            userBaseDto.setUserType("USTY_AAME");
+            break;
+            case "USTY_CRAC":
+            userBaseDto.setUserType("USTY_CAME");
+            break;
+        }
+        userBaseDto.create(userId);
+
+        UserBaseDto save = userBaseService.save(userBaseDto);
+        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
+
+        MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
+        memberInfomationDto.setCompanyId(companyInfomationByUserId.getIdx());
+        memberInfomationDto.setUserId(save.getIdx());
+        memberInfomationDto.setName(createMemberUserDto.getName());
+        memberInfomationDto.setRole(createMemberUserDto.getRole());
+        memberInfomationDto.setContactMail(createMemberUserDto.getMail());
+        memberInfomationDto.setContactPhone(createMemberUserDto.getContactPhone());
+
+        memberInfomationService.save(memberInfomationDto);
+
+        return "success";
+    }
+
+    @Transactional
+    public String deleteMemberUser(HttpServletRequest request, DeleteMemberUserDto deleteMemberUserDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseById = userBaseService.getUserBaseById(deleteMemberUserDto.getIdx());
+        userBaseById.setDelYn(true);
+        userBaseById.delete(userId);
+
+        userBaseService.save(userBaseById);
+
+        return "success";
     }
 }

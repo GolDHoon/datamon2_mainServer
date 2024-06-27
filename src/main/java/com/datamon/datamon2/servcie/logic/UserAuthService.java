@@ -1,14 +1,12 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.input.user.CopanyAndCdbtDto;
+import com.datamon.datamon2.dto.input.user.CopanyListAndCdbtDto;
+import com.datamon.datamon2.dto.input.user.UserAndCdbtDto;
 import com.datamon.datamon2.dto.input.userAuth.UserListForUserCdbtByCdbtLowCodeDto;
-import com.datamon.datamon2.dto.repository.LpgeCodeDto;
-import com.datamon.datamon2.dto.repository.UserBaseDto;
-import com.datamon.datamon2.dto.repository.UserCdbtMappingDto;
-import com.datamon.datamon2.dto.repository.UserPermissionInfomationDto;
-import com.datamon.datamon2.servcie.repository.UserBaseService;
-import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
-import com.datamon.datamon2.servcie.repository.UserPermissionInfomationService;
+import com.datamon.datamon2.dto.repository.*;
+import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserAuthService {
@@ -23,12 +22,16 @@ public class UserAuthService {
     private UserBaseService userBaseService;
     private UserCdbtMappingService userCdbtMappingService;
     private UserPermissionInfomationService userPermissionInfomationService;
+    private CompanyInfomationService companyInfomationService;
+    private MemberInfomationService memberInfomationService;
 
-    public UserAuthService(JwtUtil jwtUtil, UserBaseService userBaseService, UserCdbtMappingService userCdbtMappingService, UserPermissionInfomationService userPermissionInfomationService) {
+    public UserAuthService(JwtUtil jwtUtil, UserBaseService userBaseService, UserCdbtMappingService userCdbtMappingService, UserPermissionInfomationService userPermissionInfomationService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService) {
         this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService;
         this.userCdbtMappingService = userCdbtMappingService;
         this.userPermissionInfomationService = userPermissionInfomationService;
+        this.companyInfomationService = companyInfomationService;
+        this.memberInfomationService = memberInfomationService;
     }
 
     @Transactional
@@ -95,5 +98,85 @@ public class UserAuthService {
         result.put("keyList", keyList);
 
         return result;
+    }
+    @Transactional
+    public List<Map<String, String>> getUserListByCopanyAndCdbt(HttpServletRequest request, CopanyAndCdbtDto copanyAndCdbtDto) throws Exception {
+        List<Map<String, String>> result = new ArrayList<>();
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        List<String> companyUserCode = new ArrayList<>();
+        companyUserCode.add("USTY_MAST");
+        companyUserCode.add("USTY_CLNT");
+        companyUserCode.add("USTY_ADAC");
+        companyUserCode.add("USTY_CRAC");
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto sessionUser = userBaseService.getUserBaseById(userId);
+
+        int companyId;
+        if (companyUserCode.contains(sessionUser.getUserType())) {
+            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
+            companyId = companyInfomationByUserId.getIdx();
+        } else {
+            MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
+            companyId = memberInfomationByUserId.getCompanyId();
+        }
+
+        List<Integer> userIdxList = userCdbtMappingService.getUserCdbtListByCdbtLowCode(copanyAndCdbtDto.getCdbtLowCode()).stream()
+                .map(dto -> {
+                    return dto.getUserId();
+                })
+                .collect(Collectors.toList());
+
+        List<Integer> inviteUserIdLowData = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId).stream()
+                .filter(dto -> !userIdxList.contains(dto.getIdx()))
+                .map(dto -> {
+                    return dto.getUserId();
+                })
+                .collect(Collectors.toList());
+
+
+        userBaseService.getUserBaseByIdxList(inviteUserIdLowData).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .collect(Collectors.toList())
+                .forEach(dto -> {
+                    MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(dto.getIdx());
+
+                    if(memberInfomationByUserId.getIdx() != null){
+                        Map<String, String> resultRows = new HashMap<>();
+                        resultRows.put("Idx", String.valueOf(dto.getIdx()));
+                        resultRows.put("Id", dto.getUserId());
+
+                        resultRows.put("name", memberInfomationByUserId.getName());
+
+                        result.add(resultRows);
+                    }
+
+                });
+
+        return result;
+    }
+
+    @Transactional
+    public String createUserCdbtMappingByCopanyAndCdbt(CopanyListAndCdbtDto copanyListAndCdbtDto) throws Exception {
+        UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
+        userCdbtMappingDto.setCdbtCode("LPGE");
+        userCdbtMappingDto.setCdbtLowCode(copanyListAndCdbtDto.getCdbtLowCode());
+        List<Integer> idxs = copanyListAndCdbtDto.getIdxs();
+        idxs.forEach(idx -> {
+            userCdbtMappingDto.setUserId(idx);
+            userCdbtMappingService.save(userCdbtMappingDto);
+        });
+        return "success";
+    }
+
+    @Transactional
+    public String deleteUserCdbtMappingByCopanyAndCdbt(UserAndCdbtDto userAndCdbtDto) throws Exception {
+        userCdbtMappingService.getUserCdbtListByCdbtLowCode(userAndCdbtDto.getCdbtCode()).stream()
+                .filter(dto -> dto.getUserId().equals(userAndCdbtDto.getUserId()) )
+                .collect(Collectors.toList()).forEach(dto -> {
+                    userCdbtMappingService.delete(dto);
+                });
+        return "success";
     }
 }
