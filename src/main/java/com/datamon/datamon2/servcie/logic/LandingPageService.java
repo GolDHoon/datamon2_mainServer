@@ -39,7 +39,13 @@ public class LandingPageService {
     @Transactional
     public InitalDataDto getInitialData(String domain) throws Exception{
         InitalDataDto result = new InitalDataDto();
-        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> domain.contains(dto.getCodeValue())).findFirst().orElse(null);
+
+        if (domain.endsWith("/")) {
+            domain = domain.substring(0, domain.length() - 1);
+        }
+
+        String finalDomain = domain;
+        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> finalDomain.contains(dto.getCodeValue())).findFirst().orElse(null);
         if(lpgeCodeDto == null) result.setLpgeCode("Registration required");
         else result.setLpgeCode(lpgeCodeDto.getCodeFullName());
 
@@ -144,12 +150,13 @@ public class LandingPageService {
 
         CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
         custDataDto.getData().forEach(map->{
             CustomerBasicConsultationCheckDto customerBasicConsultationDto = new CustomerBasicConsultationCheckDto();
 
             customerBasicConsultationDto.setCustId(newCustomerInformationDto.getIdx());
             customerBasicConsultationDto.setKey(map.get("key"));
-            customerBasicConsultationDto.setValue(map.get("value"));
+            customerBasicConsultationDto.setValue(encryptionUtil.AES256encrypt(map.get("value")));
             customerBasicConsultationDto.create(CommonCodeCache.getSystemIdIdx());
             customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
         });

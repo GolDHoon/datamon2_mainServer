@@ -40,7 +40,7 @@ public class EncryptionUtil {
             c = Cipher.getInstance(instance);
             c.init(Cipher.DECRYPT_MODE, getSKeySpec(), getIvSpec());
             byte[] byteStr = Base64.getDecoder().decode(str.getBytes());
-            String decStr = new String(c.doFinal(byteStr), "UTF-8");
+            String decStr = new String(Base64.getDecoder().decode(c.doFinal(byteStr)), StandardCharsets.UTF_8);
             return decStr;
         } catch (Exception e) {
             e.printStackTrace();
