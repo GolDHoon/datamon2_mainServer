@@ -26,6 +26,7 @@ public class UserSignService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional
     public String userLogout(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         httpSessionUtil.invalidate();
