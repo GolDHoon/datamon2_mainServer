@@ -32,6 +32,19 @@ public class UserSignController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> userLogout(HttpServletRequest request, HttpServletResponse response){
+        String result;
+        try {
+            result = userSignService.userLogout(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
     @PostMapping("/sessionCheck")
     public ResponseEntity<?> sessionCheck(HttpServletRequest request, HttpServletResponse response){
         try {

@@ -37,7 +37,7 @@ public class UserAuthService {
     @Transactional
     public List<Map<String, String>> getUserCdbtLowCodeList (HttpServletRequest request) throws Exception{
         List<Map<String, String>> result = new ArrayList<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
         userCdbtMappingService.getUserCdbtListByUserId(userId).forEach(dto -> {
@@ -102,7 +102,7 @@ public class UserAuthService {
     @Transactional
     public List<Map<String, String>> getUserListByCopanyAndCdbt(HttpServletRequest request, CopanyAndCdbtDto copanyAndCdbtDto) throws Exception {
         List<Map<String, String>> result = new ArrayList<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         List<String> companyUserCode = new ArrayList<>();
         companyUserCode.add("USTY_MAST");
         companyUserCode.add("USTY_CLNT");

@@ -32,7 +32,7 @@ public class CommonService {
     @Transactional
     public List<Map<String, String>> getDBList(HttpServletRequest request) throws Exception{
         List<Map<String, String>> result = new ArrayList<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -61,7 +61,7 @@ public class CommonService {
     @Transactional
     public Map<String, String> getRoutingInfo (HttpServletRequest request) throws Exception{
         Map<String, String> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         Object jwt = httpSessionUtil.getAttribute("jwt");
 
         if(jwt != null){

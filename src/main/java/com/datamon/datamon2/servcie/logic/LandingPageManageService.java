@@ -41,7 +41,7 @@ public class LandingPageManageService {
     @Transactional
     public Map<String, List> getList(HttpServletRequest request) throws Exception{
         Map<String, List> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -76,7 +76,7 @@ public class LandingPageManageService {
 
     @Transactional
     public String createLpge(HttpServletRequest request, LandingPageCreateDto landingPageCreateDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -137,7 +137,7 @@ public class LandingPageManageService {
 
     @Transactional
     public String deleteBlockedIp(BlockIpDto blockIpDto, HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -173,7 +173,7 @@ public class LandingPageManageService {
 
     @Transactional
     public String registerBlockedIp(BlockIpDto blockIpDto, HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -229,7 +229,7 @@ public class LandingPageManageService {
 
     @Transactional
     public String deleteBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -256,7 +256,7 @@ public class LandingPageManageService {
 
     @Transactional
     public String registerBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 

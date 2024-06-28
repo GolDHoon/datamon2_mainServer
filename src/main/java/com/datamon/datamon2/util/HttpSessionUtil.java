@@ -30,4 +30,12 @@ public class HttpSessionUtil {
         int inervalTime = minute * 60;
         session.setMaxInactiveInterval(inervalTime);
     }
+
+    public void removeAttribute(String name) {
+        session.removeAttribute(name);
+    }
+
+    public void invalidate() {
+        session.invalidate();
+    }
 }

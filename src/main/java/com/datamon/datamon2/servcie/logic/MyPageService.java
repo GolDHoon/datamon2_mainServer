@@ -39,7 +39,7 @@ public class MyPageService {
     @Transactional
     public Map<String, String> getInfo(HttpServletRequest request) throws Exception {
         Map<String, String> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -84,7 +84,7 @@ public class MyPageService {
     @Transactional
     public String modifyMember(HttpServletRequest request, ModifyMemberDto modifyMemberDto) throws Exception{
         Map<String, String> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -106,7 +106,7 @@ public class MyPageService {
     @Transactional
     public String modifyCompany(HttpServletRequest request, ModifyCompanyDto modifyCompanyDto) throws Exception{
         Map<String, String> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -127,7 +127,7 @@ public class MyPageService {
     public String setPassword(HttpServletRequest request, String passWord) throws Exception{
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         Map<String, String> result = new HashMap<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 

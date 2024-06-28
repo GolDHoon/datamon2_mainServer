@@ -39,7 +39,7 @@ public class UserService {
     public Map<String, ?>  getListCompany(HttpServletRequest request) throws Exception{
         Map<String, Object> result = new HashMap<>();
         List<Map<String, String>> rows = new ArrayList<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -110,7 +110,7 @@ public class UserService {
     public Map<String, ?> getListUser(HttpServletRequest request) throws Exception{
         Map<String, Object> result = new HashMap<>();
         List<Map<String, String>> rows = new ArrayList<>();
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         List<String> companyUserCode = new ArrayList<>();
         companyUserCode.add("USTY_MAST");
@@ -164,7 +164,7 @@ public class UserService {
 
     @Transactional
     public String createCompanyUser (HttpServletRequest request, CreateCompanyUserDto createCompanyUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -197,7 +197,7 @@ public class UserService {
 
     @Transactional
     public String deleteCompanyUser(HttpServletRequest request, DeleteCompanyUserDto deleteCompanyUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -212,7 +212,7 @@ public class UserService {
 
     @Transactional
     public String createMemberUser(HttpServletRequest request, CreateMemberUserDto createMemberUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -261,7 +261,7 @@ public class UserService {
 
     @Transactional
     public String deleteMemberUser(HttpServletRequest request, DeleteMemberUserDto deleteMemberUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 

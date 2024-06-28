@@ -26,6 +26,12 @@ public class UserSignService {
         this.jwtUtil = jwtUtil;
     }
 
+    public String userLogout(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        httpSessionUtil.invalidate();
+        return "success";
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String userLogin(String userId, String password, HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonUtil jsonUtil = new JsonUtil();
