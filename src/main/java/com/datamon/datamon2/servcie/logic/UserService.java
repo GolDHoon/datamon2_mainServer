@@ -45,35 +45,31 @@ public class UserService {
 
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
-        List<String> masterCodes = CommonCodeCache.getUstyCodes().stream()
-                .filter(UstyCodeDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> dto.getCodeValue().equals("Master") || dto.getCodeValue().equals("InMember"))
-                .map(UstyCodeDto::getCodeFullName)
+        List<String> masterCodes = CommonCodeCache.getMasterCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
                 .collect(Collectors.toList());
 
         if (masterCodes.contains(userBaseById.getUserType())){
             throw new Exception("login-fail:userId");
         }
 
-        List<String> userCode = CommonCodeCache.getUstyCodes().stream()
-                .filter(UstyCodeDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> !masterCodes.contains(dto.getCodeFullName()))
-                .filter(dto -> !dto.getCodeValue().contains("Member"))
-                .filter(dto -> !dto.getCodeValue().contains("Developer"))
-                .map(UstyCodeDto::getCodeFullName)
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
                 .collect(Collectors.toList());
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        userBaseService.getUserBaseByUserTypeList(userCode).stream()
+        userBaseService.getUserBaseByUserTypeList(companyCodes).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .collect(Collectors.toList())
                 .forEach(dto->{
             Map<String, String> resultRow = new HashMap<>();
-            resultRow.put("Id", dto.getUserId());
+            resultRow.put("ID", dto.getUserId());
             resultRow.put("userIdx", String.valueOf(dto.getIdx()));
             resultRow.put("최종수정일시", dateTimeFormatter.format(dto.getModifyDate()));
 
@@ -90,7 +86,7 @@ public class UserService {
         });
 
         List<String> keyList = new ArrayList<>();
-        keyList.add("Id");
+        keyList.add("ID");
         keyList.add("상호");
         keyList.add("대표자명");
         keyList.add("사업자등록번호");
@@ -112,11 +108,11 @@ public class UserService {
         List<Map<String, String>> rows = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
-        List<String> companyUserCode = new ArrayList<>();
-        companyUserCode.add("USTY_MAST");
-        companyUserCode.add("USTY_CLNT");
-        companyUserCode.add("USTY_ADAC");
-        companyUserCode.add("USTY_CRAC");
+        List<String> memberCodes = CommonCodeCache.getMemberCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -124,11 +120,11 @@ public class UserService {
 
         int companyId = 0;
 
-        if(companyUserCode.contains(userBaseById.getUserType())){
+        if(memberCodes.contains(userBaseById.getUserType())){
             MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
             companyId = memberInfomationByUserId.getCompanyId();
         }else{
-            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationById(userId);
+            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
             companyId = companyInfomationByUserId.getIdx();
         }
 
@@ -139,6 +135,7 @@ public class UserService {
             UserBaseDto userDto = userBaseService.getUserBaseById(dto.getUserId());
 
             if(userDto.getUseYn() && !userDto.getDelYn()){
+                resultRow.put("ID", userDto.getUserId());
                 resultRow.put("담당자명", dto.getName());
                 resultRow.put("소속", dto.getRole());
                 resultRow.put("연락처", dto.getContactPhone());
@@ -151,6 +148,7 @@ public class UserService {
         });
 
         List<String> keyList = new ArrayList<>();
+        keyList.add("ID");
         keyList.add("담당자명");
         keyList.add("소속");
         keyList.add("연락처");

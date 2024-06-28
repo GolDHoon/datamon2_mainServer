@@ -103,17 +103,18 @@ public class UserAuthService {
     public List<Map<String, String>> getUserListByCopanyAndCdbt(HttpServletRequest request, CopanyAndCdbtDto copanyAndCdbtDto) throws Exception {
         List<Map<String, String>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
-        List<String> companyUserCode = new ArrayList<>();
-        companyUserCode.add("USTY_MAST");
-        companyUserCode.add("USTY_CLNT");
-        companyUserCode.add("USTY_ADAC");
-        companyUserCode.add("USTY_CRAC");
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
         UserBaseDto sessionUser = userBaseService.getUserBaseById(userId);
 
         int companyId;
-        if (companyUserCode.contains(sessionUser.getUserType())) {
+        if (companyCodes.contains(sessionUser.getUserType())) {
             CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
             companyId = companyInfomationByUserId.getIdx();
         } else {
@@ -134,6 +135,11 @@ public class UserAuthService {
                 })
                 .collect(Collectors.toList());
 
+        List<String> masterCodes = CommonCodeCache.getMasterCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
 
         userBaseService.getUserBaseByIdxList(inviteUserIdLowData).stream()
                 .filter(UserBaseDto::getUseYn)
@@ -141,15 +147,16 @@ public class UserAuthService {
                 .collect(Collectors.toList())
                 .forEach(dto -> {
                     MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(dto.getIdx());
+                    if(!masterCodes.contains(dto.getUserType())){
+                        if(memberInfomationByUserId.getIdx() != null){
+                            Map<String, String> resultRows = new HashMap<>();
+                            resultRows.put("Idx", String.valueOf(dto.getIdx()));
+                            resultRows.put("Id", dto.getUserId());
 
-                    if(memberInfomationByUserId.getIdx() != null){
-                        Map<String, String> resultRows = new HashMap<>();
-                        resultRows.put("Idx", String.valueOf(dto.getIdx()));
-                        resultRows.put("Id", dto.getUserId());
+                            resultRows.put("name", memberInfomationByUserId.getName());
 
-                        resultRows.put("name", memberInfomationByUserId.getName());
-
-                        result.add(resultRows);
+                            result.add(resultRows);
+                        }
                     }
 
                 });
