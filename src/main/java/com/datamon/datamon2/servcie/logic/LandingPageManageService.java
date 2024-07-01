@@ -26,8 +26,9 @@ public class LandingPageManageService {
     private LpgeCodeService lpgeCodeService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
+    private UserPermissionInfomationService userPermissionInfomationService;
 
-    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService) {
+    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService) {
         this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
@@ -36,6 +37,7 @@ public class LandingPageManageService {
         this.lpgeCodeService = lpgeCodeService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
+        this.userPermissionInfomationService = userPermissionInfomationService;
     }
 
     @Transactional
@@ -80,11 +82,24 @@ public class LandingPageManageService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        List<String> companyUserCode = new ArrayList<>();
-        companyUserCode.add("USTY_MAST");
-        companyUserCode.add("USTY_CLNT");
-        companyUserCode.add("USTY_ADAC");
-        companyUserCode.add("USTY_CRAC");
+
+        List<String> masterCodes = CommonCodeCache.getMasterCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        List<String> memeberCodes = CommonCodeCache.getMemberCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
 
         LpgeCodeDto lpgeCodeDto = new LpgeCodeDto();
         lpgeCodeDto.setCodeName(CommonCodeCache.getLpgeCodes().size()+1);
@@ -95,22 +110,99 @@ public class LandingPageManageService {
         LpgeCodeDto save = lpgeCodeService.save(lpgeCodeDto);
 
         UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
-
         userCdbtMappingDto.setCdbtLowCode(save.getCodeFullName());
         userCdbtMappingDto.setCdbtCode("LPGE");
-        userCdbtMappingDto.setUserId(userId);
-        userCdbtMappingService.save(userCdbtMappingDto);
 
-        userCdbtMappingDto.setUserId(1);
-        userCdbtMappingService.save(userCdbtMappingDto);
+        List<UsatCodeDto> usatCodes = CommonCodeCache.getUsatCodes().stream()
+                .filter(dto -> !CommonCodeCache.getCommonPermissionCodes().stream().map(dto2 -> {
+                    return dto2.getCodeFullName();
+                }).collect(Collectors.toList()).contains(dto.getCodeFullName()))
+                .collect(Collectors.toList());
+
+        UserPermissionInfomationDto userPermissionInfomationDto = new UserPermissionInfomationDto();
+        userPermissionInfomationDto.setCdbtLowCode(save.getCodeFullName());
+        userPermissionInfomationDto.setCdbtCode("LPGE");
+        userPermissionInfomationDto.create(userId);
 
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
-        if(!companyUserCode.contains(userBaseById.getUserType())){
+        List<UserBaseDto> masterIds = userBaseService.getUserBaseByUserTypeList(masterCodes);
+
+        if(memeberCodes.contains(userBaseById.getUserType())){
+            userCdbtMappingDto.setUserId(userId);
+            userCdbtMappingService.save(userCdbtMappingDto);
+
+            userPermissionInfomationDto.setUserId(userId);
+            userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000002");
+            userPermissionInfomationService.save(userPermissionInfomationDto);
+
+            usatCodes.forEach(dto -> {
+                userPermissionInfomationDto.setUsatCode(dto.getCodeFullName());
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+            });
+
             MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
             CompanyInfomationDto companyInfomationById = companyInfomationService.getCompanyInfomationById(memberInfomationByUserId.getCompanyId());
             userCdbtMappingDto.setUserId(companyInfomationById.getUserId());
             userCdbtMappingService.save(userCdbtMappingDto);
+
+            userPermissionInfomationDto.setUserId(companyInfomationById.getUserId());
+            userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000001");
+            userPermissionInfomationService.save(userPermissionInfomationDto);
+
+            usatCodes.forEach(dto -> {
+                userPermissionInfomationDto.setUsatCode(dto.getCodeFullName());
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+            });
+
+            masterIds.forEach(dto -> {
+                userCdbtMappingDto.setUserId(dto.getIdx());
+                userCdbtMappingService.save(userCdbtMappingDto);
+
+                userPermissionInfomationDto.setUserId(dto.getIdx());
+                userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000001");
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+
+                usatCodes.forEach(dto2 -> {
+                    userPermissionInfomationDto.setUsatCode(dto2.getCodeFullName());
+                    userPermissionInfomationService.save(userPermissionInfomationDto);
+                });
+            });
+        }else if(companyCodes.contains(userBaseById.getUserType())){
+            userCdbtMappingDto.setUserId(userId);
+            userCdbtMappingService.save(userCdbtMappingDto);
+
+            userPermissionInfomationDto.setUserId(userId);
+            userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000001");
+            userPermissionInfomationService.save(userPermissionInfomationDto);
+
+            masterIds.forEach(dto -> {
+                userCdbtMappingDto.setUserId(dto.getIdx());
+                userCdbtMappingService.save(userCdbtMappingDto);
+
+                userPermissionInfomationDto.setUserId(dto.getIdx());
+                userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000001");
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+
+                usatCodes.forEach(dto2 -> {
+                    userPermissionInfomationDto.setUsatCode(dto2.getCodeFullName());
+                    userPermissionInfomationService.save(userPermissionInfomationDto);
+                });
+            });
+        }else {
+            masterIds.forEach(dto -> {
+                userCdbtMappingDto.setUserId(dto.getIdx());
+                userCdbtMappingService.save(userCdbtMappingDto);
+
+                userPermissionInfomationDto.setUserId(dto.getIdx());
+                userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000001");
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+
+                usatCodes.forEach(dto2 -> {
+                    userPermissionInfomationDto.setUsatCode(dto2.getCodeFullName());
+                    userPermissionInfomationService.save(userPermissionInfomationDto);
+                });
+            });
         }
 
         return "success";

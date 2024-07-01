@@ -1,7 +1,7 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
-import com.datamon.datamon2.dto.repository.CustomerBasicConsultationCheckDto;
+import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
 import com.datamon.datamon2.dto.repository.CustomerInformationDto;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
@@ -31,10 +31,10 @@ public class CustInfoService {
                 .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());
 
-        List<CustomerBasicConsultationCheckDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationBycustIdList(custIds);
+        List<CustomerBasicConsultationDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationBycustIdList(custIds);
 
         List<String> keyList = customerBasicConsultationBycustIdList.stream()
-                .map(CustomerBasicConsultationCheckDto::getKey)
+                .map(CustomerBasicConsultationDto::getKey)
                 .distinct()
                 .collect(Collectors.toList());
 

@@ -10,8 +10,6 @@ import com.datamon.datamon2.util.EncryptionUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Service("LandingPageLogicService")
@@ -148,17 +146,17 @@ public class LandingPageService {
         customerInformationDto.setIp(ip);
         customerInformationDto.create(CommonCodeCache.getSystemIdIdx());
 
-        CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
+        CustomerInformationDto newCustomerInformationDto = customerInformationService.save(customerInformationDto);
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         custDataDto.getData().forEach(map->{
-            CustomerBasicConsultationCheckDto customerBasicConsultationDto = new CustomerBasicConsultationCheckDto();
+            CustomerBasicConsultationDto customerBasicConsultationDto = new CustomerBasicConsultationDto();
 
             customerBasicConsultationDto.setCustId(newCustomerInformationDto.getIdx());
             customerBasicConsultationDto.setKey(map.get("key"));
             customerBasicConsultationDto.setValue(encryptionUtil.AES256encrypt(map.get("value")));
             customerBasicConsultationDto.create(CommonCodeCache.getSystemIdIdx());
-            customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
+            customerBasicConsultationService.save(customerBasicConsultationDto);
         });
 
         return "success";

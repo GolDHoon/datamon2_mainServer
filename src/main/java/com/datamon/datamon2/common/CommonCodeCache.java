@@ -63,7 +63,7 @@ public class CommonCodeCache {
         CommonCodeCache.ustyCodes = ustyCodes;
 
         masterCodes = ustyCodes.stream()
-                .filter(dto -> masterCode.contains(dto.getCodeValue()))
+                .filter(dto -> masterCode.contains(dto.getCodeFullName()))
                 .filter(UstyCodeDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .collect(Collectors.toList());

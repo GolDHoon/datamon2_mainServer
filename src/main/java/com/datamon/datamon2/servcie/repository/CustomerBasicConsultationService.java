@@ -1,6 +1,6 @@
 package com.datamon.datamon2.servcie.repository;
 
-import com.datamon.datamon2.dto.repository.CustomerBasicConsultationCheckDto;
+import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
 import com.datamon.datamon2.mapper.repository.CustomerBasicConsultationMapper;
 import com.datamon.datamon2.repository.jpa.CustomerBasicConsultationRepository;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,13 @@ public class CustomerBasicConsultationService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CustomerBasicConsultationCheckDto saveCustomerBasicConsultation(CustomerBasicConsultationCheckDto customerBasicConsultationDto){
+    public CustomerBasicConsultationDto save(CustomerBasicConsultationDto customerBasicConsultationDto){
         return customerBasicConsultationMapper.toDto(customerBasicConsultationRepository.save(customerBasicConsultationMapper.toEntity(customerBasicConsultationDto)));
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerBasicConsultationCheckDto> getCustomerBasicConsultationBycustIdList(List<Long> custIds){
-        List<CustomerBasicConsultationCheckDto> result = new ArrayList<>();
+    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationBycustIdList(List<Long> custIds){
+        List<CustomerBasicConsultationDto> result = new ArrayList<>();
         customerBasicConsultationRepository.findByCustIdIn(custIds).forEach(entity -> {
             result.add(customerBasicConsultationMapper.toDto(entity));
         });
