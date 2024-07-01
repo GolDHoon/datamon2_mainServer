@@ -1,9 +1,6 @@
 package com.datamon.datamon2.common;
 
-import com.datamon.datamon2.dto.repository.LpgeCodeDto;
-import com.datamon.datamon2.dto.repository.PaatCodeDto;
-import com.datamon.datamon2.dto.repository.PageCodeDto;
-import com.datamon.datamon2.dto.repository.UstyCodeDto;
+import com.datamon.datamon2.dto.repository.*;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,9 +18,25 @@ public class CommonCodeCache {
     private static List<PaatCodeDto> paatCodes;
     private static List<LpgeCodeDto> lpgeCodes;
     private static List<UstyCodeDto> ustyCodes;
+    private static List<UsatCodeDto> usatCodes;
     private static List<UstyCodeDto> masterCodes;
     private static List<UstyCodeDto> memberCodes;
     private static List<UstyCodeDto> companyCode;
+    private static List<UsatCodeDto> commonPermissionCodes;
+
+    public static List<UsatCodeDto> getUsatCodes() {
+        return usatCodes;
+    }
+
+    public static void setUsatCodes(List<UsatCodeDto> usatCodes) {
+        CommonCodeCache.usatCodes = usatCodes;
+
+        commonPermissionCodes = usatCodes.stream()
+                .filter(UsatCodeDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .filter(dto -> dto.getCodeValue().equals("관리자") || dto.getCodeValue().equals("편집자") || dto.getCodeValue().equals("뷰어"))
+                .collect(Collectors.toList());
+    }
 
     public static List<UstyCodeDto> getMasterCodes() {
         return masterCodes;
@@ -97,4 +110,9 @@ public class CommonCodeCache {
     public static void setPaatCodes(List<PaatCodeDto> paatCodes) {
         CommonCodeCache.paatCodes = paatCodes;
     }
+
+    public static List<UsatCodeDto> getCommonPermissionCodes() {
+        return commonPermissionCodes;
+    }
+
 }

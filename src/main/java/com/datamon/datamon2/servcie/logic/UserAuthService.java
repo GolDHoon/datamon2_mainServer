@@ -67,32 +67,49 @@ public class UserAuthService {
     public Map<String, List> getUserListForUserCdbtByCdbtLowCode (UserListForUserCdbtByCdbtLowCodeDto userListForUserCdbtByCdbtLowCodeDto) {
         Map<String, List> result = new HashMap<>();
         List<Map<String, String>> rows = new ArrayList<>();
+
+        List<String> commonPermission = CommonCodeCache.getCommonPermissionCodes().stream()
+                .map(code -> {return code.getCodeFullName();})
+                .collect(Collectors.toList());
+
+        String viewerCode = CommonCodeCache.getCommonPermissionCodes().stream()
+                .filter(code -> code.getCodeValue().equals("뷰어"))
+                .map(code -> {return code.getCodeFullName();})
+                .findFirst().orElse("");
+
+        List<String> finalKeyList = new ArrayList<>();
         userCdbtMappingService.getUserCdbtListByCdbtLowCode(userListForUserCdbtByCdbtLowCodeDto.getCdbtCode()).forEach(dto -> {
             Map<String, String> resultRow = new HashMap<>();
             UserBaseDto userBaseById = userBaseService.getUserBaseById(dto.getUserId());
             List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(dto.getUserId());
 
+
             resultRow.put("ID", userBaseById.getUserId());
             resultRow.put("userIdx", String.valueOf(userBaseById.getIdx()));
-            resultRow.put("전체열람", String.valueOf(userPermissionInfomationByUserId.stream()
-                    .filter(code -> code.getUsatCode().equals("AUTH_USAT_0000000001"))
-                    .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
-            resultRow.put("열람", String.valueOf(userPermissionInfomationByUserId.stream()
-                    .filter(code -> code.getUsatCode().equals("AUTH_USAT_0000000002"))
-                    .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
-            resultRow.put("수정", String.valueOf(userPermissionInfomationByUserId.stream()
-                    .filter(code -> code.getUsatCode().equals("AUTH_USAT_0000000003"))
-                    .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
+            resultRow.put("권한", userPermissionInfomationByUserId.stream()
+                    .filter(UserPermissionInfomationDto::getUseYn)
+                    .filter(permission -> commonPermission.contains(permission.getUsatCode()))
+                    .map(permission -> {return permission.getUsatCode();})
+                    .findFirst().orElse(viewerCode));
 
+            finalKeyList.add("ID");
+            finalKeyList.add("권한");
+
+        CommonCodeCache.getUsatCodes().stream()
+                .filter(code -> !commonPermission.contains(code.getCodeFullName()))
+                .collect(Collectors.toList())
+                .forEach(usatCode -> {
+                    resultRow.put(usatCode.getCodeValue(), String.valueOf(userPermissionInfomationByUserId.stream()
+                            .filter(code -> code.getUsatCode().equals(usatCode.getCodeFullName()))
+                            .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
+
+
+                    finalKeyList.add(usatCode.getCodeValue());
+                });
             rows.add(resultRow);
         });
 
-        List<String> keyList = new ArrayList<>();
-
-        keyList.add("ID");
-        keyList.add("전체열람");
-        keyList.add("열람");
-        keyList.add("수정");
+        List<String> keyList = finalKeyList.stream().distinct().collect(Collectors.toList());
 
         result.put("rows", rows);
         result.put("keyList", keyList);
