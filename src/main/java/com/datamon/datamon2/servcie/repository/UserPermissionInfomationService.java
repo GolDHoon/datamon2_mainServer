@@ -4,6 +4,7 @@ import com.datamon.datamon2.dto.repository.UserPermissionInfomationDto;
 import com.datamon.datamon2.mapper.repository.UserPermissionInfomationMapper;
 import com.datamon.datamon2.repository.jpa.UserPermissionInfomationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -28,5 +29,10 @@ public class UserPermissionInfomationService {
         });
 
         return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public UserPermissionInfomationDto save(UserPermissionInfomationDto userPermissionInfomationDto){
+        return userPermissionInfomationMapper.toDto(userPermissionInfomationRepository.save(userPermissionInfomationMapper.toEntity(userPermissionInfomationDto)));
     }
 }
