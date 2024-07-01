@@ -77,36 +77,45 @@ public class UserAuthService {
                 .map(code -> {return code.getCodeFullName();})
                 .findFirst().orElse("");
 
+        List<String> memberCodes = CommonCodeCache.getMemberCodes().stream()
+                .map(code -> {
+                    return code.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+
         List<String> finalKeyList = new ArrayList<>();
         userCdbtMappingService.getUserCdbtListByCdbtLowCode(userListForUserCdbtByCdbtLowCodeDto.getCdbtCode()).forEach(dto -> {
             Map<String, String> resultRow = new HashMap<>();
             UserBaseDto userBaseById = userBaseService.getUserBaseById(dto.getUserId());
-            List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(dto.getUserId());
+            if(memberCodes.contains(userBaseById.getUserType())){
+                List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(dto.getUserId());
 
 
-            resultRow.put("ID", userBaseById.getUserId());
-            resultRow.put("userIdx", String.valueOf(userBaseById.getIdx()));
-            resultRow.put("권한", userPermissionInfomationByUserId.stream()
-                    .filter(UserPermissionInfomationDto::getUseYn)
-                    .filter(permission -> commonPermission.contains(permission.getUsatCode()))
-                    .map(permission -> {return permission.getUsatCode();})
-                    .findFirst().orElse(viewerCode));
+                resultRow.put("ID", userBaseById.getUserId());
+                resultRow.put("userIdx", String.valueOf(userBaseById.getIdx()));
+                resultRow.put("권한", userPermissionInfomationByUserId.stream()
+                        .filter(UserPermissionInfomationDto::getUseYn)
+                        .filter(permission -> commonPermission.contains(permission.getUsatCode()))
+                        .map(permission -> {return permission.getUsatCode();})
+                        .findFirst().orElse(viewerCode));
 
-            finalKeyList.add("ID");
-            finalKeyList.add("권한");
+                finalKeyList.add("ID");
+                finalKeyList.add("권한");
 
-        CommonCodeCache.getUsatCodes().stream()
-                .filter(code -> !commonPermission.contains(code.getCodeFullName()))
-                .collect(Collectors.toList())
-                .forEach(usatCode -> {
-                    resultRow.put(usatCode.getCodeValue(), String.valueOf(userPermissionInfomationByUserId.stream()
-                            .filter(code -> code.getUsatCode().equals(usatCode.getCodeFullName()))
-                            .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
+                CommonCodeCache.getUsatCodes().stream()
+                        .filter(code -> !commonPermission.contains(code.getCodeFullName()))
+                        .collect(Collectors.toList())
+                        .forEach(usatCode -> {
+                            resultRow.put(usatCode.getCodeValue(), String.valueOf(userPermissionInfomationByUserId.stream()
+                                    .filter(code -> code.getUsatCode().equals(usatCode.getCodeFullName()))
+                                    .findFirst().orElse(new UserPermissionInfomationDto()).getUseYn()));
 
 
-                    finalKeyList.add(usatCode.getCodeValue());
-                });
-            rows.add(resultRow);
+                            finalKeyList.add(usatCode.getCodeValue());
+                        });
+                rows.add(resultRow);
+            }
         });
 
         List<String> keyList = finalKeyList.stream().distinct().collect(Collectors.toList());
@@ -146,15 +155,9 @@ public class UserAuthService {
                 .collect(Collectors.toList());
 
         List<Integer> inviteUserIdLowData = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId).stream()
-                .filter(dto -> !userIdxList.contains(dto.getIdx()))
+                .filter(dto -> !userIdxList.contains(dto.getUserId()))
                 .map(dto -> {
                     return dto.getUserId();
-                })
-                .collect(Collectors.toList());
-
-        List<String> masterCodes = CommonCodeCache.getMasterCodes().stream()
-                .map(dto -> {
-                    return dto.getCodeFullName();
                 })
                 .collect(Collectors.toList());
 
@@ -164,7 +167,6 @@ public class UserAuthService {
                 .collect(Collectors.toList())
                 .forEach(dto -> {
                     MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(dto.getIdx());
-                    if(!masterCodes.contains(dto.getUserType())){
                         if(memberInfomationByUserId.getIdx() != null){
                             Map<String, String> resultRows = new HashMap<>();
                             resultRows.put("Idx", String.valueOf(dto.getIdx()));
@@ -174,8 +176,6 @@ public class UserAuthService {
 
                             result.add(resultRows);
                         }
-                    }
-
                 });
 
         return result;
@@ -184,7 +184,7 @@ public class UserAuthService {
     @Transactional
     public String createUserCdbtMappingByCopanyAndCdbt(CopanyListAndCdbtDto copanyListAndCdbtDto) throws Exception {
         UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
-        userCdbtMappingDto.setCdbtCode("LPGE");
+        userCdbtMappingDto.setCdbtCode(copanyListAndCdbtDto.getCdbtLowCode().replace("CDBT_", ""));
         userCdbtMappingDto.setCdbtLowCode(copanyListAndCdbtDto.getCdbtLowCode());
         List<Integer> idxs = copanyListAndCdbtDto.getIdxs();
         idxs.forEach(idx -> {
