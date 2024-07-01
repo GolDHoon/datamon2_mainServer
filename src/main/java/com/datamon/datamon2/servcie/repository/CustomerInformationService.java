@@ -22,7 +22,7 @@ public class CustomerInformationService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CustomerInformationDto saveCustomerInformation(CustomerInformationDto customerInformationDto){
+    public CustomerInformationDto save(CustomerInformationDto customerInformationDto){
         return customerInformationMapper.toDto(customerInformationRepository.save(customerInformationMapper.toEntity(customerInformationDto)));
     }
 

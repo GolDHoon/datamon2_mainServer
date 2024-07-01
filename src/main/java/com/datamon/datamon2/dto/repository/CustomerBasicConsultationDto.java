@@ -10,7 +10,7 @@ import java.io.Serializable;
  * DTO for {@link CustomerBasicConsultationEntity}
  */
 @Data
-public class CustomerBasicConsultationCheckDto extends DrivenCommonUserDto implements Serializable {
+public class CustomerBasicConsultationDto extends DrivenCommonUserDto implements Serializable {
     Long idx;
     Long custId;
     String key;
