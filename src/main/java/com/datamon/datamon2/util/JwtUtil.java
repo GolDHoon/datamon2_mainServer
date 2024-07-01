@@ -55,4 +55,10 @@ public class JwtUtil {
 
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
+
+
+    public int getUserId(String token) throws Exception{
+        String userIdStr = (String) getClaims(token).get("sub");
+        return Integer.parseInt(userIdStr);
+    }
 }

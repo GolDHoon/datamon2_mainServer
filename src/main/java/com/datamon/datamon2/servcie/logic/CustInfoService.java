@@ -1,10 +1,11 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
-import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
+import com.datamon.datamon2.dto.repository.CustomerBasicConsultationCheckDto;
 import com.datamon.datamon2.dto.repository.CustomerInformationDto;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
+import com.datamon.datamon2.util.EncryptionUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +31,10 @@ public class CustInfoService {
                 .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());
 
-        List<CustomerBasicConsultationDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationBycustIdList(custIds);
+        List<CustomerBasicConsultationCheckDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationBycustIdList(custIds);
 
         List<String> keyList = customerBasicConsultationBycustIdList.stream()
-                .map(CustomerBasicConsultationDto::getKey)
+                .map(CustomerBasicConsultationCheckDto::getKey)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -41,7 +42,7 @@ public class CustInfoService {
                 .map(dto -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("custId", dto.getIdx());
-                    map.put("lpgeCode", dto.getLpgeCode());
+                    map.put("cdbtLowCode", dto.getCdbtLowCode());
                     map.put("utmSourse", dto.getUtmSourse());
                     map.put("utmMedium", dto.getUtmMedium());
                     map.put("utmCampaign", dto.getUtmCampaign());
@@ -54,13 +55,14 @@ public class CustInfoService {
                     List<String> tempKeyList = new ArrayList<>(keyList);
 
                     Iterator<String> keyIterator = tempKeyList.iterator();
+                    EncryptionUtil encryptionUtil = new EncryptionUtil();
 
                     while (keyIterator.hasNext()) {
                         String key = keyIterator.next();
 
                         boolean removed = customerBasicConsultationBycustIdList.stream()
                                 .filter(custCusultation -> Objects.equals(custCusultation.getCustId(), dto.getIdx()) && key.equals(custCusultation.getKey()))
-                                .peek(custCusultation -> map.put(custCusultation.getKey(), custCusultation.getValue()))
+                                .peek(custCusultation -> map.put(custCusultation.getKey(), encryptionUtil.AES256decrypt(custCusultation.getValue())))
                                 .count() > 0; // just for triggering the terminal operation
 
                         if (removed) {

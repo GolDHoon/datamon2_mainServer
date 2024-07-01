@@ -4,6 +4,7 @@ import com.datamon.datamon2.dto.repository.LandingPageBlockedKeywordDto;
 import com.datamon.datamon2.mapper.repository.LandingPageBlockedKeywordMapper;
 import com.datamon.datamon2.repository.jpa.LandingPageBlockedKeywordRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,5 +27,10 @@ public class LandingPageBlockedKeywordService {
             result.add(landingPageBlockedKeywordMapper.toDto(entity));
         });
         return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LandingPageBlockedKeywordDto saveLandingPageBlockedKeyword(LandingPageBlockedKeywordDto landingPageBlockedKeywordDto){
+        return landingPageBlockedKeywordMapper.toDto(landingPageBlockedKeywordRepository.save(landingPageBlockedKeywordMapper.toEntity(landingPageBlockedKeywordDto)));
     }
 }

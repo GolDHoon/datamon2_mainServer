@@ -4,6 +4,7 @@ import com.datamon.datamon2.dto.repository.LandingPageBlockedIpDto;
 import com.datamon.datamon2.mapper.repository.LandingPageBlockedIpMapper;
 import com.datamon.datamon2.repository.jpa.LandingPageBlockedIpRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,6 +27,11 @@ public class LandingPageBlockedIpService {
             result.add(landingPageBlockedIpMapper.toDto(entity));
         });
         return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LandingPageBlockedIpDto saveLandingPageBlockedIp(LandingPageBlockedIpDto landingPageBlockedIpDto){
+        return landingPageBlockedIpMapper.toDto(landingPageBlockedIpRepository.save(landingPageBlockedIpMapper.toEntity(landingPageBlockedIpDto)));
     }
 
 }

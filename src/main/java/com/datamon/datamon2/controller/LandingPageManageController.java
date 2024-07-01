@@ -1,5 +1,8 @@
 package com.datamon.datamon2.controller;
 
+import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
+import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
+import com.datamon.datamon2.dto.input.landingPageManage.LandingPageCreateDto;
 import com.datamon.datamon2.servcie.logic.LandingPageManageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,9 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,10 @@ public class LandingPageManageController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response){
-        List<Map<String, String>> result;
+        Map<String, List> result;
 
         try {
-            result = landingPageManageService.getListByUserIdForSession(request);
+            result = landingPageManageService.getList(request);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -37,4 +38,115 @@ public class LandingPageManageController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/createLpge")
+    public ResponseEntity<?> createLpge(HttpServletRequest request, HttpServletResponse response, @RequestBody LandingPageCreateDto landingPageCreateDto){
+        String result;
+
+        try {
+            result = landingPageManageService.createLpge(request, landingPageCreateDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/blockedIpList")
+    public ResponseEntity<?> getBlockedIpList(HttpServletRequest request, HttpServletResponse response, @RequestParam("lpgeCode") String lpgeCode){
+        List<String> result;
+
+        try {
+            result = landingPageManageService.getBlockedIpList(lpgeCode);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/deleteBlockedIp")
+    public ResponseEntity<?> deleteBlockedId(HttpServletRequest request, HttpServletResponse response, @RequestBody  BlockIpDto blockIpDto){
+        String result;
+
+        try {
+            result = landingPageManageService.deleteBlockedIp(blockIpDto, request);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(!result.equals("success")){
+            return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping("/createBlockedIp")
+    public ResponseEntity<?> createBlockedId(HttpServletRequest request, HttpServletResponse response, @RequestBody  BlockIpDto blockIpDto){
+        String result;
+
+        try {
+            result = landingPageManageService.registerBlockedIp(blockIpDto, request);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(!result.equals("success")){
+            return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/blockedKeywordList")
+    public ResponseEntity<?> getBlockedKeywordList(HttpServletRequest request, HttpServletResponse response, @RequestParam("lpgeCode") String lpgeCode){
+        List<String> result;
+
+        try {
+            result = landingPageManageService.getBlockedKeywordList(lpgeCode);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/deleteBlockedKeyword")
+    public ResponseEntity<?> deleteBlockedKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody BlockKeywordDto blockKeywordDto){
+        String result;
+
+        try {
+            result = landingPageManageService.deleteBlockedKeyword(blockKeywordDto, request);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(!result.equals("success")){
+            return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping("/createBlockedKeyword")
+    public ResponseEntity<?> createBlockedKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody BlockKeywordDto blockKeywordDto){
+        String result;
+
+        try {
+            result = landingPageManageService.registerBlockedKeyword(blockKeywordDto, request);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(!result.equals("success")){
+            return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+    }
+
 }

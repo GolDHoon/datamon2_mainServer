@@ -7,11 +7,9 @@ import com.datamon.datamon2.dto.output.landingPage.InitalDataDto;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.EncryptionUtil;
-import com.datamon.datamon2.util.InstantUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -21,18 +19,17 @@ public class LandingPageService {
     private UserBaseService userBaseService;
     private LpgeCodeService lpgeCodeService;
     private com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService;
-    private UserLpgeMappingService userLpgeMappingService;
+    private UserCdbtMappingService userCdbtMappingService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
-    private InstantUtil instantUtil = new InstantUtil();
 
-    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserLpgeMappingService userLpgeMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
+    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
         this.userBaseService = userBaseService;
         this.lpgeCodeService = lpgeCodeService;
         this.landingPageRepositoryService = landingPageRepositoryService;
-        this.userLpgeMappingService = userLpgeMappingService;
+        this.userCdbtMappingService = userCdbtMappingService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
         this.customerInformationService = customerInformationService;
@@ -42,7 +39,13 @@ public class LandingPageService {
     @Transactional
     public InitalDataDto getInitialData(String domain) throws Exception{
         InitalDataDto result = new InitalDataDto();
-        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> domain.contains(dto.getCodeValue())).findFirst().orElse(null);
+
+        if (domain.endsWith("/")) {
+            domain = domain.substring(0, domain.length() - 1);
+        }
+
+        String finalDomain = domain;
+        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> finalDomain.contains(dto.getCodeValue())).findFirst().orElse(null);
         if(lpgeCodeDto == null) result.setLpgeCode("Registration required");
         else result.setLpgeCode(lpgeCodeDto.getCodeFullName());
 
@@ -70,42 +73,29 @@ public class LandingPageService {
 
             LpgeCodeDto newLpgeCodeDto = new LpgeCodeDto();
             newLpgeCodeDto.setCodeName(lpgeCodes.stream().mapToInt(LpgeCodeDto::getCodeName).max().orElse(0)+1);
-            newLpgeCodeDto.setCodeFullName("LPGE_" + String.format("%010d", newLpgeCodeDto.getCodeName()));
             newLpgeCodeDto.setCodeValue(createDto.getDomain());
             newLpgeCodeDto.setCodeDescript(createDto.getPageDescription());
-            newLpgeCodeDto.setUseYn(true);
-            newLpgeCodeDto.setDelYn(false);
-            newLpgeCodeDto.setCreateId(createUser.getIdx());
-            newLpgeCodeDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-            newLpgeCodeDto.setModifyId(createUser.getIdx());
-            newLpgeCodeDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-            if(!"local".equals(createDto.getInputMode())){
-                lpgeCodeDto = lpgeCodeService.saveLpgeCode(newLpgeCodeDto);
+            newLpgeCodeDto.create(createUser.getIdx());
 
-                LandingPageDto landingPageDto = new LandingPageDto();
-                landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
-                landingPageDto.setDomain(createDto.getDomain());
-                landingPageDto.setUseYn(true);
-                landingPageDto.setDelYn(false);
-                landingPageDto.setCreateId(createUser.getIdx());
-                landingPageDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-                landingPageDto.setModifyId(createUser.getIdx());
-                landingPageDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-                landingPageRepositoryService.saveLandingPage(landingPageDto);
-            }
+            lpgeCodeDto = lpgeCodeService.save(newLpgeCodeDto);
+
+            LandingPageDto landingPageDto = new LandingPageDto();
+            landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
+            landingPageDto.setDomain(createDto.getDomain());
+            landingPageDto.create(createUser.getIdx());
+            landingPageRepositoryService.saveLandingPage(landingPageDto);
 
         }
 
-        if(!"local".equals(createDto.getInputMode())){
-            UserLpgeMappingDto userLpgeMappingDto = new UserLpgeMappingDto();
-            userLpgeMappingDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
-            userLpgeMappingDto.setUserId(companyUser.getIdx());
+        UserCdbtMappingDto userLpgeMappingDto = new UserCdbtMappingDto();
+        userLpgeMappingDto.setCdbtLowCode(lpgeCodeDto.getCodeFullName());
+        userLpgeMappingDto.setUserId(companyUser.getIdx());
+        userLpgeMappingDto.setCdbtCode("LPGE");
 
-            try {
-                userLpgeMappingService.saveUserLpgeMapping(userLpgeMappingDto);
-            } catch (Exception e) {
-                return "fail - CustUserMapping fail";
-            }
+        try {
+            userCdbtMappingService.save(userLpgeMappingDto);
+        } catch (Exception e) {
+            return "fail - CustUserMapping fail";
         }
 
 
@@ -124,6 +114,9 @@ public class LandingPageService {
     @Transactional
     public String registerCustData(String ip, CustDataDto custDataDto) throws Exception{
         boolean ipChecker = false;
+        if(custDataDto.getInputMode().equals("local")){
+            ip = "127.0.0.1";
+        }
 
         List<LandingPageBlockedIpDto> landingPageBlockedIpByLpgeCode = landingPageBlockedIpService.getLandingPageBlockedIpByLpgeCode(custDataDto.getLpgeCode()).stream()
                 .filter(LandingPageBlockedIpDto::getUseYn)
@@ -145,38 +138,28 @@ public class LandingPageService {
             return "fail - Blocked IP";
         }
 
-        if(!"local".equals(custDataDto.getInputMode())){
-            CustomerInformationDto customerInformationDto = new CustomerInformationDto();
-            customerInformationDto.setLpgeCode(custDataDto.getLpgeCode());
-            customerInformationDto.setUtmSourse(custDataDto.getUtmSource());
-            customerInformationDto.setUtmMedium(custDataDto.getUtmMedium());
-            customerInformationDto.setUtmCampaign(custDataDto.getUtmCampaign());
-            customerInformationDto.setUtmTerm(custDataDto.getUtmTerm());
-            customerInformationDto.setUtmContent(custDataDto.getUtmContent());
-            customerInformationDto.setIp(ip);
-            customerInformationDto.setUseYn(true);
-            customerInformationDto.setDelYn(false);
-            customerInformationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-            customerInformationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-            customerInformationDto.setModifyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+        CustomerInformationDto customerInformationDto = new CustomerInformationDto();
+        customerInformationDto.setCdbtLowCode(custDataDto.getLpgeCode());
+        customerInformationDto.setUtmSourse(custDataDto.getUtmSource());
+        customerInformationDto.setUtmMedium(custDataDto.getUtmMedium());
+        customerInformationDto.setUtmCampaign(custDataDto.getUtmCampaign());
+        customerInformationDto.setUtmTerm(custDataDto.getUtmTerm());
+        customerInformationDto.setUtmContent(custDataDto.getUtmContent());
+        customerInformationDto.setIp(ip);
+        customerInformationDto.create(CommonCodeCache.getSystemIdIdx());
 
-            CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
+        CustomerInformationDto newCustomerInformationDto = customerInformationService.saveCustomerInformation(customerInformationDto);
 
-            custDataDto.getData().forEach(map->{
-                CustomerBasicConsultationDto customerBasicConsultationDto = new CustomerBasicConsultationDto();
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+        custDataDto.getData().forEach(map->{
+            CustomerBasicConsultationCheckDto customerBasicConsultationDto = new CustomerBasicConsultationCheckDto();
 
-                customerBasicConsultationDto.setCustId(newCustomerInformationDto.getIdx());
-                customerBasicConsultationDto.setKey(map.get("key"));
-                customerBasicConsultationDto.setValue(map.get("value"));
-                customerBasicConsultationDto.setCreateId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setCreateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-                customerBasicConsultationDto.setModifyId(CommonCodeCache.getSystemIdIdx());
-                customerBasicConsultationDto.setModiftyDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-
-                customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
-            });
-        }
+            customerBasicConsultationDto.setCustId(newCustomerInformationDto.getIdx());
+            customerBasicConsultationDto.setKey(map.get("key"));
+            customerBasicConsultationDto.setValue(encryptionUtil.AES256encrypt(map.get("value")));
+            customerBasicConsultationDto.create(CommonCodeCache.getSystemIdIdx());
+            customerBasicConsultationService.saveCustomerBasicConsultation(customerBasicConsultationDto);
+        });
 
         return "success";
     }
