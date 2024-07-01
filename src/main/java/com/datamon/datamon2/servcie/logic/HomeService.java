@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,6 +47,9 @@ public class HomeService {
                     .filter(dto -> !dto.getDelYn())
                     .collect(Collectors.groupingBy(dto -> dateTimeFormatter.format(dto.getCreateDate()), Collectors.counting()));
 
+            Map<String, Long> sortedMap = new TreeMap<>(Comparator.reverseOrder());
+            sortedMap.putAll(collect);
+
             switch (userCdbtMapping.getCdbtCode()){
                 case "LPGE":
                     resultData.put("DBName", CommonCodeCache.getLpgeCodes().stream()
@@ -60,7 +60,7 @@ public class HomeService {
                     break;
             }
 
-            resultData.put("data", collect);
+            resultData.put("data", sortedMap);
             result.add(resultData);
         });
         return result;
