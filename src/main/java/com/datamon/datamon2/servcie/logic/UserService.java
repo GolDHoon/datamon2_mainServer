@@ -51,7 +51,7 @@ public class UserService {
                 })
                 .collect(Collectors.toList());
 
-        if (masterCodes.contains(userBaseById.getUserType())){
+        if (!masterCodes.contains(userBaseById.getUserType())){
             throw new Exception("login-fail:userId");
         }
 
