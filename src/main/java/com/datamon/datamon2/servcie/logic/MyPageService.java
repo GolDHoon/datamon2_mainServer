@@ -10,6 +10,7 @@ import com.datamon.datamon2.dto.repository.UstyCodeDto;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.MemberInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
+import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MyPageService {
+    private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private JwtUtil jwtUtil;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
@@ -46,26 +48,29 @@ public class MyPageService {
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
         result.put("id", userBaseById.getUserId());
+        result.put("userType", userBaseById.getUserType());
+        result.put("modifyDate", dateTimeUtil.LocalDateTimeToDateTimeStr(userBaseById.getModifyDate()));
 
-        List<UstyCodeDto> ustyCodes = CommonCodeCache.getUstyCodes();
-        List<UstyCodeDto> memberCode = ustyCodes.stream()
-                .filter(UstyCodeDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> dto.getCodeValue().contains("Meber") || dto.getCodeValue().contains("Developer"))
+        List<String> memberCodes = CommonCodeCache.getMemberCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
                 .collect(Collectors.toList());
+        memberCodes.add("USTY_DEVL");
+        memberCodes.add("USTY_INME");
 
-        if(memberCode.stream().anyMatch(dto -> dto.getCodeFullName().contains(userBaseById.getUserType()))){
+        if(memberCodes.contains(userBaseById.getUserType())){
             MemberInfomationDto memberInfo = memberInfomationService.getMemberInfomationByUserId(userId);
             CompanyInfomationDto companyInfo = new CompanyInfomationDto();
             if(memberInfo.getCompanyId() != null){
                 companyInfo = companyInfomationService.getCompanyInfomationById(memberInfo.getCompanyId());
             }
-
             result.put("companyName", companyInfo.getName());
             result.put("name", memberInfo.getName());
             result.put("role", memberInfo.getRole());
             result.put("phoneNumber", memberInfo.getContactPhone());
             result.put("mail", memberInfo.getContactMail());
+            result.put("userKind", "member");
         }else{
             CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(userId);
             result.put("companyName", companyInfo.getName());
@@ -75,7 +80,7 @@ public class MyPageService {
             result.put("corporateAddress", companyInfo.getCorporateAddress());
             result.put("businessItem", companyInfo.getBusinessItem());
             result.put("businessStatus", companyInfo.getBusinessStatus());
-
+            result.put("userKind", "company");
         }
 
         return result;

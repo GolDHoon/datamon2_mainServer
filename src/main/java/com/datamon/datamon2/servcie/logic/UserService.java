@@ -7,6 +7,7 @@ import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.MemberInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
+import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
@@ -14,12 +15,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private JwtUtil jwtUtil;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
@@ -58,8 +59,6 @@ public class UserService {
                 })
                 .collect(Collectors.toList());
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
         userBaseService.getUserBaseByUserTypeList(companyCodes).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
@@ -69,7 +68,7 @@ public class UserService {
             Map<String, String> resultRow = new HashMap<>();
             resultRow.put("ID", dto.getUserId());
             resultRow.put("idx", String.valueOf(dto.getIdx()));
-            resultRow.put("최종수정일시", dateTimeFormatter.format(dto.getModifyDate()));
+            resultRow.put("최종수정일시", dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getModifyDate()));
 
             CompanyInfomationDto companyInfomationById = companyInfomationService.getCompanyInfomationByUserId(dto.getIdx());
             resultRow.put("상호", companyInfomationById.getName());
@@ -126,7 +125,6 @@ public class UserService {
             companyId = companyInfomationByUserId.getIdx();
         }
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId).forEach(dto -> {
             Map<String, String> resultRow = new HashMap<>();
@@ -139,7 +137,7 @@ public class UserService {
                 resultRow.put("연락처", dto.getContactPhone());
                 resultRow.put("이메일", dto.getContactMail());
 
-                resultRow.put("최종수정일시", dateTimeFormatter.format(userDto.getModifyDate()));
+                resultRow.put("최종수정일시", dateTimeUtil.LocalDateTimeToDateTimeStr(userDto.getModifyDate()));
                 resultRow.put("userIdx", String.valueOf(userDto.getIdx()));
                 rows.add(resultRow);
             }

@@ -64,7 +64,7 @@ public class MyPageController {
     }
 
     @PostMapping("/setPassword")
-    public ResponseEntity<?> setPassword(HttpServletRequest request, HttpServletResponse response, @RequestParam String password){
+    public ResponseEntity<?> setPassword(HttpServletRequest request, HttpServletResponse response, @RequestBody String password){
         String result;
 
         try {

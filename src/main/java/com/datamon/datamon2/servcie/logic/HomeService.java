@@ -5,19 +5,20 @@ import com.datamon.datamon2.dto.repository.CustomerInformationDto;
 import com.datamon.datamon2.dto.repository.LpgeCodeDto;
 import com.datamon.datamon2.dto.repository.UserCdbtMappingDto;
 import com.datamon.datamon2.servcie.repository.*;
+import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 public class HomeService {
+    private DateTimeUtil dateTimeUtil;
     private JwtUtil jwtUtil;
     private CustomerInformationService customerInformationService;
     private UserCdbtMappingService userCdbtMappingService;
@@ -32,7 +33,6 @@ public class HomeService {
     public List<Map<String, Object>> homeStatistics(HttpServletRequest request) throws Exception{
         List<Map<String, Object>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
@@ -45,7 +45,7 @@ public class HomeService {
             Map<String, Long> collect = customerInformationService.getCustomerInformationByLpgeCode(userCdbtMapping.getCdbtLowCode()).stream()
                     .filter(CustomerInformationDto::getUseYn)
                     .filter(dto -> !dto.getDelYn())
-                    .collect(Collectors.groupingBy(dto -> dateTimeFormatter.format(dto.getCreateDate()), Collectors.counting()));
+                    .collect(Collectors.groupingBy(dto -> dateTimeUtil.LocalDateTimeToDateStr(dto.getCreateDate()), Collectors.counting()));
 
             Map<String, Long> sortedMap = new TreeMap<>(Comparator.reverseOrder());
             sortedMap.putAll(collect);
