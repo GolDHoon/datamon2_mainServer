@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,11 +63,12 @@ public class UserService {
         userBaseService.getUserBaseByUserTypeList(companyCodes).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
+                .sorted(Comparator.comparing(UserBaseDto::getModifyDate).reversed())
                 .collect(Collectors.toList())
                 .forEach(dto->{
             Map<String, String> resultRow = new HashMap<>();
             resultRow.put("ID", dto.getUserId());
-            resultRow.put("userIdx", String.valueOf(dto.getIdx()));
+            resultRow.put("idx", String.valueOf(dto.getIdx()));
             resultRow.put("최종수정일시", dateTimeFormatter.format(dto.getModifyDate()));
 
             CompanyInfomationDto companyInfomationById = companyInfomationService.getCompanyInfomationByUserId(dto.getIdx());
