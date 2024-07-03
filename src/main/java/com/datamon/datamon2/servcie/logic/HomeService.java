@@ -14,11 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class HomeService {
-    private DateTimeUtil dateTimeUtil;
+    private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private JwtUtil jwtUtil;
     private CustomerInformationService customerInformationService;
     private UserCdbtMappingService userCdbtMappingService;
