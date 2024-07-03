@@ -2,6 +2,7 @@ package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.input.myPage.ModifyCompanyDto;
 import com.datamon.datamon2.dto.input.myPage.ModifyMemberDto;
+import com.datamon.datamon2.dto.input.myPage.PasswordSetDto;
 import com.datamon.datamon2.servcie.logic.MyPageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,11 +65,11 @@ public class MyPageController {
     }
 
     @PostMapping("/setPassword")
-    public ResponseEntity<?> setPassword(HttpServletRequest request, HttpServletResponse response, @RequestBody String password){
+    public ResponseEntity<?> setPassword(HttpServletRequest request, HttpServletResponse response, @RequestBody PasswordSetDto passwordSetDto){
         String result;
 
         try {
-            result = myPageService.setPassword(request, password);
+            result = myPageService.setPassword(request, passwordSetDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -3,6 +3,7 @@ package com.datamon.datamon2.servcie.logic;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.myPage.ModifyCompanyDto;
 import com.datamon.datamon2.dto.input.myPage.ModifyMemberDto;
+import com.datamon.datamon2.dto.input.myPage.PasswordSetDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.MemberInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
@@ -129,7 +130,7 @@ public class MyPageService {
     }
 
     @Transactional
-    public String setPassword(HttpServletRequest request, String passWord) throws Exception{
+    public String setPassword(HttpServletRequest request, PasswordSetDto passwordSetDto) throws Exception{
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         Map<String, String> result = new HashMap<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
@@ -139,7 +140,7 @@ public class MyPageService {
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
         String salt = encryptionUtil.getSalt();
-        String encryptPw = encryptionUtil.getSHA256WithSalt(passWord, salt);
+        String encryptPw = encryptionUtil.getSHA256WithSalt(passwordSetDto.getPassword(), salt);
 
         userBaseById.setUserPw(encryptPw);
         userBaseById.setSalt(salt);
