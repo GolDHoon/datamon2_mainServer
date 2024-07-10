@@ -43,7 +43,7 @@ public class LandingPageService {
         }
 
         String finalDomain = domain;
-        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> finalDomain.contains(dto.getCodeValue())).findFirst().orElse(null);
+        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> finalDomain.equals(dto.getCodeValue())).findFirst().orElse(null);
         if(lpgeCodeDto == null) result.setLpgeCode("Registration required");
         else result.setLpgeCode(lpgeCodeDto.getCodeFullName());
 
