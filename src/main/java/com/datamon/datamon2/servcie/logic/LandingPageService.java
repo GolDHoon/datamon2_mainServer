@@ -42,6 +42,10 @@ public class LandingPageService {
             domain = domain.substring(0, domain.length() - 1);
         }
 
+        if (domain.startsWith("www.")) {
+            domain = domain.substring(4);
+        }
+
         String finalDomain = domain;
         LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream().filter(dto -> finalDomain.equals(dto.getCodeValue())).findFirst().orElse(null);
         if(lpgeCodeDto == null) result.setLpgeCode("Registration required");
