@@ -117,10 +117,10 @@ public class UserService {
 
         int companyId = 0;
 
-        if(memberCodes.contains(userBaseById.getUserType())){
+        if(memberCodes.contains(userBaseById.getUserType()) || "USTY_DEVL".equals(userBaseById.getUserType()) || "USTY_INME".equals(userBaseById.getUserType())){
             MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
             companyId = memberInfomationByUserId.getCompanyId();
-        }else{
+        }else {
             CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
             companyId = companyInfomationByUserId.getIdx();
         }
@@ -138,7 +138,7 @@ public class UserService {
                 resultRow.put("이메일", dto.getContactMail());
 
                 resultRow.put("최종수정일시", dateTimeUtil.LocalDateTimeToDateTimeStr(userDto.getModifyDate()));
-                resultRow.put("userIdx", String.valueOf(userDto.getIdx()));
+                resultRow.put("idx", String.valueOf(userDto.getIdx()));
                 rows.add(resultRow);
             }
         });

@@ -4,6 +4,7 @@ import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.user.CopanyAndCdbtDto;
 import com.datamon.datamon2.dto.input.user.CopanyListAndCdbtDto;
 import com.datamon.datamon2.dto.input.user.UserAndCdbtDto;
+import com.datamon.datamon2.dto.input.userAuth.UserAuthModifyDto;
 import com.datamon.datamon2.dto.input.userAuth.UserListForUserCdbtByCdbtLowCodeDto;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
@@ -83,7 +84,6 @@ public class UserAuthService {
                 })
                 .collect(Collectors.toList());
 
-
         List<String> finalKeyList = new ArrayList<>();
         userCdbtMappingService.getUserCdbtListByCdbtLowCode(userListForUserCdbtByCdbtLowCodeDto.getCdbtCode()).forEach(dto -> {
             Map<String, String> resultRow = new HashMap<>();
@@ -91,9 +91,8 @@ public class UserAuthService {
             if(memberCodes.contains(userBaseById.getUserType())){
                 List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(dto.getUserId());
 
-
                 resultRow.put("ID", userBaseById.getUserId());
-                resultRow.put("userIdx", String.valueOf(userBaseById.getIdx()));
+                resultRow.put("idx", String.valueOf(userBaseById.getIdx()));
                 resultRow.put("권한", userPermissionInfomationByUserId.stream()
                         .filter(UserPermissionInfomationDto::getUseYn)
                         .filter(permission -> commonPermission.contains(permission.getUsatCode()))
@@ -126,18 +125,19 @@ public class UserAuthService {
         return result;
     }
     @Transactional
-    public List<Map<String, String>> getUserListByCopanyAndCdbt(HttpServletRequest request, CopanyAndCdbtDto copanyAndCdbtDto) throws Exception {
+    public List<Map<String, String>> getUserListByCompanyAndCdbt(HttpServletRequest request, CopanyAndCdbtDto copanyAndCdbtDto) throws Exception {
         List<Map<String, String>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto sessionUser = userBaseService.getUserBaseById(userId);
+
         List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
                 .map(dto -> {
                     return dto.getCodeFullName();
                 })
                 .collect(Collectors.toList());
-
-        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
-
-        UserBaseDto sessionUser = userBaseService.getUserBaseById(userId);
 
         int companyId;
         if (companyCodes.contains(sessionUser.getUserType())) {
@@ -182,14 +182,45 @@ public class UserAuthService {
     }
 
     @Transactional
-    public String createUserCdbtMappingByCopanyAndCdbt(CopanyListAndCdbtDto copanyListAndCdbtDto) throws Exception {
+    public String createUserCdbtMappingByCopanyAndCdbt(HttpServletRequest request, CopanyListAndCdbtDto copanyListAndCdbtDto) throws Exception {
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        List<String> commonPermissionCodes = CommonCodeCache.getCommonPermissionCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        String cdbtLowCode = copanyListAndCdbtDto.getCdbtLowCode().substring(5, 9);
+
+
         UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
-        userCdbtMappingDto.setCdbtCode(copanyListAndCdbtDto.getCdbtLowCode().replace("CDBT_", ""));
+        userCdbtMappingDto.setCdbtCode(cdbtLowCode);
         userCdbtMappingDto.setCdbtLowCode(copanyListAndCdbtDto.getCdbtLowCode());
         List<Integer> idxs = copanyListAndCdbtDto.getIdxs();
+
+        List<UserPermissionInfomationDto> userPermissionInfomationDtoList = userPermissionInfomationService.getUserPermissionInfomationByUserId(userId).stream()
+                .filter(dto -> dto.getCdbtLowCode().equals(copanyListAndCdbtDto.getCdbtLowCode()))
+                .filter(dto -> !commonPermissionCodes.contains(dto.getUsatCode()))
+                .collect(Collectors.toList());
+
         idxs.forEach(idx -> {
             userCdbtMappingDto.setUserId(idx);
             userCdbtMappingService.save(userCdbtMappingDto);
+
+            userPermissionInfomationDtoList.forEach(dto -> {
+                dto.setUserId(idx);
+                dto.create(userId);
+                userPermissionInfomationService.save(dto);
+            });
+
+            UserPermissionInfomationDto userPermissionInfomationDto = new UserPermissionInfomationDto();
+            userPermissionInfomationDto.setUsatCode("AUTH_USAT_0000000003");
+            userPermissionInfomationDto.setCdbtCode(copanyListAndCdbtDto.getCdbtLowCode());
+            userPermissionInfomationDto.setUserId(idx);
+            userPermissionInfomationDto.setCdbtLowCode(cdbtLowCode);
         });
         return "success";
     }
@@ -201,6 +232,72 @@ public class UserAuthService {
                 .collect(Collectors.toList()).forEach(dto -> {
                     userCdbtMappingService.delete(dto);
                 });
+        return "success";
+    }
+
+    @Transactional
+    public String modifyUserAuth(HttpServletRequest request, UserAuthModifyDto userAuthModifyDto) throws Exception {
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(userAuthModifyDto.getIdx()).stream()
+                .filter(dto -> dto.getCdbtLowCode().equals(userAuthModifyDto.getCdbtLowCode()))
+                .collect(Collectors.toList());
+
+        List<String> commonPermissionCode = CommonCodeCache.getCommonPermissionCodes().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        if(commonPermissionCode.contains(userAuthModifyDto.getUsatCode())){
+            List<UserPermissionInfomationDto> userPermissionInfomation = userPermissionInfomationByUserId.stream()
+                    .filter(dto -> commonPermissionCode.contains(userAuthModifyDto.getUsatCode()))
+                    .collect(Collectors.toList());
+
+            if(userPermissionInfomation.size() > 0){
+                userPermissionInfomation.get(0).setUsatCode(userAuthModifyDto.getUsatCode());
+                userPermissionInfomation.get(0).modify(userId);
+                userPermissionInfomationService.save(userPermissionInfomation.get(0));
+            }else{
+                UserPermissionInfomationDto userPermissionInfomationDto = new UserPermissionInfomationDto();
+                userPermissionInfomationDto.setUserId(userAuthModifyDto.getIdx());
+                userPermissionInfomationDto.setUsatCode(userAuthModifyDto.getUsatCode());
+                userPermissionInfomationDto.setCdbtLowCode(userAuthModifyDto.getCdbtLowCode());
+                userPermissionInfomationDto.setCdbtCode(userAuthModifyDto.getCdbtLowCode().replace("CDBT_", ""));
+                userPermissionInfomationDto.create(userId);
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+            }
+        }else{
+            List<UserPermissionInfomationDto> userPermissionInfomation = userPermissionInfomationByUserId.stream()
+                    .filter(dto -> dto.getUsatCode().equals(userAuthModifyDto.getUsatCode()))
+                    .collect(Collectors.toList());
+
+            if(userPermissionInfomation.size() > 0){
+                if(userAuthModifyDto.getValue().equals("on")){
+                    userPermissionInfomation.get(0).setUseYn(false);
+                }else{
+                    userPermissionInfomation.get(0).setUseYn(true);
+                }
+                    userPermissionInfomation.get(0).modify(userId);
+                    userPermissionInfomationService.save(userPermissionInfomation.get(0));
+            }else{
+                UserPermissionInfomationDto userPermissionInfomationDto = new UserPermissionInfomationDto();
+                userPermissionInfomationDto.setUserId(userAuthModifyDto.getIdx());
+                userPermissionInfomationDto.setUsatCode(userAuthModifyDto.getUsatCode());
+                userPermissionInfomationDto.setCdbtLowCode(userAuthModifyDto.getCdbtLowCode());
+                userPermissionInfomationDto.setCdbtCode(userAuthModifyDto.getCdbtLowCode().replace("CDBT_", ""));
+                userPermissionInfomationDto.create(userId);
+                if(userAuthModifyDto.getValue().equals("on")){
+                    userPermissionInfomationDto.setUseYn(false);
+                }else{
+                    userPermissionInfomationDto.setUseYn(true);
+                }
+                userPermissionInfomationService.save(userPermissionInfomationDto);
+            }
+        }
+
         return "success";
     }
 }

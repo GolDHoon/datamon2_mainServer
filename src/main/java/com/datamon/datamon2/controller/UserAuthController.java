@@ -3,6 +3,7 @@ package com.datamon.datamon2.controller;
 import com.datamon.datamon2.dto.input.user.CopanyAndCdbtDto;
 import com.datamon.datamon2.dto.input.user.CopanyListAndCdbtDto;
 import com.datamon.datamon2.dto.input.user.UserAndCdbtDto;
+import com.datamon.datamon2.dto.input.userAuth.UserAuthModifyDto;
 import com.datamon.datamon2.dto.input.userAuth.UserListForUserCdbtByCdbtLowCodeDto;
 import com.datamon.datamon2.servcie.logic.UserAuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +59,7 @@ public class UserAuthController {
     public ResponseEntity<?> getUserListByCopanyAndCdbt(HttpServletRequest request, HttpServletResponse response, @RequestBody CopanyAndCdbtDto userListByCopanyAndCdbtDto) throws Exception {
         List<Map<String, String>> result = new ArrayList<>();
         try {
-            result = userAuthService.getUserListByCopanyAndCdbt(request, userListByCopanyAndCdbtDto);
+            result = userAuthService.getUserListByCompanyAndCdbt(request, userListByCopanyAndCdbtDto);
         } catch (Exception e) {
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -70,7 +71,7 @@ public class UserAuthController {
     public ResponseEntity<?> createUserCdbtMappingByCopanyAndCdbt (HttpServletRequest request, HttpServletResponse response, @RequestBody CopanyListAndCdbtDto copanyListAndCdbtDto) throws Exception {
         String result;
         try {
-            result = userAuthService.createUserCdbtMappingByCopanyAndCdbt(copanyListAndCdbtDto);
+            result = userAuthService.createUserCdbtMappingByCopanyAndCdbt(request, copanyListAndCdbtDto);
         } catch (Exception e) {
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -83,6 +84,18 @@ public class UserAuthController {
         String result;
         try {
             result = userAuthService.deleteUserCdbtMappingByCopanyAndCdbt(userAndCdbtDto);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/modifyUserAuth")
+    public ResponseEntity<?> modifyUserAuth(HttpServletRequest request, HttpServletResponse response, @RequestBody UserAuthModifyDto userAuthModifyDto) throws Exception {
+        String result;
+        try {
+            result = userAuthService.modifyUserAuth(request, userAuthModifyDto);
         } catch (Exception e) {
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }

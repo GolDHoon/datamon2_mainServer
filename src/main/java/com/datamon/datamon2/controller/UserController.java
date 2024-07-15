@@ -1,6 +1,7 @@
 package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.input.user.*;
+import com.datamon.datamon2.dto.input.userAuth.UserAuthModifyDto;
 import com.datamon.datamon2.servcie.logic.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
