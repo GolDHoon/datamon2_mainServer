@@ -275,10 +275,10 @@ public class UserAuthService {
                     .collect(Collectors.toList());
 
             if(userPermissionInfomation.size() > 0){
-                if(userAuthModifyDto.getValue().equals("on")){
-                    userPermissionInfomation.get(0).setUseYn(false);
-                }else{
+                if(userAuthModifyDto.isValue()){
                     userPermissionInfomation.get(0).setUseYn(true);
+                }else{
+                    userPermissionInfomation.get(0).setUseYn(false);
                 }
                     userPermissionInfomation.get(0).modify(userId);
                     userPermissionInfomationService.save(userPermissionInfomation.get(0));
@@ -289,10 +289,10 @@ public class UserAuthService {
                 userPermissionInfomationDto.setCdbtLowCode(userAuthModifyDto.getCdbtLowCode());
                 userPermissionInfomationDto.setCdbtCode(userAuthModifyDto.getCdbtLowCode().replace("CDBT_", ""));
                 userPermissionInfomationDto.create(userId);
-                if(userAuthModifyDto.getValue().equals("on")){
-                    userPermissionInfomationDto.setUseYn(false);
-                }else{
+                if(userAuthModifyDto.isValue()){
                     userPermissionInfomationDto.setUseYn(true);
+                }else{
+                    userPermissionInfomationDto.setUseYn(false);
                 }
                 userPermissionInfomationService.save(userPermissionInfomationDto);
             }

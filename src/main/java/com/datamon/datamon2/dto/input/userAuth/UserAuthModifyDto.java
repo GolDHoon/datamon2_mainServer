@@ -7,5 +7,5 @@ public class UserAuthModifyDto {
     int idx;
     String usatCode;
     String cdbtLowCode;
-    String value;
+    boolean value;
 }
