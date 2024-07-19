@@ -68,7 +68,7 @@ public class CustInfoService {
 
                         boolean removed = customerBasicConsultationBycustIdList.stream()
                                 .filter(custCusultation -> Objects.equals(custCusultation.getCustId(), dto.getIdx()) && key.equals(custCusultation.getKey()))
-                                .peek(custCusultation -> map.put(custCusultation.getKey(), encryptionUtil.AES256decrypt(custCusultation.getValue())))
+                                .peek(custCusultation -> map.put(custCusultation.getKey(), Optional.ofNullable(encryptionUtil.AES256decrypt(custCusultation.getValue())).orElse("")))
                                 .count() > 0; // just for triggering the terminal operation
 
                         if (removed) {
