@@ -46,7 +46,7 @@ public class UserAuthController {
         Map<String, List> result;
 
         try {
-            result = userAuthService.getUserListForUserCdbtByCdbtLowCode(userListForUserCdbtByCdbtLowCodeDto);
+            result = userAuthService.getUserListForUserCdbtByCdbtLowCode(request, userListForUserCdbtByCdbtLowCodeDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

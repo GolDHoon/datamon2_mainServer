@@ -1,12 +1,16 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
+import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
 import com.datamon.datamon2.dto.repository.CustomerInformationDto;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
 import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
+import com.datamon.datamon2.util.HttpSessionUtil;
+import com.datamon.datamon2.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +22,12 @@ public class CustInfoService {
     private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
+    private JwtUtil jwtUtil;
 
-    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
+    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil) {
         this.customerInformationService = customerInformationService;
         this.customerBasicConsultationService = customerBasicConsultationService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Transactional
@@ -42,9 +48,9 @@ public class CustInfoService {
 
         List<Map<String, Object>> rows = customerInformationByLpgeCode.stream()
                 .filter(dto -> !dto.getDelYn())
-                .filter(CustomerInformationDto::getUseYn)
                 .map(dto -> {
                     Map<String, Object> map = new HashMap<>();
+                    Boolean useYn = !dto.getUseYn();
                     map.put("idx", dto.getIdx());
                     map.put("cdbtLowCode", Optional.ofNullable(dto.getCdbtLowCode()).orElse(" "));
                     map.put("sourse", Optional.ofNullable(dto.getUtmSourse()).orElse(" "));
@@ -53,7 +59,7 @@ public class CustInfoService {
                     map.put("term", Optional.ofNullable(dto.getUtmTerm()).orElse(" "));
                     map.put("content", Optional.ofNullable(dto.getUtmContent()).orElse(" "));
                     map.put("IP", dto.getIp());
-                    map.put("허수여부", dto.getUseYn().toString());
+                    map.put("허수여부", useYn.toString());
                     map.put("삭제여부", dto.getDelYn().toString());
                     map.put("생성일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getCreateDate())).orElse(""));
                     map.put("수정일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getModifyDate())).orElse(""));
@@ -87,5 +93,25 @@ public class CustInfoService {
         result.put("rows", rows);
 
         return result;
+    }
+
+    @Transactional
+    public String modifyCustInfo(HttpServletRequest request, ModifyCustInfoDto modifyCustInfoDto, String mode) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        CustomerInformationDto customerInformationById = customerInformationService.getCustomerInformationById(modifyCustInfoDto.getIdx());
+
+        if(mode.equals("useYn")){
+            customerInformationById.setUseYn(!modifyCustInfoDto.isValue());
+            customerInformationById.modify(userId);
+        }else if (mode.equals("delYn")){
+            customerInformationById.setDelYn(modifyCustInfoDto.isValue());
+            customerInformationById.delete(userId);
+        }
+
+        customerInformationService.save(customerInformationById);
+        return "success";
     }
 }

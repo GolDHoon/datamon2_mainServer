@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserBaseRepository extends JpaRepository<UserBaseEntity, Integer> {
-    Optional<UserBaseEntity> findByUserId(String userId);
+    List<UserBaseEntity> findByUserId(String userId);
     List<UserBaseEntity> findByUserTypeIn(List<String> userTypes);
     List<UserBaseEntity> findByIdxIn(List<Integer> idxs);
 }

@@ -91,4 +91,28 @@ public class UserController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/checkMemberIdDuplicate")
+    public ResponseEntity<?> checkMemberIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
+        String result;
+        try {
+            result = userService.checkMemberIdDuplicate(checkIdDuplicateDto);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/checkCompanyIdDuplicate")
+    public ResponseEntity<?> checkCompanyIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
+        String result;
+        try {
+            result = userService.checkCompanyIdDuplicate(checkIdDuplicateDto);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

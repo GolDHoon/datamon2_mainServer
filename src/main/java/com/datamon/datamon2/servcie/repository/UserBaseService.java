@@ -27,9 +27,12 @@ public class UserBaseService {
         this.userBaseMapper = userBaseMapper;
     }
 
-    public UserBaseDto getUserBaseByUserId(String userId){
-        UserBaseEntity userBaseEntity = userBaseRepository.findByUserId(userId).orElse(new UserBaseEntity());
-        return userBaseMapper.toDto(userBaseEntity);
+    public List<UserBaseDto> getUserBaseByUserId(String userId){
+        List<UserBaseDto> result = new ArrayList<>();
+        userBaseRepository.findByUserId(userId).forEach(entity -> {
+            result.add(userBaseMapper.toDto(entity));
+        });
+        return result;
     }
 
     public List<UserBaseDto> getUserBaseList(){
@@ -46,7 +49,7 @@ public class UserBaseService {
 
     @PostConstruct
     public void init() {
-        UserBaseDto userBaseByUserId = getUserBaseByUserId(systemId);
+        UserBaseDto userBaseByUserId = getUserBaseByUserId(systemId).stream().findFirst().orElse(new UserBaseDto());
         CommonCodeCache.setSystemIdIdx(userBaseByUserId.getIdx());
     }
 

@@ -1,6 +1,11 @@
 package com.datamon.datamon2.servcie.logic;
 
+import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.input.user.LoginInuptDto;
+import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
+import com.datamon.datamon2.servcie.repository.MemberInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.*;
 import io.jsonwebtoken.Claims;
@@ -15,15 +20,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserSignService {
+    private final CompanyInfomationService companyInfomationService;
+    private final MemberInfomationService memberInfomationService;
     private UserBaseService userBaseService;
     private JwtUtil jwtUtil;
 
-    public UserSignService(UserBaseService userBaseService, JwtUtil jwtUtil) {
+    public UserSignService(UserBaseService userBaseService, JwtUtil jwtUtil, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService) {
         this.userBaseService = userBaseService;
         this.jwtUtil = jwtUtil;
+        this.companyInfomationService = companyInfomationService;
+        this.memberInfomationService = memberInfomationService;
     }
 
     @Transactional
@@ -34,18 +44,50 @@ public class UserSignService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String userLogin(String userId, String password, HttpServletRequest request, HttpServletResponse response) throws Exception{
+    public String userLogin(LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonUtil jsonUtil = new JsonUtil();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
         IpUtil ipUtil = new IpUtil(request);
 
-        UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(userId);
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(loginInuptDto.getCompanyId()).stream()
+                .filter(dto-> companyCodes.contains(dto.getUserType()) || "USTY_MAST".equals(dto.getUserType()))
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .findFirst().orElse(new UserBaseDto());
+
+        if(companyUser.getIdx() == null){
+            return "login-fail:companyId";
+        }
+
+        UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .findFirst().orElse(new UserBaseDto());
+
         if(userBaseByUserId.getIdx() == null){
             return "login-fail:userId";
         }
 
+        int companyId;
+
+        if(companyCodes.contains(userBaseByUserId.getUserType()) || "USTY_MAST".equals(userBaseByUserId.getUserType())){
+            companyId = userBaseByUserId.getIdx();
+        }else{
+            companyId = companyInfomationService.getCompanyInfomationById(memberInfomationService.getMemberInfomationByUserId(userBaseByUserId.getIdx()).getCompanyId()).getUserId();
+        }
+
+        if(companyUser.getIdx() != companyId){
+            return "login-fail:companyId";
+        }
+
         EncryptionUtil encryptionUtil = new EncryptionUtil();
-        String encriptPw = encryptionUtil.getSHA256WithSalt(password, userBaseByUserId.getSalt());
+        String encriptPw = encryptionUtil.getSHA256WithSalt(loginInuptDto.getPassword(), userBaseByUserId.getSalt());
 
         if(encriptPw.equals(userBaseByUserId.getUserPw())){
             List<Map<String, Object>> claimsList = new ArrayList<>();
@@ -53,6 +95,7 @@ public class UserSignService {
 
             httpSessionUtil.setAttribute("jwt", token);
             httpSessionUtil.setAttribute("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
+            httpSessionUtil.setAttribute("companyId", String.valueOf(companyId));
 
             Cookie cookie = new Cookie("JSESSIONID", request.getSession(false).getId());
             response.addCookie(cookie);
@@ -61,6 +104,28 @@ public class UserSignService {
         }else {
             return "login-fail:password";
         }
+    }
+
+    @Transactional
+    public String getCompanyName(String companyId) throws Exception {
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseByUserId(companyId).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .filter(dto -> companyCodes.contains(dto.getUserType()) || dto.getUserType().equals("USTY_MAST"))
+                .findFirst().orElse(new UserBaseDto());
+
+        if(userBaseDto.getIdx() == null){
+            return "companyName-fail:companyId";
+        }
+
+        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userBaseDto.getIdx());
+        return companyInfomationByUserId.getName();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

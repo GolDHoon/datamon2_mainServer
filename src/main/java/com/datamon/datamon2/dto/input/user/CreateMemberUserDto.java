@@ -10,4 +10,5 @@ public class CreateMemberUserDto {
     String role;
     String contactPhone;
     String mail;
+    String companyId;
 }

@@ -37,4 +37,9 @@ public class CustomerInformationService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public CustomerInformationDto getCustomerInformationById(Long idx){
+        return customerInformationMapper.toDto(customerInformationRepository.findById(idx).orElse(new CustomerInformationEntity()));
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
+import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.servcie.logic.CustInfoService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +28,32 @@ public class CustInfoController {
         Map<String, Object> result;
         try {
             result= custInfoService.getListByLpgeCode(custInfoDto);
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/unUseCustInfo")
+    public ResponseEntity<?> modifyCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
+        String result;
+        try {
+            result = custInfoService.modifyCustInfo(request, modifyCustInfoDto, "useYn");
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/deleteCustInfo")
+    public ResponseEntity<?> deleteCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
+        String result;
+        try {
+            result = custInfoService.modifyCustInfo(request, modifyCustInfoDto, "delYn");
         } catch (Exception e) {
             logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

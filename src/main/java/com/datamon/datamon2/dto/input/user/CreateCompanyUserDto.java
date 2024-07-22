@@ -8,6 +8,7 @@ public class CreateCompanyUserDto {
     String pw;
     String name;
     String ceo;
+    String userType;
     String corporateNumber;
     String corporateAddress;
     String corporateMail;

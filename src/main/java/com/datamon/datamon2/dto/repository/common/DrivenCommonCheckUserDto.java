@@ -50,6 +50,7 @@ public class DrivenCommonCheckUserDto implements Serializable {
 
     public void delete(int userId){
         deleteId = userId;
+        delYn = true;
         deleteDate = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
 }

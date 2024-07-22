@@ -65,9 +65,15 @@ public class UserAuthService {
     }
 
     @Transactional
-    public Map<String, List> getUserListForUserCdbtByCdbtLowCode (UserListForUserCdbtByCdbtLowCodeDto userListForUserCdbtByCdbtLowCodeDto) {
+    public Map<String, List> getUserListForUserCdbtByCdbtLowCode (HttpServletRequest request, UserListForUserCdbtByCdbtLowCodeDto userListForUserCdbtByCdbtLowCodeDto)  throws Exception {
         Map<String, List> result = new HashMap<>();
         List<Map<String, String>> rows = new ArrayList<>();
+
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto sessionUser = userBaseService.getUserBaseById(userId);
+        int sessionCompanyId = Integer.parseInt((String) httpSessionUtil.getAttribute("companyId"));
 
         List<String> commonPermission = CommonCodeCache.getCommonPermissionCodes().stream()
                 .map(code -> {return code.getCodeFullName();})
@@ -78,7 +84,19 @@ public class UserAuthService {
                 .map(code -> {return code.getCodeFullName();})
                 .findFirst().orElse("");
 
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(code -> {
+                    return code.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
         List<String> memberCodes = CommonCodeCache.getMemberCodes().stream()
+                .map(code -> {
+                    return code.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        List<String> masterCodes = CommonCodeCache.getMasterCodes().stream()
                 .map(code -> {
                     return code.getCodeFullName();
                 })
@@ -88,11 +106,27 @@ public class UserAuthService {
         userCdbtMappingService.getUserCdbtListByCdbtLowCode(userListForUserCdbtByCdbtLowCodeDto.getCdbtCode()).forEach(dto -> {
             Map<String, String> resultRow = new HashMap<>();
             UserBaseDto userBaseById = userBaseService.getUserBaseById(dto.getUserId());
+            if(!userBaseById.getUseYn() || userBaseById.getDelYn()){
+                return;
+            }
             if(memberCodes.contains(userBaseById.getUserType())){
                 List<UserPermissionInfomationDto> userPermissionInfomationByUserId = userPermissionInfomationService.getUserPermissionInfomationByUserId(dto.getUserId());
+                int userCompanyId;
+                if(companyCodes.contains(userBaseById.getUserType())){
+                    userCompanyId = userBaseById.getIdx();
+                }else{
+                    userCompanyId = companyInfomationService.getCompanyInfomationById(memberInfomationService.getMemberInfomationByUserId(userBaseById.getIdx()).getCompanyId()).getUserId();
+                }
+
+                boolean customCellParam = (sessionCompanyId == userCompanyId);
+
+                if(masterCodes.contains(sessionUser.getUserType())){
+                    customCellParam = true;
+                }
 
                 resultRow.put("ID", userBaseById.getUserId());
                 resultRow.put("idx", String.valueOf(userBaseById.getIdx()));
+                resultRow.put("customCellParam", String.valueOf(customCellParam));
                 resultRow.put("권한", userPermissionInfomationByUserId.stream()
                         .filter(UserPermissionInfomationDto::getUseYn)
                         .filter(permission -> commonPermission.contains(permission.getUsatCode()))

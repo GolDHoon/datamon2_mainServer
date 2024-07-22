@@ -23,7 +23,7 @@ public class UserSignController {
     public ResponseEntity<?> login(@RequestBody LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response){
         String result;
         try {
-            result = userSignService.userLogin(loginInuptDto.getUserId(), loginInuptDto.getPassword(), request, response);
+            result = userSignService.userLogin(loginInuptDto, request, response);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -37,6 +37,19 @@ public class UserSignController {
         String result;
         try {
             result = userSignService.userLogout(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCompanyName")
+    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response, @RequestParam String companyId){
+        String result;
+        try {
+            result = userSignService.getCompanyName(companyId);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

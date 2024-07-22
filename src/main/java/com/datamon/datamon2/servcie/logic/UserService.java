@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -162,6 +163,22 @@ public class UserService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        List<UserBaseDto> companyUserList = userBaseService.getUserBaseByUserId(createCompanyUserDto.getUserId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .filter(dto -> companyCodes.contains(dto.getUserType()))
+                .collect(Collectors.toList());
+
+        if(companyUserList.size() != 0){
+            return "createCompany-fail:idDuplication";
+        }
+
         EncryptionUtil encryptionUtil = new EncryptionUtil();
 
         UserBaseDto userBaseDto = new UserBaseDto();
@@ -170,7 +187,7 @@ public class UserService {
         String encryptPw = encryptionUtil.getSHA256WithSalt(createCompanyUserDto.getPw(), salt);
         userBaseDto.setSalt(salt);
         userBaseDto.setUserPw(encryptPw);
-        userBaseDto.setUserType("USTY_CLNT");
+        userBaseDto.setUserType(createCompanyUserDto.getUserType());
         userBaseDto.create(userId);
 
         UserBaseDto save = userBaseService.save(userBaseDto);
@@ -214,6 +231,28 @@ public class UserService {
 
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(createMemberUserDto.getCompanyId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .findFirst().orElse(new UserBaseDto());
+        CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(companyUser.getIdx());
+
+        List<MemberInfomationDto> memberInfomationDtoListByCompanyId = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyInfo.getIdx());
+        List<Integer> memberList = memberInfomationDtoListByCompanyId.stream()
+                .map(dto -> {
+                    return dto.getUserId();
+                })
+                .collect(Collectors.toList());
+
+        List<UserBaseDto> userBaseByIdxList = userBaseService.getUserBaseByIdxList(memberList).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .filter(dto -> dto.getUserId().equals(createMemberUserDto.getUserId()))
+                .collect(Collectors.toList());
+
+        if(userBaseByIdxList.size() != 0){
+            return "createMember-fail:idDuplication";
+        }
 
         UserBaseDto userBaseDto = new UserBaseDto();
         userBaseDto.setUserId(createMemberUserDto.getUserId());
@@ -223,25 +262,27 @@ public class UserService {
         userBaseDto.setUserPw(encryptPw);
         switch (userBaseById.getUserType()){
             case "USTY_MAST":
-            userBaseDto.setUserType("USTY_INME");
-            break;
+                userBaseDto.setUserType("USTY_INME");
+                break;
             case "USTY_CLNT":
-            userBaseDto.setUserType("USTY_CLME");
-            break;
+                userBaseDto.setUserType("USTY_CLME");
+                break;
             case "USTY_ADAC":
-            userBaseDto.setUserType("USTY_AAME");
-            break;
+                userBaseDto.setUserType("USTY_AAME");
+                break;
             case "USTY_CRAC":
-            userBaseDto.setUserType("USTY_CAME");
-            break;
+                userBaseDto.setUserType("USTY_CAME");
+                break;
+            default:
+                userBaseDto.setUserType(userBaseById.getUserType());
+                break;
         }
         userBaseDto.create(userId);
 
         UserBaseDto save = userBaseService.save(userBaseDto);
-        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
 
         MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
-        memberInfomationDto.setCompanyId(companyInfomationByUserId.getIdx());
+        memberInfomationDto.setCompanyId(companyInfo.getIdx());
         memberInfomationDto.setUserId(save.getIdx());
         memberInfomationDto.setName(createMemberUserDto.getName());
         memberInfomationDto.setRole(createMemberUserDto.getRole());
@@ -266,5 +307,58 @@ public class UserService {
         userBaseService.save(userBaseById);
 
         return "success";
+    }
+
+    @Transactional
+    public String checkMemberIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(checkIdDuplicateDto.getCompanyId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .findFirst().orElse(new UserBaseDto());
+
+        if (companyUser.getIdx() == null){
+            return "checkId-fail:sessionError";
+        }
+
+        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(companyUser.getIdx());
+
+        List<Integer> memberIdxList = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyInfomationByUserId.getIdx()).stream()
+                .map(dto -> {
+                    return dto.getUserId();
+                })
+                .collect(Collectors.toList());
+
+        List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(memberIdxList).stream()
+                .filter(dto -> dto.getUserId().equals(checkIdDuplicateDto.getUserId()))
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .collect(Collectors.toList());
+
+        if(userList.size() != 0){
+            return "checkId-fail:idDuplication";
+        }else{
+            return "success";
+        }
+    }
+
+    @Transactional
+    public String checkCompanyIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
+        List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
+                .map(dto -> {
+                    return dto.getCodeFullName();
+                })
+                .collect(Collectors.toList());
+
+        List<UserBaseDto> companyUserList = userBaseService.getUserBaseByUserId(checkIdDuplicateDto.getUserId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .filter(dto -> companyCodes.contains(dto.getUserType()))
+                .collect(Collectors.toList());
+
+        if(companyUserList.size() != 0){
+            return "checkId-fail:idDuplication";
+        }else{
+            return "success";
+        }
     }
 }
