@@ -16,17 +16,15 @@ import java.util.List;
 public class LandingPageService {
     private UserBaseService userBaseService;
     private LpgeCodeService lpgeCodeService;
-    private com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService;
     private UserCdbtMappingService userCdbtMappingService;
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
 
-    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, com.datamon.datamon2.servcie.repository.LandingPageService landingPageRepositoryService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
+    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
         this.userBaseService = userBaseService;
         this.lpgeCodeService = lpgeCodeService;
-        this.landingPageRepositoryService = landingPageRepositoryService;
         this.userCdbtMappingService = userCdbtMappingService;
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
@@ -80,13 +78,6 @@ public class LandingPageService {
             newLpgeCodeDto.create(createUser.getIdx());
 
             lpgeCodeDto = lpgeCodeService.save(newLpgeCodeDto);
-
-            LandingPageDto landingPageDto = new LandingPageDto();
-            landingPageDto.setLpgeCode(lpgeCodeDto.getCodeFullName());
-            landingPageDto.setDomain(createDto.getDomain());
-            landingPageDto.create(createUser.getIdx());
-            landingPageRepositoryService.saveLandingPage(landingPageDto);
-
         }
 
         UserCdbtMappingDto userLpgeMappingDto = new UserCdbtMappingDto();
