@@ -29,7 +29,8 @@ public class LandingPageManageService {
     private UserPermissionInfomationService userPermissionInfomationService;
     private TableIndexService tableIndexService;
 
-    public LandingPageManageService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService, TableIndexService tableIndexService) {
+    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService, TableIndexService tableIndexService) {
+        this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
         this.memberInfomationService = memberInfomationService;
@@ -113,9 +114,9 @@ public class LandingPageManageService {
         TableIndexDto tableIndexDto = new TableIndexDto();
         tableIndexDto.setTableName("TB_CUSTOMER_INFORMATION");
         tableIndexDto.setOptionName(save.getCodeFullName());
-        tableIndexDto.setIdx(1L);
+        tableIndexDto.setIndex(1L);
 
-        tableIndexService.save(tableIndexDto);
+        TableIndexDto save1 = tableIndexService.save(tableIndexDto);
 
         UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
         userCdbtMappingDto.setCdbtLowCode(save.getCodeFullName());

@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Table(name = "TB_OUTBOUND_HISTORY")
 public class OutboundHistoryEntity extends DrivenCommonCheckUserEntity implements Serializable {
     @Id
-    @Column(name = "idx", nullable = false, length = 33)
+    @Column(name = "idx", nullable = false, length = 43)
     private String idx;
 
     @Column(name = "user_id", nullable = false)

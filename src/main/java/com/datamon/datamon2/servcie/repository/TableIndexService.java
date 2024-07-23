@@ -13,6 +13,11 @@ public class TableIndexService {
     private TableIndexRepository tableIndexRepository;
     private TableIndexMapper tableIndexMapper;
 
+    public TableIndexService(TableIndexRepository tableIndexRepository, TableIndexMapper tableIndexMapper) {
+        this.tableIndexRepository = tableIndexRepository;
+        this.tableIndexMapper = tableIndexMapper;
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TableIndexDto save(TableIndexDto tableIndexDto){
         return tableIndexMapper.toDto(tableIndexRepository.save(tableIndexMapper.toEntity(tableIndexDto)));
