@@ -20,6 +20,12 @@ public class CustomerInformationEntity extends DrivenCommonCheckUserEntity imple
     @Column(name = "cdbt_low_code", nullable = false)
     private String cdbtLowCode;
 
+    @Column(name = "cdbs_code", nullable = false)
+    private String cdbsCode;
+
+    @Column(name = "cdbq_code", nullable = false)
+    private String cdbqCode;
+
     @Column(name = "utm_sourse", length = 20)
     private String utmSourse;
 

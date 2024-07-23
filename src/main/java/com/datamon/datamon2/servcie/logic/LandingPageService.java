@@ -133,6 +133,8 @@ public class LandingPageService {
 
         CustomerInformationDto customerInformationDto = new CustomerInformationDto();
         customerInformationDto.setCdbtLowCode(custDataDto.getLpgeCode());
+        customerInformationDto.setCdbsCode("CDBS_PNDG");
+        customerInformationDto.setCdbqCode("CDBQ_VLDT");
         customerInformationDto.setUtmSourse(custDataDto.getUtmSource());
         customerInformationDto.setUtmMedium(custDataDto.getUtmMedium());
         customerInformationDto.setUtmCampaign(custDataDto.getUtmCampaign());
