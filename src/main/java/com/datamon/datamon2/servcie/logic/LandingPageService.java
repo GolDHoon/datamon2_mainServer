@@ -21,8 +21,9 @@ public class LandingPageService {
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
+    private TableIndexService tableIndexService;
 
-    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
+    public LandingPageService(UserBaseService userBaseService, LpgeCodeService lpgeCodeService, UserCdbtMappingService userCdbtMappingService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, TableIndexService tableIndexService) {
         this.userBaseService = userBaseService;
         this.lpgeCodeService = lpgeCodeService;
         this.userCdbtMappingService = userCdbtMappingService;
@@ -30,6 +31,7 @@ public class LandingPageService {
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
         this.customerInformationService = customerInformationService;
         this.customerBasicConsultationService = customerBasicConsultationService;
+        this.tableIndexService = tableIndexService;
     }
 
     @Transactional
@@ -133,6 +135,8 @@ public class LandingPageService {
 
         CustomerInformationDto customerInformationDto = new CustomerInformationDto();
         customerInformationDto.setCdbtLowCode(custDataDto.getLpgeCode());
+        TableIndexDto tableIndexByOptionName = tableIndexService.getTableIndexByOptionName(custDataDto.getLpgeCode());
+        customerInformationDto.setIdx(tableIndexByOptionName.getOptionName()+"-"+String.format("%020d", tableIndexByOptionName.getIndex()));
         customerInformationDto.setCdbsCode("CDBS_PNDG");
         customerInformationDto.setCdbqCode("CDBQ_VLDT");
         customerInformationDto.setUtmSourse(custDataDto.getUtmSource());
@@ -144,6 +148,9 @@ public class LandingPageService {
         customerInformationDto.create(CommonCodeCache.getSystemIdIdx());
 
         CustomerInformationDto newCustomerInformationDto = customerInformationService.save(customerInformationDto);
+
+        tableIndexByOptionName.setIndex(tableIndexByOptionName.getIndex()+1L);
+        tableIndexService.save(tableIndexByOptionName);
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         custDataDto.getData().forEach(map->{

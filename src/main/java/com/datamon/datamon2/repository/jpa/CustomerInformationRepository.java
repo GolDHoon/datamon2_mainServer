@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CustomerInformationRepository extends JpaRepository<CustomerInformationEntity, Long> {
+public interface CustomerInformationRepository extends JpaRepository<CustomerInformationEntity, String> {
     List<CustomerInformationEntity> findByCdbtLowCode(String cdbtLowCode);
 }

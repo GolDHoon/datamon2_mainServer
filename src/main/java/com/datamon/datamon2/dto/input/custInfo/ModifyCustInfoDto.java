@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ModifyCustInfoDto {
-    Long idx;
+    String idx;
     boolean value;
 }

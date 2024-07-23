@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class CustomerInformationDto extends DrivenCommonCheckUserDto implements Serializable {
-    Long  idx;
+    String  idx;
     String cdbtLowCode;
     String cdbsCode;
     String cdbqCode;

@@ -1,16 +1,16 @@
 package com.datamon.datamon2.dto.repository;
 
 import com.datamon.datamon2.dto.repository.common.DrivenCommonCheckUserDto;
-import com.datamon.datamon2.entity.CdbtCodeEntity;
+import com.datamon.datamon2.entity.CdbsCodeEntity;
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * DTO for {@link CdbtCodeEntity}
+ * DTO for {@link CdbsCodeEntity}
  */
 @Data
-public class CdbtCodeDto extends DrivenCommonCheckUserDto implements Serializable {
+public class CdbsCodeDto extends DrivenCommonCheckUserDto implements Serializable {
     Integer idx;
     String codeName;
     String codeFullName;
@@ -20,6 +20,6 @@ public class CdbtCodeDto extends DrivenCommonCheckUserDto implements Serializabl
     @Override
     public void create(int userId) {
         super.create(userId);
-        codeFullName = "CDBT_" + codeName;
+        codeFullName = "CDBS_" + codeName;
     }
 }

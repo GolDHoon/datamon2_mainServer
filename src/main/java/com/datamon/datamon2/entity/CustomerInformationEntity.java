@@ -13,9 +13,8 @@ public class CustomerInformationEntity extends DrivenCommonCheckUserEntity imple
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Long idx;
+    private String idx;
 
     @Column(name = "cdbt_low_code", nullable = false)
     private String cdbtLowCode;

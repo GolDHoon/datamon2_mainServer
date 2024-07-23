@@ -34,7 +34,7 @@ public class CustInfoService {
     public Map<String, Object> getListByLpgeCode(CustInfoDto custInfoDto) throws Exception{
         List<CustomerInformationDto> customerInformationByLpgeCode = customerInformationService.getCustomerInformationByLpgeCode(custInfoDto.getLpgeCode());
         
-        List<Long> custIds = customerInformationByLpgeCode.stream()
+        List<String> custIds = customerInformationByLpgeCode.stream()
                 .filter(dto -> !dto.getDelYn())
                 .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());

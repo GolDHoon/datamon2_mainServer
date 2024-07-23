@@ -26,7 +26,7 @@ public class CustomerBasicConsultationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationBycustIdList(List<Long> custIds){
+    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationBycustIdList(List<String> custIds){
         List<CustomerBasicConsultationDto> result = new ArrayList<>();
         customerBasicConsultationRepository.findByCustIdIn(custIds).forEach(entity -> {
             result.add(customerBasicConsultationMapper.toDto(entity));

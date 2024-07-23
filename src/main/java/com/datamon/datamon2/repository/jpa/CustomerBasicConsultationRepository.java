@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface CustomerBasicConsultationRepository extends JpaRepository<CustomerBasicConsultationEntity, Long> {
-    List<CustomerBasicConsultationEntity> findByCustIdIn(List<Long> custIds);
+    List<CustomerBasicConsultationEntity> findByCustIdIn(List<String> custIds);
 }

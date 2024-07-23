@@ -18,7 +18,7 @@ public class CustomerBasicConsultationEntity extends DrivenCommonUserEntity impl
     private Long idx;
 
     @Column(name = "cust_id", nullable = false)
-    private Long custId;
+    private String custId;
 
     @Column(name = "`key`", nullable = false, length = 100)
     private String key;

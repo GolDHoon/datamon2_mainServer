@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 public class CustomerBasicConsultationDto extends DrivenCommonUserDto implements Serializable {
     Long idx;
-    Long custId;
+    String custId;
     String key;
     String value;
 }

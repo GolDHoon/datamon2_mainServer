@@ -27,9 +27,9 @@ public class LandingPageManageService {
     private LandingPageBlockedIpService landingPageBlockedIpService;
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private UserPermissionInfomationService userPermissionInfomationService;
+    private TableIndexService tableIndexService;
 
-    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService) {
-        this.jwtUtil = jwtUtil;
+    public LandingPageManageService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService, TableIndexService tableIndexService) {
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
         this.memberInfomationService = memberInfomationService;
@@ -38,6 +38,7 @@ public class LandingPageManageService {
         this.landingPageBlockedIpService = landingPageBlockedIpService;
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
         this.userPermissionInfomationService = userPermissionInfomationService;
+        this.tableIndexService = tableIndexService;
     }
 
     @Transactional
@@ -108,6 +109,13 @@ public class LandingPageManageService {
         lpgeCodeDto.create(userId);
 
         LpgeCodeDto save = lpgeCodeService.save(lpgeCodeDto);
+
+        TableIndexDto tableIndexDto = new TableIndexDto();
+        tableIndexDto.setTableName("TB_CUSTOMER_INFORMATION");
+        tableIndexDto.setOptionName(save.getCodeFullName());
+        tableIndexDto.setIdx(1L);
+
+        tableIndexService.save(tableIndexDto);
 
         UserCdbtMappingDto userCdbtMappingDto = new UserCdbtMappingDto();
         userCdbtMappingDto.setCdbtLowCode(save.getCodeFullName());
