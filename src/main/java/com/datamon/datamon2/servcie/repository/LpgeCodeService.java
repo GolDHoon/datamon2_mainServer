@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LpgeCodeService {
@@ -39,12 +40,29 @@ public class LpgeCodeService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public LpgeCodeDto getLpgeCodeByCodeFullName(String codeFullName){
+        return lpgeCodeMapper.toDto(lpgeCodeRepository.findByCodeFullName(codeFullName).orElse(new LpgeCodeEntity()));
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LpgeCodeDto save(LpgeCodeDto lpgeCodeDto){
         LpgeCodeDto save = lpgeCodeMapper.toDto(lpgeCodeRepository.save(lpgeCodeMapper.toEntity(lpgeCodeDto)));
         List<LpgeCodeDto> lpgeCodes = CommonCodeCache.getLpgeCodes();
         lpgeCodes.add(save);
         return save;
+    }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LpgeCodeDto modify(LpgeCodeDto lpgeCodeDto){
+        LpgeCodeDto save = lpgeCodeMapper.toDto(lpgeCodeRepository.save(lpgeCodeMapper.toEntity(lpgeCodeDto)));
+        List<LpgeCodeDto> lpgeCodes = CommonCodeCache.getLpgeCodes();
+        for (int i = 0; i < lpgeCodes.size(); i++) {
+            if (lpgeCodes.get(i).getIdx().equals(save.getIdx())) {
+                lpgeCodes.set(i, save);
+                break;
+            }
+        }
+        return save;
     }
 }

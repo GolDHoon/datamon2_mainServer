@@ -27,7 +27,7 @@ public class CustomerInformationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerInformationDto> getCustomerInformationByLpgeCode(String cdbtLowCode){
+    public List<CustomerInformationDto> getCustomerInformationByCdbtLowCode(String cdbtLowCode){
         List<CustomerInformationDto> result = new ArrayList<>();
 
         customerInformationRepository.findByCdbtLowCode(cdbtLowCode).forEach(entity -> {

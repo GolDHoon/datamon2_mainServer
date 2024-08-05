@@ -1,8 +1,12 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
+import com.datamon.datamon2.dto.repository.CustomerInformationDto;
 import com.datamon.datamon2.dto.repository.LpgeCodeDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
+import com.datamon.datamon2.servcie.repository.CustomerInformationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
 import com.datamon.datamon2.util.HttpSessionUtil;
@@ -22,11 +26,15 @@ public class CommonService {
     private JwtUtil jwtUtil;
     private UserCdbtMappingService userCdbtMappingService;
     private UserBaseService userBaseService;
+    private CustomerInformationService customerInformationService;
+    private CustomerBasicConsultationService customerBasicConsultationService;
 
-    public CommonService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, UserBaseService userBaseService) {
+    public CommonService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, UserBaseService userBaseService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService) {
         this.jwtUtil = jwtUtil;
         this.userCdbtMappingService = userCdbtMappingService;
         this.userBaseService = userBaseService;
+        this.customerInformationService = customerInformationService;
+        this.customerBasicConsultationService = customerBasicConsultationService;
     }
 
     @Transactional
@@ -73,6 +81,25 @@ public class CommonService {
         }
 
         return result;
+    }
+
+    @Transactional
+    public List<String> getColumnList (String cdbtLowCode) throws Exception{
+        List<String> customerIdList = customerInformationService.getCustomerInformationByCdbtLowCode(cdbtLowCode).stream()
+                .filter(CustomerInformationDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .map(dto -> {
+                    return dto.getIdx();
+                })
+                .collect(Collectors.toList());
+
+        List<String> columnList = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(customerIdList).stream()
+                .filter(dto -> dto.getDeleteId() == null)
+                .map(dto -> dto.getKey())
+                .distinct()
+                .collect(Collectors.toList());
+
+        return columnList;
     }
 
 }

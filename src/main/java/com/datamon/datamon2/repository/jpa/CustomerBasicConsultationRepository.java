@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CustomerBasicConsultationRepository extends JpaRepository<CustomerBasicConsultationEntity, Long> {
     List<CustomerBasicConsultationEntity> findByCustIdIn(List<String> custIds);
+    List<CustomerBasicConsultationEntity> findByCustId(String custId);
 }

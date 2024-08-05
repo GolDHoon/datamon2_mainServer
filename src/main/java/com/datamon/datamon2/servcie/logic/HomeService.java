@@ -41,7 +41,7 @@ public class HomeService {
         userCdbtListByUserId.forEach(userCdbtMapping -> {
             Map<String, Object> resultData = new HashMap<>();
 
-            Map<String, Long> collect = customerInformationService.getCustomerInformationByLpgeCode(userCdbtMapping.getCdbtLowCode()).stream()
+            Map<String, Long> collect = customerInformationService.getCustomerInformationByCdbtLowCode(userCdbtMapping.getCdbtLowCode()).stream()
                     .filter(CustomerInformationDto::getUseYn)
                     .filter(dto -> !dto.getDelYn())
                     .collect(Collectors.groupingBy(dto -> dateTimeUtil.LocalDateTimeToDateStr(dto.getCreateDate()), Collectors.counting()));

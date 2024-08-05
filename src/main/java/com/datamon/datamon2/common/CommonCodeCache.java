@@ -19,10 +19,28 @@ public class CommonCodeCache {
     private static List<LpgeCodeDto> lpgeCodes;
     private static List<UstyCodeDto> ustyCodes;
     private static List<UsatCodeDto> usatCodes;
+    private static List<CdbqCodeDto> cdbqCodes;
+    private static List<CdbsCodeDto> cdbsCodes;
     private static List<UstyCodeDto> masterCodes;
     private static List<UstyCodeDto> memberCodes;
     private static List<UstyCodeDto> companyCode;
     private static List<UsatCodeDto> commonPermissionCodes;
+
+    public static List<CdbsCodeDto> getCdbsCodes() {
+        return cdbsCodes;
+    }
+
+    public static void setCdbsCodes(List<CdbsCodeDto> cdbsCodes) {
+        CommonCodeCache.cdbsCodes = cdbsCodes;
+    }
+
+    public static List<CdbqCodeDto> getCdbqCodes() {
+        return cdbqCodes;
+    }
+
+    public static void setCdbqCodes(List<CdbqCodeDto> cdbqCodes) {
+        CommonCodeCache.cdbqCodes = cdbqCodes;
+    }
 
     public static List<UsatCodeDto> getUsatCodes() {
         return usatCodes;

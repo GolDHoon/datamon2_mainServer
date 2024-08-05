@@ -26,7 +26,16 @@ public class CustomerBasicConsultationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationBycustIdList(List<String> custIds){
+    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationByCustId(String custId){
+        List<CustomerBasicConsultationDto> result = new ArrayList<>();
+        customerBasicConsultationRepository.findByCustId(custId).forEach(entity -> {
+            result.add(customerBasicConsultationMapper.toDto(entity));
+        });
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerBasicConsultationDto> getCustomerBasicConsultationByCustIdList(List<String> custIds){
         List<CustomerBasicConsultationDto> result = new ArrayList<>();
         customerBasicConsultationRepository.findByCustIdIn(custIds).forEach(entity -> {
             result.add(customerBasicConsultationMapper.toDto(entity));

@@ -10,8 +10,11 @@ import java.io.Serializable;
  */
 @Data
 public class LandingPageSettingDto implements Serializable {
-    Integer idx;
+    Long idx;
     String lpgeCode;
-    String duplicationColumn;
+    String columnName;
+    Boolean duplicationValidationYn;
     Integer duplicationValidationDays;
+    Boolean displayOrderingYn;
+    Long displayOrderingNumber;
 }

@@ -1,8 +1,6 @@
 package com.datamon.datamon2.controller;
 
-import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
-import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
-import com.datamon.datamon2.dto.input.landingPageManage.LandingPageCreateDto;
+import com.datamon.datamon2.dto.input.landingPageManage.*;
 import com.datamon.datamon2.servcie.logic.LandingPageManageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -147,6 +145,37 @@ public class LandingPageManageController {
         }else {
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
+    }
+
+    @PostMapping("/useUpdate")
+    public ResponseEntity<?> updateLpgeCode(HttpServletRequest request, HttpServletResponse response, @RequestBody LandingPageModifyDto landingPageModifyDto){
+        String result;
+
+        try {
+            result = landingPageManageService.updateLpgeCode(request, landingPageModifyDto);
+        } catch (Exception e) {
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if(!result.equals("success")){
+            return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+    }
+
+    @PostMapping("/getLandingPageSettings")
+    public ResponseEntity<?> getLandingPageSettings (HttpServletRequest request, HttpServletResponse response, @RequestBody GetLandingPageSettingDto getLandingPageSettingDto){
+        Map<String, Object> result;
+
+        try {
+            result = landingPageManageService.getLandingPageSettings(getLandingPageSettingDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

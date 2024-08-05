@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Data
 @Entity
@@ -12,15 +13,26 @@ public class LandingPageSettingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Integer idx;
+    private Long idx;
 
     @Column(name = "lpge_code", nullable = false)
     private String lpgeCode;
 
-    @Column(name = "duplication_column")
-    private String duplicationColumn;
+    @Column(name = "column_name")
+    private String columnName;
+
+    @ColumnDefault("0")
+    @Column(name = "duplication_validation_yn", nullable = false)
+    private Boolean duplicationValidationYn = false;
 
     @Column(name = "duplication_validation_days")
     private Integer duplicationValidationDays;
+
+    @ColumnDefault("0")
+    @Column(name = "display_ordering_yn", nullable = false)
+    private Boolean displayOrderingYn = false;
+
+    @Column(name = "display_ordering_number", columnDefinition = "int UNSIGNED")
+    private Long displayOrderingNumber;
 
 }

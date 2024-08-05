@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface LpgeCodeRepository extends JpaRepository<LpgeCodeEntity, Integer> {
     Optional<LpgeCodeEntity> findByCodeValue(String codeValue);
+    Optional<LpgeCodeEntity> findByCodeFullName(String codeFullName);
 }

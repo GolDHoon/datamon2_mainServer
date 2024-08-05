@@ -32,14 +32,14 @@ public class CustInfoService {
 
     @Transactional
     public Map<String, Object> getListByLpgeCode(CustInfoDto custInfoDto) throws Exception{
-        List<CustomerInformationDto> customerInformationByLpgeCode = customerInformationService.getCustomerInformationByLpgeCode(custInfoDto.getLpgeCode());
+        List<CustomerInformationDto> customerInformationByLpgeCode = customerInformationService.getCustomerInformationByCdbtLowCode(custInfoDto.getLpgeCode());
         
         List<String> custIds = customerInformationByLpgeCode.stream()
                 .filter(dto -> !dto.getDelYn())
                 .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());
 
-        List<CustomerBasicConsultationDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationBycustIdList(custIds);
+        List<CustomerBasicConsultationDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(custIds);
 
         List<String> keyList = customerBasicConsultationBycustIdList.stream()
                 .map(CustomerBasicConsultationDto::getKey)

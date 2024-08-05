@@ -1,9 +1,7 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.input.landingPageManage.BlockIpDto;
-import com.datamon.datamon2.dto.input.landingPageManage.BlockKeywordDto;
-import com.datamon.datamon2.dto.input.landingPageManage.LandingPageCreateDto;
+import com.datamon.datamon2.dto.input.landingPageManage.*;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
@@ -28,8 +26,10 @@ public class LandingPageManageService {
     private LandingPageBlockedKeywordService landingPageBlockedKeywordService;
     private UserPermissionInfomationService userPermissionInfomationService;
     private TableIndexService tableIndexService;
+    private LandingPageInfomationService landingPageInfomationService;
+    private LandingPageSettingService landingPageSettingService;
 
-    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService, TableIndexService tableIndexService) {
+    public LandingPageManageService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, UserPermissionInfomationService userPermissionInfomationService, TableIndexService tableIndexService, LandingPageInfomationService landingPageInfomationService, LandingPageSettingService landingPageSettingService) {
         this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
@@ -40,6 +40,8 @@ public class LandingPageManageService {
         this.landingPageBlockedKeywordService = landingPageBlockedKeywordService;
         this.userPermissionInfomationService = userPermissionInfomationService;
         this.tableIndexService = tableIndexService;
+        this.landingPageInfomationService = landingPageInfomationService;
+        this.landingPageSettingService = landingPageSettingService;
     }
 
     @Transactional
@@ -61,7 +63,7 @@ public class LandingPageManageService {
                     map.put("도메인", dto.getCodeValue());
                     map.put("도메인 설명", dto.getCodeDescript());
                     map.put("사용유무", dto.getUseYn().toString());
-                    map.put("code", dto.getCodeFullName());
+                    map.put("idx", dto.getCodeFullName());
                     return map;
                 })
                 .collect(Collectors.toList());
@@ -273,7 +275,7 @@ public class LandingPageManageService {
     }
 
     @Transactional
-    public String registerBlockedIp(BlockIpDto blockIpDto, HttpServletRequest request) throws Exception{
+    public String registerBlockedIp(BlockIpDto blockIpDto, HttpServletRequest request) throws Exception {
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -316,7 +318,7 @@ public class LandingPageManageService {
     }
 
     @Transactional
-    public List<String> getBlockedKeywordList(String lpgeCode) throws Exception{
+    public List<String> getBlockedKeywordList(String lpgeCode) throws Exception {
         List<String> result = new ArrayList<>();
         landingPageBlockedKeywordService.getLandingPageBlockedKeywordByLpgeCode(lpgeCode).stream()
                 .filter(LandingPageBlockedKeywordDto::getUseYn)
@@ -329,7 +331,7 @@ public class LandingPageManageService {
     }
 
     @Transactional
-    public String deleteBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception{
+    public String deleteBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception {
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -356,7 +358,7 @@ public class LandingPageManageService {
     }
 
     @Transactional
-    public String registerBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception{
+    public String registerBlockedKeyword(BlockKeywordDto blockKeywordDto, HttpServletRequest request) throws Exception {
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -382,5 +384,58 @@ public class LandingPageManageService {
         }
 
         return "success";
+    }
+
+    @Transactional
+    public String updateLpgeCode (HttpServletRequest request, LandingPageModifyDto landingPageModifyDto) throws Exception {
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        LpgeCodeDto lpgeCode = lpgeCodeService.getLpgeCodeByCodeFullName(landingPageModifyDto.getLpgeCode());
+
+        if(lpgeCode.getCodeFullName() == null){
+            return "not Found Code";
+        }
+
+        lpgeCode.setUseYn(landingPageModifyDto.isUseYn());
+        lpgeCode.modify(userId);
+
+        lpgeCodeService.modify(lpgeCode);
+
+        return "success";
+    }
+
+    @Transactional
+    public Map<String, Object> getLandingPageSettings (GetLandingPageSettingDto getLandingPageSettingDto) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+
+        LandingPageInfomationDto landingPageInfomationDto = landingPageInfomationService.getLandingPageInfomationByLpgeCode(getLandingPageSettingDto.getLpgeCode());
+        Map<String, String> landingPageInfomation = new HashMap<>();
+
+        landingPageInfomation.put("subTitle", Optional.ofNullable(landingPageInfomationDto.getSubTitle()).orElse(""));
+        result.put("landingPageInfomation", landingPageInfomation);
+
+        List<LandingPageSettingDto> landingPageSettingDtoList = landingPageSettingService.getLandingPageSettingListByLpgeCode(getLandingPageSettingDto.getLpgeCode());
+
+        List<Map<String, String>> landingPageSettingList = new ArrayList<>();
+
+        landingPageSettingDtoList.forEach(dto -> {
+            Map<String, String> landingPageSetting = new HashMap<>();
+            landingPageSetting.put("columnName", dto.getColumnName());
+            landingPageSetting.put("displayOrderingYn", dto.getDisplayOrderingYn().toString());
+            landingPageSetting.put("displayOrderingNumber", String.valueOf(Optional.ofNullable(dto.getDisplayOrderingNumber()).orElse(0L)));
+            landingPageSetting.put("duplicationValidationYn", dto.getDuplicationValidationYn().toString());
+            landingPageSetting.put("duplicationValidationDays",String.valueOf(Optional.ofNullable(dto.getDuplicationValidationDays()).orElse(0)));
+
+            landingPageSettingList.add(landingPageSetting);
+        });
+
+        if (landingPageSettingDtoList.isEmpty()) {
+            Map<String, String> landingPageSetting = new HashMap<>();
+        }
+
+        result.put("landingPageSettingList", landingPageSettingList);
+
+        return result;
     }
 }
