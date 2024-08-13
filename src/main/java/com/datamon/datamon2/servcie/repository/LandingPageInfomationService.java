@@ -5,6 +5,7 @@ import com.datamon.datamon2.entity.LandingPageInfomationEntity;
 import com.datamon.datamon2.mapper.repository.LandingPageInfomationMapper;
 import com.datamon.datamon2.repository.jpa.LandingPageInfomationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -20,6 +21,11 @@ public class LandingPageInfomationService {
     @Transactional(readOnly = true)
     public LandingPageInfomationDto getLandingPageInfomationByLpgeCode (String lpgeCode){
         return landingPageInfomationMapper.toDto(landingPageInfomationRepository.findByLpgeCode(lpgeCode).orElse(new LandingPageInfomationEntity()));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LandingPageInfomationDto save(LandingPageInfomationDto landingPageInfomationDto){
+        return landingPageInfomationMapper.toDto(landingPageInfomationRepository.save(landingPageInfomationMapper.toEntity(landingPageInfomationDto)));
     }
 
 }

@@ -22,8 +22,14 @@ public class CustomerInformationEntity extends DrivenCommonCheckUserEntity imple
     @Column(name = "cdbs_code", nullable = false)
     private String cdbsCode;
 
+    @Column(name = "status_change_reason")
+    private String statusChangeReason;
+
     @Column(name = "cdbq_code", nullable = false)
     private String cdbqCode;
+
+    @Column(name = "quality_change_reason")
+    private String qualityChangeReason;
 
     @Column(name = "utm_sourse", length = 20)
     private String utmSourse;

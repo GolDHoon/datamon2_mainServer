@@ -30,10 +30,9 @@ public class CdbsCodeService {
 
     @Transactional(readOnly = true)
     public List<CdbsCodeDto> getCdbsCodeAll(){
-        List<CdbsCodeEntity> all = cdbsCodeRepository.findAll();
         List<CdbsCodeDto> result = new ArrayList<>();
 
-        all.forEach(entity -> {
+        cdbsCodeRepository.findAll().forEach(entity -> {
             result.add(cdbsCodeMapper.toDto(entity));
         });
 

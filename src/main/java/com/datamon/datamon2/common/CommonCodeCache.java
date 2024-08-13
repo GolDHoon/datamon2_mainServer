@@ -25,6 +25,11 @@ public class CommonCodeCache {
     private static List<UstyCodeDto> memberCodes;
     private static List<UstyCodeDto> companyCode;
     private static List<UsatCodeDto> commonPermissionCodes;
+    private static List<CdbsCodeDto> distributionAllowedCodes;
+
+    public static List<CdbsCodeDto> getDistributionAllowedCodes() {
+        return distributionAllowedCodes;
+    }
 
     public static List<CdbsCodeDto> getCdbsCodes() {
         return cdbsCodes;
@@ -32,6 +37,17 @@ public class CommonCodeCache {
 
     public static void setCdbsCodes(List<CdbsCodeDto> cdbsCodes) {
         CommonCodeCache.cdbsCodes = cdbsCodes;
+
+        List<String> distributionAllowedList = new ArrayList<>();
+        distributionAllowedList.add("대기중");
+        distributionAllowedList.add("상담종료");
+        distributionAllowedList.add("최종완료");
+        distributionAllowedList.add("관리대상");
+
+        distributionAllowedCodes = cdbsCodes.stream()
+                .filter(dto -> distributionAllowedList.contains(dto.getCodeValue()))
+                .collect(Collectors.toList());
+
     }
 
     public static List<CdbqCodeDto> getCdbqCodes() {

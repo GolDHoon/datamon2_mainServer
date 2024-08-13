@@ -65,4 +65,30 @@ public class CommonController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @GetMapping("/getCdbsCode")
+    public ResponseEntity<?> getCdbsCode(HttpServletRequest request, HttpServletResponse response, @RequestParam String mode){
+        List<Map<String, Object>> result;
+        try {
+            result = commonService.getCdbsCode(mode);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCdbqCode")
+    public ResponseEntity<?> getCdbqCode(HttpServletRequest request, HttpServletResponse response){
+        List<Map<String, Object>> result;
+        try {
+            result = commonService.getCdbqCode();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }

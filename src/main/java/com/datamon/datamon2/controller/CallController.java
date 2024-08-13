@@ -1,6 +1,10 @@
 package com.datamon.datamon2.controller;
 
 import com.datamon.datamon2.dto.input.call.CustListDto;
+import com.datamon.datamon2.dto.input.call.SaveMultiOutBoundDto;
+import com.datamon.datamon2.dto.input.call.SaveSingleOutBoundDto;
+import com.datamon.datamon2.dto.input.call.UpdateCdbsCodeDto;
+import com.datamon.datamon2.dto.repository.OutboundDto;
 import com.datamon.datamon2.servcie.logic.CallService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +42,7 @@ public class CallController {
 
     @GetMapping("/employeeList")
     public ResponseEntity<?> getEmployeeList (HttpServletRequest request, HttpServletResponse response) {
-        List<Map<String, String>> result;
+        List<Map<String, Object>> result;
         try {
             result = callService.getEmployeeList(request);
         } catch (Exception e) {
@@ -51,9 +55,61 @@ public class CallController {
 
     @PostMapping("/custList")
     public ResponseEntity<?> getCustList (HttpServletRequest request, HttpServletResponse response, @RequestBody CustListDto custListDto){
-        List<Map<String, String>> result;
+        List<Map<String, Object>> result;
         try {
             result = callService.getCustList(custListDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/distribution/single")
+    public ResponseEntity<?> saveSingleOutBound (HttpServletRequest request, HttpServletResponse response, @RequestBody SaveSingleOutBoundDto saveSingleOutBoundDto){
+        String result;
+        try {
+            result = callService.saveSingleOutBound(request, saveSingleOutBoundDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/distribution/multi")
+    public ResponseEntity<?> saveMultiOutBound (HttpServletRequest request, HttpServletResponse response, @RequestBody SaveMultiOutBoundDto saveMultiOutBoundDto){
+        String result;
+        try {
+            result = callService.saveMultiOutBound(request, saveMultiOutBoundDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/outbound/list")
+    public ResponseEntity<?> getOutBoundList (HttpServletRequest request, HttpServletResponse response){
+        List<?> result;
+        try {
+            result = callService.getOutBoundList(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/outbound/updateCdbsCode")
+    public ResponseEntity<?> updateCdbsCode (HttpServletRequest request, HttpServletResponse response, @RequestBody UpdateCdbsCodeDto updateCdbsCodeDto){
+        String result;
+        try {
+            result = callService.updateCdbsCode(request, updateCdbsCodeDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

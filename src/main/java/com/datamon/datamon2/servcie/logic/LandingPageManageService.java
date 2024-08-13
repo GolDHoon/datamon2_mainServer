@@ -7,7 +7,6 @@ import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -426,6 +425,8 @@ public class LandingPageManageService {
             landingPageSetting.put("displayOrderingNumber", String.valueOf(Optional.ofNullable(dto.getDisplayOrderingNumber()).orElse(0L)));
             landingPageSetting.put("duplicationValidationYn", dto.getDuplicationValidationYn().toString());
             landingPageSetting.put("duplicationValidationDays",String.valueOf(Optional.ofNullable(dto.getDuplicationValidationDays()).orElse(0)));
+            landingPageSetting.put("displayPrefix", Optional.ofNullable(dto.getDisplayPrefix()).orElse(""));
+            landingPageSetting.put("displaySuffix", Optional.ofNullable(dto.getDisplaySuffix()).orElse(""));
 
             landingPageSettingList.add(landingPageSetting);
         });
@@ -437,5 +438,43 @@ public class LandingPageManageService {
         result.put("landingPageSettingList", landingPageSettingList);
 
         return result;
+    }
+
+    @Transactional
+    public String saveLandingPageSettings(HttpServletRequest request, SaveLandingPageSettingsDto saveLandingPageSettingsDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        LandingPageInfomationDto landingPageInfomationDto = landingPageInfomationService.getLandingPageInfomationByLpgeCode(saveLandingPageSettingsDto.getLpgeCode());
+        landingPageInfomationDto.setSubTitle(saveLandingPageSettingsDto.getSubTitle());
+
+        List<?> saveSettings = saveLandingPageSettingsDto.getSaveSettings();
+        List<LandingPageSettingDto> landingPageSettingListByLpgeCode = landingPageSettingService.getLandingPageSettingListByLpgeCode(saveLandingPageSettingsDto.getLpgeCode());
+        landingPageSettingListByLpgeCode.forEach(dto -> {
+            landingPageSettingService.delete(dto);
+        });
+        for(int i = 0; i < saveSettings.size(); i++){
+            LinkedHashMap<String, String> inputMap = (LinkedHashMap<String, String>) saveSettings.get(i);
+            LandingPageSettingDto landingPageSettingDto = new LandingPageSettingDto();
+            landingPageSettingDto.setLpgeCode(saveLandingPageSettingsDto.getLpgeCode());
+            landingPageSettingDto.setColumnName(inputMap.get("value"));
+            landingPageSettingDto.setDisplayPrefix(Optional.ofNullable(inputMap.get("prefix")).orElse(""));
+            landingPageSettingDto.setDisplaySuffix(Optional.ofNullable(inputMap.get("suffix")).orElse(""));
+            landingPageSettingDto.setDisplayOrderingYn(true);
+            landingPageSettingDto.setDisplayOrderingNumber((long) i);
+            landingPageSettingDto.setDuplicationValidationYn(false);
+            landingPageSettingService.save(landingPageSettingDto);
+        }
+
+        LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream()
+                .filter(dto -> dto.getCodeFullName().equals(saveLandingPageSettingsDto.getLpgeCode()))
+                .findFirst().orElse(new LpgeCodeDto());
+
+        lpgeCodeDto.modify(userId);
+
+        lpgeCodeService.modify(lpgeCodeDto);
+
+        return "success";
     }
 }

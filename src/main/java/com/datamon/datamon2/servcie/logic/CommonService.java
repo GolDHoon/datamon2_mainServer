@@ -1,10 +1,7 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
-import com.datamon.datamon2.dto.repository.CustomerInformationDto;
-import com.datamon.datamon2.dto.repository.LpgeCodeDto;
-import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
@@ -102,4 +99,61 @@ public class CommonService {
         return columnList;
     }
 
+    @Transactional
+    public List<Map<String, Object>> getCdbsCode (String mode) throws Exception {
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<CdbsCodeDto> cdbsCodes = CommonCodeCache.getCdbsCodes();
+        List<String> excludedItems = new ArrayList<>();
+        List<String> includedItems = new ArrayList<>();
+
+        switch (mode) {
+            case "outboundListInit":
+                excludedItems.add("CDBS_PNDG");
+                excludedItems.add("CDBS_ICST");
+                excludedItems.add("CDBS_ACPL");
+                result = cdbsCodes.stream()
+                        .filter(code -> !excludedItems.contains(code.getCodeFullName()))
+                        .map(code -> {
+                            Map<String, Object> resultMap = new HashMap<>();
+
+                            resultMap.put("key", code.getCodeValue());
+                            resultMap.put("value", code.getCodeFullName());
+                            return resultMap;
+                        })
+                        .collect(Collectors.toList());
+                break;
+            case "outboundListNextNotAllow":
+                includedItems.add("CDBS_EXCS");
+                includedItems.add("CDBS_MNTG");
+                includedItems.add("CDBS_FLSI");
+                result = cdbsCodes.stream()
+                        .filter(code -> includedItems.contains(code.getCodeFullName()))
+                        .map(code -> {
+                            Map<String, Object> resultMap = new HashMap<>();
+
+                            resultMap.put("key", code.getCodeValue());
+                            resultMap.put("value", code.getCodeFullName());
+                            return resultMap;
+                        })
+                        .collect(Collectors.toList());
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public List<Map<String, Object>> getCdbqCode () throws Exception {
+        return CommonCodeCache.getCdbqCodes().stream()
+                .map(code -> {
+                    Map<String, Object> resultMap = new HashMap<>();
+
+                    resultMap.put("key", code.getCodeValue());
+                    resultMap.put("value", code.getCodeFullName());
+                    return resultMap;
+                })
+                .collect(Collectors.toList());
+    }
 }

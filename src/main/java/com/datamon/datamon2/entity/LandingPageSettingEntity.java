@@ -35,4 +35,13 @@ public class LandingPageSettingEntity {
     @Column(name = "display_ordering_number", columnDefinition = "int UNSIGNED")
     private Long displayOrderingNumber;
 
+    @Column(name = "display_prefix")
+    private String displayPrefix;
+
+    @Column(name = "display_suffix")
+    private String displaySuffix;
+
+    @ColumnDefault("0")
+    @Column(name = "tel_number_yn", nullable = false)
+    private Boolean telNumberYn = false;
 }

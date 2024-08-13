@@ -1,5 +1,6 @@
 package com.datamon.datamon2.servcie.logic;
 
+import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
@@ -53,6 +54,16 @@ public class CustInfoService {
                     Boolean useYn = !dto.getUseYn();
                     map.put("idx", dto.getIdx());
                     map.put("cdbtLowCode", Optional.ofNullable(dto.getCdbtLowCode()).orElse(" "));
+                    map.put("품질", Optional.ofNullable(CommonCodeCache.getCdbqCodes().stream()
+                            .filter(code -> code.getCodeFullName().equals(dto.getCdbqCode()))
+                            .map(code -> code.getCodeValue())
+                            .findFirst().orElse(" ")).orElse(" "));
+                    map.put("품질변경사유", Optional.ofNullable(dto.getQualityChangeReason()).orElse(" "));
+                    map.put("상태", Optional.ofNullable(CommonCodeCache.getCdbsCodes().stream()
+                            .filter(code -> code.getCodeFullName().equals(dto.getCdbsCode()))
+                            .map(code -> code.getCodeValue())
+                            .findFirst().orElse(" ")).orElse(" "));
+                    map.put("상태변경사유", Optional.ofNullable(dto.getStatusChangeReason()).orElse(" "));
                     map.put("sourse", Optional.ofNullable(dto.getUtmSourse()).orElse(" "));
                     map.put("medium", Optional.ofNullable(dto.getUtmMedium()).orElse(" "));
                     map.put("campaign", Optional.ofNullable(dto.getUtmCampaign()).orElse(" "));

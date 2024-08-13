@@ -178,4 +178,17 @@ public class LandingPageManageController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PostMapping("/updateLandingPageSettings")
+    public ResponseEntity<?> saveLandingPageSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody SaveLandingPageSettingsDto saveLandingPageSettingsDto){
+        String result;
+
+        try {
+            result = landingPageManageService.saveLandingPageSettings(request, saveLandingPageSettingsDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

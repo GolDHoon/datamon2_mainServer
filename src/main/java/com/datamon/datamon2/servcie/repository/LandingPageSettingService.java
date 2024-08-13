@@ -5,6 +5,7 @@ import com.datamon.datamon2.entity.LandingPageSettingEntity;
 import com.datamon.datamon2.mapper.repository.LandingPageSettingMapper;
 import com.datamon.datamon2.repository.jpa.LandingPageSettingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -27,6 +28,16 @@ public class LandingPageSettingService {
             result.add(landingPageSettingMapper.toDto(entity));
         });
         return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public LandingPageSettingDto save(LandingPageSettingDto landingPageSettingDto){
+        return landingPageSettingMapper.toDto(landingPageSettingRepository.save(landingPageSettingMapper.toEntity(landingPageSettingDto)));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void delete(LandingPageSettingDto landingPageSettingDto){
+        landingPageSettingRepository.delete(landingPageSettingMapper.toEntity(landingPageSettingDto));
     }
 
 }

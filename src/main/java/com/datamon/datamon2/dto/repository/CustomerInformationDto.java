@@ -16,11 +16,17 @@ public class CustomerInformationDto extends DrivenCommonCheckUserDto implements 
     String  idx;
     String cdbtLowCode;
     String cdbsCode;
+    String statusChangeReason;
     String cdbqCode;
+    String qualityChangeReason;
     String utmSourse;
     String utmMedium;
     String utmCampaign;
     String utmTerm;
     String utmContent;
     String ip;
+
+    public void distribution(){
+        cdbsCode = "CDBS_ACPL";
+    }
 }

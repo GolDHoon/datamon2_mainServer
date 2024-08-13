@@ -17,4 +17,7 @@ public class LandingPageSettingDto implements Serializable {
     Integer duplicationValidationDays;
     Boolean displayOrderingYn;
     Long displayOrderingNumber;
+    String displayPrefix;
+    String displaySuffix;
+    Boolean telNumberYn;
 }
