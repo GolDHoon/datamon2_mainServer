@@ -24,8 +24,30 @@ public class OutboundHistoryDto extends DrivenCommonCheckUserDto implements Seri
     String orderMemo;
     LocalDateTime scheduledCallbackDate;
     LocalDateTime scheduledConversionDate;
+    String cdbsCode;
+    String statusChangeReason;
+    String cdbqCode;
+    String qualityChangeReason;
 
     public void createId () {
         idx = custId + "_" + String.format("%010d", sort);
+    }
+
+    public void setHistory (OutboundDto outboundDto) {
+        originalIdx = outboundDto.getIdx();
+        userId = outboundDto.getUserId();
+        custId = outboundDto.getCustId();
+        telColumn = outboundDto.getTelColumn();
+        memo = outboundDto.getMemo();
+        orderMemo = outboundDto.getOrderMemo();
+        scheduledCallbackDate = outboundDto.getScheduledCallbackDate();
+        scheduledConversionDate = outboundDto.getScheduledConversionDate();
+    }
+
+    public void setCustDbStatusInfo (CustomerInformationDto custDbStatusInfo){
+        cdbsCode = custDbStatusInfo.getCdbsCode();
+        statusChangeReason = custDbStatusInfo.getStatusChangeReason();
+        cdbqCode = custDbStatusInfo.getCdbqCode();
+        qualityChangeReason = custDbStatusInfo.getQualityChangeReason();
     }
 }

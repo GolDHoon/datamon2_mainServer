@@ -1,9 +1,6 @@
 package com.datamon.datamon2.controller;
 
-import com.datamon.datamon2.dto.input.call.CustListDto;
-import com.datamon.datamon2.dto.input.call.SaveMultiOutBoundDto;
-import com.datamon.datamon2.dto.input.call.SaveSingleOutBoundDto;
-import com.datamon.datamon2.dto.input.call.UpdateCdbsCodeDto;
+import com.datamon.datamon2.dto.input.call.*;
 import com.datamon.datamon2.dto.repository.OutboundDto;
 import com.datamon.datamon2.servcie.logic.CallService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,6 +107,32 @@ public class CallController {
         String result;
         try {
             result = callService.updateCdbsCode(request, updateCdbsCodeDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/outbound/updateOutbound")
+    public ResponseEntity<?> updateOutbound (HttpServletRequest request, HttpServletResponse response, @RequestBody UpdateOutboundDto updateOutboundDto){
+        String result;
+        try {
+            result = callService.updateOutbound(request, updateOutboundDto);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/outbound/listByUser/total")
+    public ResponseEntity<?> getOutboundTotalList (HttpServletRequest request, HttpServletResponse response){
+        List<Map<String, Object>> result;
+        try {
+            result = callService.getOutboundTotalList(request);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -32,6 +32,11 @@ public class OutboundService {
         return outboundMapper.toDto(outboundRepository.findByCustId(custId).orElse(new OutboundEntity()));
     }
 
+    @Transactional(readOnly = true)
+    public OutboundDto getOutboundByIdx (String idx){
+        return outboundMapper.toDto(outboundRepository.findById(idx).orElse(new OutboundEntity()));
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public OutboundDto save (OutboundDto outboundDto){
         return outboundMapper.toDto(outboundRepository.save(outboundMapper.toEntity(outboundDto)));

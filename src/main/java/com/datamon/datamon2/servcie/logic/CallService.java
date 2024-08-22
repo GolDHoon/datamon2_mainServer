@@ -1,13 +1,11 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.input.call.CustListDto;
-import com.datamon.datamon2.dto.input.call.SaveMultiOutBoundDto;
-import com.datamon.datamon2.dto.input.call.SaveSingleOutBoundDto;
-import com.datamon.datamon2.dto.input.call.UpdateCdbsCodeDto;
+import com.datamon.datamon2.dto.input.call.*;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.entity.OutboundEntity;
 import com.datamon.datamon2.servcie.repository.*;
+import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
@@ -15,11 +13,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class CallService {
+    private final LpgeCodeService lpgeCodeService;
     private JwtUtil jwtUtil;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
@@ -31,7 +32,7 @@ public class CallService {
     private OutboundService outboundService;
     private OutboundHistoryService outboundHistoryService;
 
-    public CallService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, LandingPageSettingService landingPageSettingService, OutboundService outboundService, OutboundHistoryService outboundHistoryService) {
+    public CallService(JwtUtil jwtUtil, UserBaseService userBaseService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserCdbtMappingService userCdbtMappingService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, LandingPageSettingService landingPageSettingService, OutboundService outboundService, OutboundHistoryService outboundHistoryService, LpgeCodeService lpgeCodeService) {
         this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
@@ -42,6 +43,7 @@ public class CallService {
         this.landingPageSettingService = landingPageSettingService;
         this.outboundService = outboundService;
         this.outboundHistoryService = outboundHistoryService;
+        this.lpgeCodeService = lpgeCodeService;
     }
 
     @Transactional
@@ -210,20 +212,19 @@ public class CallService {
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
         OutboundDto outboundDto = outboundService.getOutboundByCustId(saveSingleOutBoundDto.getCustId());
-        OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
 
         outboundDto.setCustId(saveSingleOutBoundDto.getCustId());
-        outboundHistoryDto.setCustId(saveSingleOutBoundDto.getCustId());
         outboundDto.setUserId(saveSingleOutBoundDto.getUserId());
-        outboundHistoryDto.setUserId(saveSingleOutBoundDto.getUserId());
         outboundDto.setOrderMemo(saveSingleOutBoundDto.getOrderMemo());
-        outboundHistoryDto.setOrderMemo(saveSingleOutBoundDto.getOrderMemo());
 
         if(outboundDto.getIdx() == null){
             outboundDto.setTelColumn("");
-            outboundHistoryDto.setTelColumn("");
             outboundDto.createId();
         }
+
+        OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
+        outboundHistoryDto.setHistory(outboundDto);
+        outboundHistoryDto.setCustDbStatusInfo(customerInformationService.getCustomerInformationById(saveSingleOutBoundDto.getCustId()));
         outboundHistoryDto.setOriginalIdx(outboundDto.getIdx());
         outboundHistoryDto.setSort(outboundHistoryService.getOutboundHistoryByOriginalIdx(outboundHistoryDto.getOriginalIdx()).size());
         outboundHistoryDto.setSaveReason("outbound 분배");
@@ -250,20 +251,19 @@ public class CallService {
 
         saveMultiOutBoundDto.getCustId().forEach(custId -> {
             OutboundDto outboundDto = outboundService.getOutboundByCustId(custId);
-            OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
 
             outboundDto.setCustId(custId);
-            outboundHistoryDto.setCustId(custId);
             outboundDto.setUserId(saveMultiOutBoundDto.getUserId());
-            outboundHistoryDto.setUserId(saveMultiOutBoundDto.getUserId());
             outboundDto.setOrderMemo(saveMultiOutBoundDto.getOrderMemo());
-            outboundHistoryDto.setOrderMemo(saveMultiOutBoundDto.getOrderMemo());
 
             if(outboundDto.getIdx() == null){
                 outboundDto.setTelColumn("");
-                outboundHistoryDto.setTelColumn("");
                 outboundDto.createId();
             }
+
+            OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
+            outboundHistoryDto.setHistory(outboundDto);
+            outboundHistoryDto.setCustDbStatusInfo(customerInformationService.getCustomerInformationById(custId));
             outboundHistoryDto.setOriginalIdx(outboundDto.getIdx());
             outboundHistoryDto.setSort(outboundHistoryService.getOutboundHistoryByOriginalIdx(outboundHistoryDto.getOriginalIdx()).size());
             outboundHistoryDto.setSaveReason("outbound 분배");
@@ -292,6 +292,8 @@ public class CallService {
 
         EncryptionUtil encryptionUtil = new EncryptionUtil();
 
+        DateTimeUtil dateTimeUtil = new DateTimeUtil();
+
         outboundService.getOutboundByUserId(userId).forEach(outbound -> {
             Map<String, Object> resultMap = new HashMap<>();
 
@@ -300,7 +302,9 @@ public class CallService {
             resultMap.put("order", outbound.getOrderMemo());
             resultMap.put("memo", outbound.getMemo());
             resultMap.put("callbackDate", outbound.getScheduledCallbackDate());
+            resultMap.put("callbackDateDisplay", outbound.getScheduledCallbackDate() != null ? dateTimeUtil.LocalDateTimeToDateTimeStr(outbound.getScheduledCallbackDate()) : null);
             resultMap.put("conversionDate", outbound.getScheduledConversionDate());
+            resultMap.put("conversionDateDisplay", outbound.getScheduledConversionDate() != null ? dateTimeUtil.LocalDateTimeToDateTimeStr(outbound.getScheduledConversionDate()) : null);
 
             List<CustomerBasicConsultationDto> customerBasicConsultationDtoList = customerBasicConsultationService.getCustomerBasicConsultationByCustId(outbound.getCustId()).stream()
                     .filter(consultation -> consultation.getDeleteId() == null)
@@ -363,5 +367,149 @@ public class CallService {
         customerInformationService.save(customerInformationDto);
 
         return "success";
+    }
+
+    @Transactional
+    public String updateOutbound(HttpServletRequest request, UpdateOutboundDto updateOutboundDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        String saveReason = "";
+        String mode = updateOutboundDto.getMode();
+
+        OutboundDto outboundDto = outboundService.getOutboundByIdx(updateOutboundDto.getIdx());
+        CustomerInformationDto customerInformationDto = customerInformationService.getCustomerInformationById(outboundDto.getCustId());
+
+        if(mode.equals("all") || mode.equals("memo")){
+            if(updateOutboundDto.getMemo().length() != 0){
+                outboundDto.setMemo(updateOutboundDto.getMemo());
+
+                if(!mode.equals("all")){
+                    outboundService.save(outboundDto);
+                    saveReason = "고객 메모 저장";
+                }
+            }
+        }
+
+        if(mode.equals("all") || mode.equals("callBackDate")){
+            if(updateOutboundDto.getCallBackDate().length() != 0){
+                outboundDto.setScheduledCallbackDate(LocalDateTime.parse(updateOutboundDto.getCallBackDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+                if(!mode.equals("all")){
+                    outboundService.save(outboundDto);
+                    saveReason = "재통화 예정일 저장";
+                }
+            }
+        }
+
+        if(mode.equals("all") || mode.equals("conversionDate")){
+            if(updateOutboundDto.getConversionDate().length() != 0) {
+                outboundDto.setScheduledConversionDate(LocalDateTime.parse(updateOutboundDto.getConversionDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+                if(!mode.equals("all")){
+                    outboundService.save(outboundDto);
+                    saveReason = "전환 예정일 저장";
+                }
+            }
+        }
+
+        if(mode.equals("all") || mode.equals("cdbs")){
+            if(!updateOutboundDto.getCdbsCode().equals("init")){
+                customerInformationDto.setCdbsCode(updateOutboundDto.getCdbsCode());
+                customerInformationDto.setStatusChangeReason(updateOutboundDto.getStatusChangeReason());
+
+                if(!mode.equals("all")){
+                    customerInformationDto.modify(userId);
+                    customerInformationService.save(customerInformationDto);
+                    saveReason = "고객DB 상태 변경";
+                }
+            }
+        }
+
+        if(mode.equals("all") || mode.equals("cdbq")){
+            if(!updateOutboundDto.getCdbqCode().equals("init")){
+                customerInformationDto.setCdbqCode(updateOutboundDto.getCdbqCode());
+                customerInformationDto.setQualityChangeReason(updateOutboundDto.getQualityChangeReason());
+
+                if(!mode.equals("all")){
+                    customerInformationDto.modify(userId);
+                    customerInformationService.save(customerInformationDto);
+                    saveReason = "고객DB 품질 변경";
+                }
+            }
+        }
+
+        if(mode.equals("all")){
+            saveReason = "상담 완료";
+        }
+
+        OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
+
+        outboundHistoryDto.setHistory(outboundDto);
+        outboundHistoryDto.setCustDbStatusInfo(customerInformationDto);
+        outboundHistoryDto.setSort(outboundHistoryService.getOutboundHistoryByOriginalIdx(outboundDto.getIdx()).size());
+        outboundHistoryDto.setSaveReason(saveReason);
+        outboundHistoryDto.create(userId);
+        outboundHistoryDto.createId();
+        outboundHistoryService.save(outboundHistoryDto);
+
+        return "success";
+    }
+
+    @Transactional
+    public List<Map<String, Object>> getOutboundTotalList(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        outboundService.getOutboundByUserId(userId).forEach(outbound -> {
+            Map<String, Object> resultMap = new LinkedHashMap<>();
+
+            CustomerInformationDto customerInformationDto = customerInformationService.getCustomerInformationById(outbound.getCustId());
+
+            String cdbtCode = customerInformationDto.getCdbtLowCode().substring(0, 9);
+
+            List<CustomerBasicConsultationDto> customerBasicConsultationDtoList = customerBasicConsultationService.getCustomerBasicConsultationByCustId(customerInformationDto.getIdx());
+
+            switch (cdbtCode){
+                case "CDBT_LPGE" :
+                    landingPageSettingService.getLandingPageSettingListByLpgeCode(customerInformationDto.getCdbtLowCode()).stream()
+                            .sorted(Comparator.comparingLong(LandingPageSettingDto::getDisplayOrderingNumber))
+                            .collect(Collectors.toList()).forEach(setting -> {
+                                CustomerBasicConsultationDto customerBasicConsultationDto = customerBasicConsultationDtoList.stream()
+                                        .filter(dto -> dto.getKey().equals(setting.getColumnName()))
+                                        .findFirst().orElse(new CustomerBasicConsultationDto());
+
+                                resultMap.put(customerBasicConsultationDto.getKey(), Optional.ofNullable(encryptionUtil.AES256decrypt(customerBasicConsultationDto.getValue())).orElse(""));
+                            });
+                    break;
+                default:
+                    break;
+            }
+            
+            resultMap.put("상태", Optional.ofNullable(CommonCodeCache.getCdbsCodes().stream()
+                    .filter(code -> code.getCodeFullName().equals(customerInformationDto.getCdbsCode()))
+                    .map(code -> code.getCodeValue())
+                    .findFirst().orElse("배정완료")).orElse(""));
+
+            resultMap.put("품질", Optional.ofNullable(CommonCodeCache.getCdbqCodes().stream()
+                    .filter(code -> code.getCodeFullName().equals(customerInformationDto.getCdbqCode()))
+                    .map(code -> code.getCodeValue())
+                    .findFirst().orElse("정상 유입 데이터")).orElse(""));
+
+            resultMap.put("재통화 예정일", outbound.getScheduledCallbackDate());
+            resultMap.put("전환 예정일", outbound.getScheduledConversionDate());
+            resultMap.put("지시사항", outbound.getOrderMemo());
+            resultMap.put("상담메모", outbound.getMemo());
+
+            result.add(resultMap);
+        });
+
+        return result;
     }
 }

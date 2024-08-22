@@ -45,4 +45,16 @@ public class OutboundHistoryEntity extends DrivenCommonCheckUserEntity implement
     @Column(name = "scheduled_conversion_date")
     private LocalDateTime scheduledConversionDate;
 
+    @Column(name = "cdbs_code")
+    private String cdbsCode;
+
+    @Column(name = "status_change_reason")
+    private String statusChangeReason;
+
+    @Column(name = "cdbq_code")
+    private String cdbqCode;
+
+    @Column(name = "quality_change_reason")
+    private String qualityChangeReason;
+
 }
