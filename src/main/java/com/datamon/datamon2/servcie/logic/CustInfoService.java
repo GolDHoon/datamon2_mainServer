@@ -64,7 +64,7 @@ public class CustInfoService {
                             .map(code -> code.getCodeValue())
                             .findFirst().orElse(" ")).orElse(" "));
                     map.put("상태변경사유", Optional.ofNullable(dto.getStatusChangeReason()).orElse(" "));
-                    map.put("sourse", Optional.ofNullable(dto.getUtmSourse()).orElse(" "));
+                    map.put("source", Optional.ofNullable(dto.getUtmSource()).orElse(" "));
                     map.put("medium", Optional.ofNullable(dto.getUtmMedium()).orElse(" "));
                     map.put("campaign", Optional.ofNullable(dto.getUtmCampaign()).orElse(" "));
                     map.put("term", Optional.ofNullable(dto.getUtmTerm()).orElse(" "));

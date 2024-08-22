@@ -19,7 +19,7 @@ public class CustomerInformationDto extends DrivenCommonCheckUserDto implements 
     String statusChangeReason;
     String cdbqCode;
     String qualityChangeReason;
-    String utmSourse;
+    String utmSource;
     String utmMedium;
     String utmCampaign;
     String utmTerm;

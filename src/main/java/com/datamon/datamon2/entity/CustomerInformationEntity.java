@@ -31,8 +31,8 @@ public class CustomerInformationEntity extends DrivenCommonCheckUserEntity imple
     @Column(name = "quality_change_reason")
     private String qualityChangeReason;
 
-    @Column(name = "utm_sourse", length = 20)
-    private String utmSourse;
+    @Column(name = "utm_source", length = 20)
+    private String utmSource;
 
     @Column(name = "utm_medium", length = 20)
     private String utmMedium;
