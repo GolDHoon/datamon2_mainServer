@@ -70,7 +70,7 @@ public class CustInfoService {
                     map.put("term", Optional.ofNullable(dto.getUtmTerm()).orElse(" "));
                     map.put("content", Optional.ofNullable(dto.getUtmContent()).orElse(" "));
                     map.put("IP", dto.getIp());
-                    map.put("허수여부", useYn.toString());
+                    map.put("사용여부", useYn.toString());
                     map.put("삭제여부", dto.getDelYn().toString());
                     map.put("생성일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getCreateDate())).orElse(""));
                     map.put("수정일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getModifyDate())).orElse(""));
