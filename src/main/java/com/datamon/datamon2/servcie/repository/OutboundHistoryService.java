@@ -28,6 +28,13 @@ public class OutboundHistoryService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public List<OutboundHistoryDto> getOutboundHistoryByCustId(String custId){
+        List<OutboundHistoryDto> result = new ArrayList<>();
+        outboundHistoryRepository.findByCustId(custId).forEach(enttiy -> result.add(outboundHistoryMapper.toDto(enttiy)));
+        return result;
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public OutboundHistoryDto save (OutboundHistoryDto outboundHistoryDto){
         return outboundHistoryMapper.toDto(outboundHistoryRepository.save(outboundHistoryMapper.toEntity(outboundHistoryDto)));

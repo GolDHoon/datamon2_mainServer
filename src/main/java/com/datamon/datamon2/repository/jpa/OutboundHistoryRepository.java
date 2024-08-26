@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface OutboundHistoryRepository extends JpaRepository<OutboundHistoryEntity, String> {
     List<OutboundHistoryEntity> findByOriginalIdx(String originalIdx);
+    List<OutboundHistoryEntity> findByCustId(String custId);
 }

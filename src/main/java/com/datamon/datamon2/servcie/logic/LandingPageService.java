@@ -138,7 +138,7 @@ public class LandingPageService {
         TableIndexDto tableIndexByOptionName = tableIndexService.getTableIndexByOptionName(custDataDto.getLpgeCode());
         customerInformationDto.setIdx(tableIndexByOptionName.getOptionName()+"-"+String.format("%020d", tableIndexByOptionName.getIndex()));
         customerInformationDto.setCdbsCode("CDBS_PNDG");
-        customerInformationDto.setCdbqCode("CDBQ_VLDT");
+        customerInformationDto.setCdbqCode("CDBQ_UVDA");
         customerInformationDto.setUtmSource(custDataDto.getUtmSource());
         customerInformationDto.setUtmMedium(custDataDto.getUtmMedium());
         customerInformationDto.setUtmCampaign(custDataDto.getUtmCampaign());
