@@ -23,6 +23,17 @@ public class PerformanceService {
     private UserBaseService userBaseService;
     private OutboundHistoryService outboundHistoryService;
 
+    public PerformanceService(JwtUtil jwtUtil, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, UserCdbtMappingService userCdbtMappingService, CompanyInfomationService companyInfomationService, MemberInfomationService memberInfomationService, UserBaseService userBaseService, OutboundHistoryService outboundHistoryService) {
+        this.jwtUtil = jwtUtil;
+        this.customerInformationService = customerInformationService;
+        this.customerBasicConsultationService = customerBasicConsultationService;
+        this.userCdbtMappingService = userCdbtMappingService;
+        this.companyInfomationService = companyInfomationService;
+        this.memberInfomationService = memberInfomationService;
+        this.userBaseService = userBaseService;
+        this.outboundHistoryService = outboundHistoryService;
+    }
+
     @Transactional
     public Map<String, Object> getAdPerformance(HttpServletRequest request) throws Exception{
         Map<String, Object> result = new HashMap<>();
@@ -69,6 +80,18 @@ public class PerformanceService {
                     resultMapItemMinusOneMonth.put("duplicateData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
                     resultMapItemMinusOneMonth.put("missingNumberData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
                     resultMap.put("minusOneMonth", resultMapItemMinusOneMonth);
+
+                    List<CustomerInformationDto> minusOneYearList = customerInformationDtoList.stream()
+                            .filter(info -> info.getCreateDate().isAfter(LocalDateTime.now().minusYears(1l)))
+                            .collect(Collectors.toList());
+                    Map<String, Object> resultMapItemMinusOneYear = new HashMap<>();
+                    resultMapItemMinusOneYear.put("totalData", minusOneYearList.size());
+                    resultMapItemMinusOneYear.put("unverifiedData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_UVDA")).collect(Collectors.toList()).size());
+                    resultMapItemMinusOneYear.put("validData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_VLDT")).collect(Collectors.toList()).size());
+                    resultMapItemMinusOneYear.put("fakeData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_FLDT")).collect(Collectors.toList()).size());
+                    resultMapItemMinusOneYear.put("duplicateData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    resultMapItemMinusOneYear.put("missingNumberData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    resultMap.put("minusOneYear", resultMapItemMinusOneYear);
 
                     resultMap.put("list", customerInformationDtoList);
                     break;
