@@ -39,11 +39,11 @@ public class CommonController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/routingInfo")
-    public ResponseEntity<?> getRoutingInfo(HttpServletRequest request, HttpServletResponse response){
+    @GetMapping("/getUserType")
+    public ResponseEntity<?> getUserType(HttpServletRequest request, HttpServletResponse response){
         Map<String, String> result;
         try {
-            result = commonService.getRoutingInfo(request);
+            result = commonService.getUserType(request);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -90,5 +90,7 @@ public class CommonController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+
 
 }

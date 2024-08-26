@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 @Data
 public class CustomerTagInfomationDto extends DrivenCommonCheckUserDto implements Serializable {
-    Integer idx;
+    String idx;
     Integer companyId;
     String cdbtLowCode;
     String tagTitle;

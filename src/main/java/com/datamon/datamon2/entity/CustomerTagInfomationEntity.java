@@ -15,7 +15,7 @@ public class CustomerTagInfomationEntity extends DrivenCommonCheckUserEntity imp
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Integer idx;
+    private String idx;
 
     @Column(name = "company_id", nullable = false)
     private Integer companyId;

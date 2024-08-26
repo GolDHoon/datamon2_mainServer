@@ -64,7 +64,7 @@ public class CommonService {
     }
 
     @Transactional
-    public Map<String, String> getRoutingInfo (HttpServletRequest request) throws Exception{
+    public Map<String, String> getUserType (HttpServletRequest request) throws Exception{
         Map<String, String> result = new HashMap<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         Object jwt = httpSessionUtil.getAttribute("jwt");
