@@ -1,5 +1,6 @@
 package com.datamon.datamon2.servcie.logic;
 
+import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
@@ -94,12 +95,17 @@ public class PerformanceService {
                     resultMap.put("minusOneYear", resultMapItemMinusOneYear);
 
                     resultMap.put("list", customerInformationDtoList);
+
+                    CommonCodeCache.getLpgeCodes().stream()
+                                    .filter(code -> code.getCodeFullName().equals(mapping.getCdbtLowCode()))
+                                    .findFirst();
+
+                    result.put("", resultMap);
                     break;
                 default:
                     break;
             }
 
-            resultMap.put(mapping.getCdbtLowCode(), resultMap);
         });
 
         return result;
