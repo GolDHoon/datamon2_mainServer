@@ -96,11 +96,13 @@ public class PerformanceService {
 
                     resultMap.put("list", customerInformationDtoList);
 
-                    CommonCodeCache.getLpgeCodes().stream()
-                                    .filter(code -> code.getCodeFullName().equals(mapping.getCdbtLowCode()))
-                                    .findFirst();
+                    LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream()
+                            .filter(code -> code.getCodeFullName().equals(mapping.getCdbtLowCode()))
+                            .findFirst().orElse(new LpgeCodeDto());
 
-                    result.put("", resultMap);
+                    resultMap.put("cdbtCode", lpgeCodeDto.getCodeFullName());
+
+                    result.put(lpgeCodeDto.getCodeValue(), resultMap);
                     break;
                 default:
                     break;
