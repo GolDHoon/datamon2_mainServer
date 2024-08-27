@@ -24,7 +24,7 @@ public class PerformanceController {
 
     @GetMapping("/ad/init")
     public ResponseEntity<?> getAdPerformance (HttpServletRequest request, HttpServletResponse response){
-        Map<String, Object> result;
+        List<Map<String, Object>> result;
         try {
             result = performanceService.getAdPerformance(request);
         } catch (Exception e) {

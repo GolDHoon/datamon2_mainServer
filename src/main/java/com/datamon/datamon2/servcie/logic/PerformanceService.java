@@ -36,8 +36,8 @@ public class PerformanceService {
     }
 
     @Transactional
-    public Map<String, Object> getAdPerformance(HttpServletRequest request) throws Exception{
-        Map<String, Object> result = new HashMap<>();
+    public List<Map<String, Object>> getAdPerformance(HttpServletRequest request) throws Exception{
+        List<Map<String, Object>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -47,15 +47,15 @@ public class PerformanceService {
 
             switch (mapping.getCdbtLowCode().substring(0, 9)) {
                 case "CDBT_LPGE":
-                    List<CustomerInformationDto> customerInformationDtoList = customerInformationService.getCustomerInformationByCdbtLowCode(mapping.getCdbtLowCode());
+                    List<CustomerInformationDto> customerInformationDtoList = customerInformationService.getCustomerInformationByCdbtLowCode(mapping.getCdbtLowCode()).stream()
+                            .filter(custInfo -> !custInfo.getDelYn())
+                            .collect(Collectors.toList());
                     Map<String, Object> resultMapItemTotal = new HashMap<>();
 
                     resultMapItemTotal.put("totalData", customerInformationDtoList.size());
-                    resultMapItemTotal.put("unverifiedData", customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_UVDA")).collect(Collectors.toList()).size());
-                    resultMapItemTotal.put("validData", customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_VLDT")).collect(Collectors.toList()).size());
-                    resultMapItemTotal.put("fakeData", customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_FLDT")).collect(Collectors.toList()).size());
-                    resultMapItemTotal.put("duplicateData", customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
-                    resultMapItemTotal.put("missingNumberData", customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    CommonCodeCache.getCdbqCodes().forEach(code -> {
+                        resultMapItemTotal.put(code.getCodeValue(), customerInformationDtoList.stream().filter(info -> info.getCdbqCode().equals(code.getCodeFullName())).collect(Collectors.toList()).size());
+                    });
                     resultMap.put("total", resultMapItemTotal);
 
                     List<CustomerInformationDto> minusOneWeekList = customerInformationDtoList.stream()
@@ -63,11 +63,9 @@ public class PerformanceService {
                             .collect(Collectors.toList());
                     Map<String, Object> resultMapItemMinusOneWeek = new HashMap<>();
                     resultMapItemMinusOneWeek.put("totalData", minusOneWeekList.size());
-                    resultMapItemMinusOneWeek.put("unverifiedData", minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_UVDA")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneWeek.put("validData", minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_VLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneWeek.put("fakeData", minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_FLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneWeek.put("duplicateData", minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneWeek.put("missingNumberData", minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    CommonCodeCache.getCdbqCodes().forEach(code -> {
+                        resultMapItemMinusOneWeek.put(code.getCodeValue(), minusOneWeekList.stream().filter(info -> info.getCdbqCode().equals(code.getCodeFullName())).collect(Collectors.toList()).size());
+                    });
                     resultMap.put("minusOneWeek", resultMapItemMinusOneWeek);
 
                     List<CustomerInformationDto> minusOneMonthList = customerInformationDtoList.stream()
@@ -75,11 +73,9 @@ public class PerformanceService {
                             .collect(Collectors.toList());
                     Map<String, Object> resultMapItemMinusOneMonth = new HashMap<>();
                     resultMapItemMinusOneMonth.put("totalData", minusOneMonthList.size());
-                    resultMapItemMinusOneMonth.put("unverifiedData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_UVDA")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneMonth.put("validData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_VLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneMonth.put("fakeData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_FLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneMonth.put("duplicateData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneMonth.put("missingNumberData", minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    CommonCodeCache.getCdbqCodes().forEach(code -> {
+                        resultMapItemMinusOneMonth.put(code.getCodeValue(), minusOneMonthList.stream().filter(info -> info.getCdbqCode().equals(code.getCodeFullName())).collect(Collectors.toList()).size());
+                    });
                     resultMap.put("minusOneMonth", resultMapItemMinusOneMonth);
 
                     List<CustomerInformationDto> minusOneYearList = customerInformationDtoList.stream()
@@ -87,22 +83,32 @@ public class PerformanceService {
                             .collect(Collectors.toList());
                     Map<String, Object> resultMapItemMinusOneYear = new HashMap<>();
                     resultMapItemMinusOneYear.put("totalData", minusOneYearList.size());
-                    resultMapItemMinusOneYear.put("unverifiedData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_UVDA")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneYear.put("validData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_VLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneYear.put("fakeData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_FLDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneYear.put("duplicateData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
-                    resultMapItemMinusOneYear.put("missingNumberData", minusOneYearList.stream().filter(info -> info.getCdbqCode().equals("CDBQ_DPDT")).collect(Collectors.toList()).size());
+                    CommonCodeCache.getCdbqCodes().forEach(code -> {
+                        resultMapItemMinusOneYear.put(code.getCodeValue(), minusOneYearList.stream().filter(info -> info.getCdbqCode().equals(code.getCodeFullName())).collect(Collectors.toList()).size());
+                    });
                     resultMap.put("minusOneYear", resultMapItemMinusOneYear);
 
-                    resultMap.put("list", customerInformationDtoList);
+                    resultMap.put("list", customerInformationDtoList.stream()
+                                                                    .map(custInfo -> {
+                                                                        custInfo.setCdbqCode(CommonCodeCache.getCdbqCodes().stream()
+                                                                                .filter(code -> custInfo.getCdbqCode().equals(code.getCodeFullName()))
+                                                                                .findFirst().orElse(new CdbqCodeDto()).getCodeValue());
+
+                                                                        custInfo.setCdbsCode(CommonCodeCache.getCdbsCodes().stream()
+                                                                                .filter(code -> custInfo.getCdbsCode().equals(code.getCodeFullName()))
+                                                                                .findFirst().orElse(new CdbsCodeDto()).getCodeValue());
+
+                                                                        return custInfo;
+                                                                    })
+                                                                    .collect(Collectors.toList()));
 
                     LpgeCodeDto lpgeCodeDto = CommonCodeCache.getLpgeCodes().stream()
                             .filter(code -> code.getCodeFullName().equals(mapping.getCdbtLowCode()))
                             .findFirst().orElse(new LpgeCodeDto());
 
                     resultMap.put("cdbtCode", lpgeCodeDto.getCodeFullName());
-
-                    result.put(lpgeCodeDto.getCodeValue(), resultMap);
+                    resultMap.put("url", lpgeCodeDto.getCodeValue());
+                    result.add(resultMap);
                     break;
                 default:
                     break;
