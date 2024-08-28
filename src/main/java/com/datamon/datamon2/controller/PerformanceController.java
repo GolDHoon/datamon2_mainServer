@@ -36,10 +36,10 @@ public class PerformanceController {
     }
 
     @GetMapping("/crm/company/init")
-    public ResponseEntity<?> getCrmCompanyPerformance (HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<?> getCrmCompanyPerformance (HttpServletRequest request, HttpServletResponse response, @RequestParam String companyId){
         List<Map<String, Object>> result;
         try {
-            result = performanceService.getCrmCompanyPerformance(request);
+            result = performanceService.getCrmCompanyPerformance(request, companyId);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

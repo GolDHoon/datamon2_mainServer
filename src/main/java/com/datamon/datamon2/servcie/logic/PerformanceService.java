@@ -120,24 +120,36 @@ public class PerformanceService {
     }
 
     @Transactional
-    public List<Map<String, Object>> getCrmCompanyPerformance(HttpServletRequest request) throws Exception{
+    public List<Map<String, Object>> getCrmCompanyPerformance(HttpServletRequest request, String companyId) throws Exception{
         List<Map<String, Object>> result = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+        List<String> companyCode = CommonCodeCache.getCompanyCode().stream().map(code -> code.getCodeFullName()).collect(Collectors.toList());
+        CompanyInfomationDto companyInfomationDto;
 
-        CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(userId);
+        if(companyCode.contains(userBaseService.getUserBaseById(userId).getUserType())){
+            companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(userId);
+        }else{
+            UserBaseDto userBaseDto = userBaseService.getUserBaseByUserId(companyId).stream()
+                    .filter(user -> "USTY_MAST".equals(user.getUserType()))
+                    .findFirst().orElse(new UserBaseDto());
+            companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(userBaseDto.getIdx());
+        }
+
         memberInfomationService.getMemberInfomationDtoListByCompanyId(companyInfomationDto.getIdx()).forEach(member -> {
             Map<String, Object> resultMap = new LinkedHashMap<>();
             resultMap.put("name", member.getName());
-            resultMap.put("index", member.getIdx());
+            resultMap.put("index", member.getUserId());
             resultMap.put("role", member.getRole());
+            resultMap.put("total", 0);
+            resultMap.put("quality", new HashMap<String, Object>());
+            resultMap.put("status", new HashMap<String, Object>());
 
             result.add(resultMap);
         });
 
         userCdbtMappingService.getUserCdbtListByUserId(userId).forEach(mapping -> {
-
             switch (mapping.getCdbtLowCode().substring(0, 9)) {
                 case "CDBT_LPGE":
                     customerInformationService.getCustomerInformationByCdbtLowCode(mapping.getCdbtLowCode()).forEach(custInfo -> {
@@ -147,21 +159,34 @@ public class PerformanceService {
 
                         if (outboundHistoryDto.getIdx() != null){
                             Map<String, Object> resultMap = result.stream()
-                                    .filter(map -> map.get("index").equals(outboundHistoryDto.getUserId()))
+                                    .filter(map -> outboundHistoryDto.getUserId().equals(Integer.parseInt(map.get("index").toString())))
                                     .findFirst().orElse(new LinkedHashMap<>());
 
+                            String cdbsMapKey = CommonCodeCache.getCdbsCodes().stream()
+                                    .filter(code -> code.getCodeFullName().equals(custInfo.getCdbsCode()))
+                                    .findFirst().orElse(new CdbsCodeDto()).getCodeValue();
+
+                            String cdbqMapKey = CommonCodeCache.getCdbqCodes().stream()
+                                    .filter(code -> code.getCodeFullName().equals(custInfo.getCdbqCode()))
+                                    .findFirst().orElse(new CdbqCodeDto()).getCodeValue();
+
+                            HashMap<String, Object> status = (HashMap<String, Object>) resultMap.get("status");
+                            HashMap<String, Object> quality = (HashMap<String, Object>) resultMap.get("quality");
+
                             if(resultMap.get("index") != null){
-                                if(resultMap.get(custInfo.getCdbsCode()) != null){
-                                    resultMap.put(custInfo.getCdbsCode(), ((int) resultMap.get(custInfo.getCdbsCode())) + 1);
+                                if(status.get(cdbsMapKey) != null){
+                                    status.put(cdbsMapKey, ((int) status.get(cdbsMapKey)) + 1);
                                 }else {
-                                    resultMap.put(custInfo.getCdbsCode(), 1);
+                                    status.put(cdbsMapKey, 1);
                                 }
 
-                                if(resultMap.get(custInfo.getCdbqCode()) != null){
-                                    resultMap.put(custInfo.getCdbqCode(), ((int) resultMap.get(custInfo.getCdbqCode())) + 1);
+                                if(quality.get(cdbqMapKey) != null){
+                                    quality.put(cdbqMapKey, ((int) quality.get(cdbqMapKey)) + 1);
                                 }else {
-                                    resultMap.put(custInfo.getCdbqCode(), 1);
+                                    quality.put(cdbqMapKey, 1);
                                 }
+
+                                resultMap.put("total", ((int) resultMap.get("total")) + 1);
                             }
                         }
                     });
@@ -187,9 +212,17 @@ public class PerformanceService {
         result.put("name", memberInfomationDto.getName());
         result.put("index", memberInfomationDto.getIdx());
         result.put("role", memberInfomationDto.getRole());
+        result.put("total", 0);
+        result.put("quality", new HashMap<String, Object>());
+        result.put("status", new HashMap<String, Object>());
+
+
+        List<String> allowUstyCods = new ArrayList<>();
+        allowUstyCods.add("USTY_CRAC");
+        allowUstyCods.add("USTY_MAST");
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseByUserId(companyId).stream()
-                .filter(user -> user.getUserType().equals("USTY_CRAC"))
+                .filter(user -> allowUstyCods.contains(user.getUserType()))
                 .findFirst().orElse(new UserBaseDto());
 
         if(userBaseDto.getIdx() != null){
@@ -202,19 +235,31 @@ public class PerformanceService {
                                     .orElse(new OutboundHistoryDto());
 
                             if(outboundHistoryDto.getUserId() == memberInfomationDto.getUserId()){
-                                if(result.get(custInfo.getCdbsCode()) != null){
-                                    result.put(custInfo.getCdbsCode(), ((int) result.get(custInfo.getCdbsCode())) + 1);
+                                String cdbsMapKey = CommonCodeCache.getCdbsCodes().stream()
+                                        .filter(code -> code.getCodeFullName().equals(custInfo.getCdbsCode()))
+                                        .findFirst().orElse(new CdbsCodeDto()).getCodeValue();
+
+                                String cdbqMapKey = CommonCodeCache.getCdbqCodes().stream()
+                                        .filter(code -> code.getCodeFullName().equals(custInfo.getCdbqCode()))
+                                        .findFirst().orElse(new CdbqCodeDto()).getCodeValue();
+
+                                HashMap<String, Object> status = (HashMap<String, Object>) result.get("status");
+                                HashMap<String, Object> quality = (HashMap<String, Object>) result.get("quality");
+
+                                if(status.get(cdbsMapKey) != null){
+                                    status.put(cdbsMapKey, ((int) status.get(cdbsMapKey)) + 1);
                                 }else {
-                                    result.put(custInfo.getCdbsCode(), 1);
+                                    status.put(cdbsMapKey, 1);
                                 }
 
-                                if(result.get(custInfo.getCdbqCode()) != null){
-                                    result.put(custInfo.getCdbqCode(), ((int) result.get(custInfo.getCdbqCode())) + 1);
+                                if(quality.get(cdbqMapKey) != null){
+                                    quality.put(cdbqMapKey, ((int) quality.get(cdbqMapKey)) + 1);
                                 }else {
-                                    result.put(custInfo.getCdbqCode(), 1);
+                                    quality.put(cdbqMapKey, 1);
                                 }
-                            }
-                        });
+                                result.put("total", ((int) result.get("total")) + 1);
+                                }
+                            });
                         break;
                     default:
                         break;
