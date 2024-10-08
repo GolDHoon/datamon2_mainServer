@@ -36,7 +36,7 @@ public class UserSignController {
     @Operation(summary = "로그인", description = "api 설명")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공.",
-                    content = @Content(schema = @Schema(implementation = Case1OutputDto.class))),
+                    content = @Content(schema = @Schema(implementation = LoginOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
@@ -66,51 +66,51 @@ public class UserSignController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> userLogout(HttpServletRequest request, HttpServletResponse response){
-        String result;
-        try {
-            result = userSignService.userLogout(request);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @GetMapping("/getCompanyName")
-    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response, @RequestParam String companyId){
-        String result;
-        try {
-            result = userSignService.getCompanyName(companyId);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @PostMapping("/sessionCheck")
-    public ResponseEntity<?> sessionCheck(HttpServletRequest request, HttpServletResponse response){
-        try {
-            userSignService.sessionTimeReset(request);
-            return new ResponseEntity<>("success", HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("/sessionCheck2")
-    public ResponseEntity<?> sessionCheck2(HttpServletRequest request, HttpServletResponse response){
-        try {
-            userSignService.sessionCheck(request);
-            return new ResponseEntity<>("success", HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> userLogout(HttpServletRequest request, HttpServletResponse response){
+//        String result;
+//        try {
+//            result = userSignService.userLogout(request);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/getCompanyName")
+//    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response, @RequestParam String companyId){
+//        String result;
+//        try {
+//            result = userSignService.getCompanyName(companyId);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//    }
+//
+//    @PostMapping("/sessionCheck")
+//    public ResponseEntity<?> sessionCheck(HttpServletRequest request, HttpServletResponse response){
+//        try {
+//            userSignService.sessionTimeReset(request);
+//            return new ResponseEntity<>("success", HttpStatus.OK);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+//
+//    @PostMapping("/sessionCheck2")
+//    public ResponseEntity<?> sessionCheck2(HttpServletRequest request, HttpServletResponse response){
+//        try {
+//            userSignService.sessionCheck(request);
+//            return new ResponseEntity<>("success", HttpStatus.OK);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 }
