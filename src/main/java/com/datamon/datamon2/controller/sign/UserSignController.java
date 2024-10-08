@@ -25,7 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/sign")
-@Tag(name = "sing", description = "로그인 및 세션관련 API")
+@Tag(name = "sign", description = "로그인 및 세션관련 API")
 public class UserSignController {
     private static final Logger logger = LogManager.getLogger(com.datamon.datamon2.controller.sign.UserSignController.class);
     private UserSignService userSignService;
