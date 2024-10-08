@@ -1,7 +1,6 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.outbound;
 
 import com.datamon.datamon2.dto.input.call.*;
-import com.datamon.datamon2.dto.repository.OutboundDto;
 import com.datamon.datamon2.servcie.logic.CallService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

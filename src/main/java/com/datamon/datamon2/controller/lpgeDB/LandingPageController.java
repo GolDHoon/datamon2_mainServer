@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.lpgeDB;
 
 import com.datamon.datamon2.dto.input.landingPage.CreateDto;
 import com.datamon.datamon2.dto.input.landingPage.CustDataDto;

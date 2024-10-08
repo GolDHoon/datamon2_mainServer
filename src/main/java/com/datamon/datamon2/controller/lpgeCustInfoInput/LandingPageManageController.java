@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.lpgeCustInfoInput;
 
 import com.datamon.datamon2.dto.input.landingPageManage.*;
 import com.datamon.datamon2.servcie.logic.LandingPageManageService;

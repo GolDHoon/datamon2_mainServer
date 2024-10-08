@@ -1,7 +1,6 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.member;
 
 import com.datamon.datamon2.dto.input.user.*;
-import com.datamon.datamon2.dto.input.userAuth.UserAuthModifyDto;
 import com.datamon.datamon2.servcie.logic.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,18 +10,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
-public class UserController {
-    private static final Logger logger = LogManager.getLogger(UserController.class);
+@RequestMapping("/member")
+public class MemberController {
+    private static final Logger logger = LogManager.getLogger(MemberController.class);
 
     private UserService userService;
 
-    public UserController(UserService userService) {
+    public MemberController(UserService userService) {
         this.userService = userService;
     }
 

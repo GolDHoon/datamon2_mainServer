@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.myPage;
 
 import com.datamon.datamon2.dto.input.myPage.ModifyCompanyDto;
 import com.datamon.datamon2.dto.input.myPage.ModifyMemberDto;

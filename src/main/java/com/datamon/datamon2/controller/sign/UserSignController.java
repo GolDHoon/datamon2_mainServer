@@ -4,7 +4,6 @@ import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
 import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
-import com.datamon.datamon2.dto.output.test.Case1OutputDto;
 import com.datamon.datamon2.servcie.logic.UserSignService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

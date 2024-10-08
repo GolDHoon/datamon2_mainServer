@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.custInfo;
 
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;

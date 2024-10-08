@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.performance;
 
 import com.datamon.datamon2.servcie.logic.PerformanceService;
 import jakarta.servlet.http.HttpServletRequest;

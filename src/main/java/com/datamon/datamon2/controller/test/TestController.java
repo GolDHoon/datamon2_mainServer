@@ -32,7 +32,7 @@ public class TestController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getEmployeeList (HttpServletRequest request, HttpServletResponse response,
+    public ResponseEntity<?> case1 (HttpServletRequest request, HttpServletResponse response,
                                               @Parameter(description = "입력값 설명 여기에 작성")
                                               @RequestParam String input) {
         Case1OutputDto case1OutputDto = new Case1OutputDto();
@@ -51,7 +51,7 @@ public class TestController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
+    public ResponseEntity<?> case2(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
         Case2OutputDto case2OutputDto = new Case2OutputDto();
         return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
     }
