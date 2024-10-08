@@ -3,6 +3,7 @@ package com.datamon.datamon2.servcie.logic;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
 import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.MemberInfomationDto;
@@ -136,25 +137,54 @@ public class UserSignService {
     }
 
     @Transactional
-    public String getCompanyName(String companyId) throws Exception {
+    public Map<String, Object> getCompanyName(String companyId) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        CompanyInfoDto companyInfoDto = new CompanyInfoDto();
+        result.put("result", "E");
+
         List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
                 .map(dto -> {
                     return dto.getCodeFullName();
                 })
                 .collect(Collectors.toList());
 
-        UserBaseDto userBaseDto = userBaseService.getUserBaseByUserId(companyId).stream()
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> companyCodes.contains(dto.getUserType()) || dto.getUserType().equals("USTY_MAST"))
-                .findFirst().orElse(new UserBaseDto());
+        List<UserBaseDto> matchedUserList = userBaseService.getUserBaseByUserId(companyId);
 
-        if(userBaseDto.getIdx() == null){
-            return "companyName-fail:companyId";
+        if(matchedUserList.size() == 0){
+            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
+            errorOutputDto.setCode(412);
+            result.put("output", errorOutputDto);
+            return result;
         }
 
-        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userBaseDto.getIdx());
-        return companyInfomationByUserId.getName();
+        List<UserBaseDto> allowYnChecker = matchedUserList.stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .collect(Collectors.toList());
+
+        if(allowYnChecker.size() == 0){
+            errorOutputDto.setDetailReason("사용권한이 없습니다.");
+            errorOutputDto.setCode(561);
+            result.put("output", errorOutputDto);
+            return result;
+        }else if (allowYnChecker.size() > 1){
+            errorOutputDto.setDetailReason("유효계정 중복, 개발팀에 문의하세요");
+            errorOutputDto.setCode(500);
+            result.put("output", errorOutputDto);
+        }
+
+        UserBaseDto userInfo = allowYnChecker.get(0);
+
+        CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(userInfo.getIdx());
+
+        companyInfoDto.setCompanyName(companyInfo.getName());
+        companyInfoDto.setCompanyIdx(companyInfo.getIdx());
+
+        result.put("result", "E");
+        result.put("output", companyInfoDto);
+
+        return result;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

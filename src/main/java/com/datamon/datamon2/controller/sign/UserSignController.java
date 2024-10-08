@@ -2,10 +2,12 @@ package com.datamon.datamon2.controller.sign;
 
 import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
 import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
 import com.datamon.datamon2.dto.output.test.Case1OutputDto;
 import com.datamon.datamon2.servcie.logic.UserSignService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -66,32 +68,65 @@ public class UserSignController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<?> userLogout(HttpServletRequest request, HttpServletResponse response){
-//        String result;
-//        try {
-//            result = userSignService.userLogout(request);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/getCompanyName")
-//    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response, @RequestParam String companyId){
-//        String result;
-//        try {
-//            result = userSignService.getCompanyName(companyId);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃 시 사용되는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> userLogout(HttpServletRequest request, HttpServletResponse response){
+        String result;
+        try {
+            result = userSignService.userLogout(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCompanyInfo")
+    @Operation(summary = "업체정보 요청", description = "로그인 초기화면 구성 시 업체정보를 데이터를 반환해주는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공.",
+                    content = @Content(schema = @Schema(implementation = CompanyInfoDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response,
+                                            @RequestParam
+                                            @Parameter(description = "업체 계정 ID")
+                                            String companyId){
+        Map<String, Object> result;
+        CompanyInfoDto resultData;
+        try {
+            result = userSignService.getCompanyName(companyId);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (CompanyInfoDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
 //    @PostMapping("/sessionCheck")
 //    public ResponseEntity<?> sessionCheck(HttpServletRequest request, HttpServletResponse response){
 //        try {
