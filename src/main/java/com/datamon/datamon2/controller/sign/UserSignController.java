@@ -92,21 +92,20 @@ public class UserSignController {
     @GetMapping("/getCompanyInfo")
     @Operation(summary = "업체정보 요청", description = "로그인 초기화면 구성 시 업체정보를 데이터를 반환해주는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공.",
-                    content = @Content(schema = @Schema(implementation = CompanyInfoDto.class))),
+            @ApiResponse(responseCode = "200", description = "로그인 성공."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getCompanyName(HttpServletRequest request, HttpServletResponse response,
+    public ResponseEntity<?> getCompanyInfo(HttpServletRequest request, HttpServletResponse response,
                                             @RequestParam
                                             @Parameter(description = "업체 계정 ID")
                                             String companyId){
         Map<String, Object> result;
         CompanyInfoDto resultData;
         try {
-            result = userSignService.getCompanyName(companyId);
+            result = userSignService.getCompanyInfo(companyId);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (CompanyInfoDto) result.get("output");

@@ -137,7 +137,7 @@ public class UserSignService {
     }
 
     @Transactional
-    public Map<String, Object> getCompanyName(String companyId) throws Exception {
+    public Map<String, Object> getCompanyInfo(String companyId) throws Exception {
         Map<String, Object> result = new HashMap<>();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
         CompanyInfoDto companyInfoDto = new CompanyInfoDto();
@@ -181,7 +181,7 @@ public class UserSignService {
         companyInfoDto.setCompanyName(companyInfo.getName());
         companyInfoDto.setCompanyIdx(companyInfo.getIdx());
 
-        result.put("result", "E");
+        result.put("result", "S");
         result.put("output", companyInfoDto);
 
         return result;
