@@ -129,6 +129,7 @@ public class UserSignService {
             return result;
         }
 
+        loginOutDto.setCompanyIdx(companyId);
         result.put("result", "S");
         result.put("output", loginOutDto);
         return result;

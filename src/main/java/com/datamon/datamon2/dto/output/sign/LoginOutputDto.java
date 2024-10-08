@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class LoginOutputDto {
     @Schema(description = "업체 데이터 ID")
-    String companyIdx;
+    int companyIdx;
 }
