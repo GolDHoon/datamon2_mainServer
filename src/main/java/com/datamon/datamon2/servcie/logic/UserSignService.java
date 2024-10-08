@@ -1,9 +1,11 @@
 package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.input.user.LoginInuptDto;
+import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
+import com.datamon.datamon2.dto.repository.MemberInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.MemberInfomationService;
@@ -13,7 +15,6 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,10 +49,40 @@ public class UserSignService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Map<String, Object> userLogin(LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response) throws Exception{
         Map<String, Object> result = new HashMap<>();
+        LoginOutputDto loginOutDto = new LoginOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
         JsonUtil jsonUtil = new JsonUtil();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
         IpUtil ipUtil = new IpUtil(request);
+
+        result.put("result", "E");
+
+        List<UserBaseDto> matchedUserList = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId());
+
+        if(matchedUserList.size() == 0){
+            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
+            errorOutputDto.setCode(412);
+            result.put("output", errorOutputDto);
+            return result;
+        }
+
+        List<UserBaseDto> allowYnChecker = matchedUserList.stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .collect(Collectors.toList());
+
+        if(allowYnChecker.size() == 0){
+            errorOutputDto.setDetailReason("사용권한이 없습니다.");
+            errorOutputDto.setCode(561);
+            result.put("output", errorOutputDto);
+            return result;
+        }else if (allowYnChecker.size() > 1){
+            errorOutputDto.setDetailReason("유효계정 중복, 개발팀에 문의하세요");
+            errorOutputDto.setCode(500);
+            result.put("output", errorOutputDto);
+        }
+
+        UserBaseDto userInfo = allowYnChecker.get(0);
 
         List<String> companyCodes = CommonCodeCache.getCompanyCode().stream()
                 .map(dto -> {
@@ -59,49 +90,31 @@ public class UserSignService {
                 })
                 .collect(Collectors.toList());
 
-        userBaseService.getUserBaseByUserId(loginInuptDto.getUserId());
+        int companyId;
+        CompanyInfomationDto companyInfo;
+        MemberInfomationDto memberInfo;
 
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(loginInuptDto.getCompanyIdx()).stream()
-                .filter(dto-> companyCodes.contains(dto.getUserType()) || "USTY_MAST".equals(dto.getUserType()))
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .findFirst().orElse(new UserBaseDto());
+        if(companyCodes.contains(userInfo.getUserType()) || "USTY_MAST".equals(userInfo.getUserType())){
+            companyInfo = companyInfomationService.getCompanyInfomationByUserId(userInfo.getIdx());
+            companyId = companyInfo.getIdx();
+        }else{
+            memberInfo = memberInfomationService.getMemberInfomationByUserId(userInfo.getIdx());
+            companyId = memberInfo.getCompanyId();
+        }
 
-        if(companyUser.getIdx() == null){
-            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
-            errorOutputDto.setCode(561);
-            result.put("result", "E");
+        if(loginInuptDto.getCompanyIdx() != companyId){
+            errorOutputDto.setDetailReason("ID를 찾을 수 없습니다.");
+            errorOutputDto.setCode(412);
             result.put("output", errorOutputDto);
             return result;
         }
 
-        UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId()).stream()
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .findFirst().orElse(new UserBaseDto());
-
-        if(userBaseByUserId.getIdx() == null){
-            return "login-fail:userId";
-        }
-
-        int companyId;
-
-        if(companyCodes.contains(userBaseByUserId.getUserType()) || "USTY_MAST".equals(userBaseByUserId.getUserType())){
-            companyId = userBaseByUserId.getIdx();
-        }else{
-            companyId = companyInfomationService.getCompanyInfomationById(memberInfomationService.getMemberInfomationByUserId(userBaseByUserId.getIdx()).getCompanyId()).getUserId();
-        }
-
-        if(companyUser.getIdx() != companyId){
-            return "login-fail:companyId";
-        }
-
         EncryptionUtil encryptionUtil = new EncryptionUtil();
-        String encriptPw = encryptionUtil.getSHA256WithSalt(loginInuptDto.getPassword(), userBaseByUserId.getSalt());
+        String encriptPw = encryptionUtil.getSHA256WithSalt(loginInuptDto.getPassword(), userInfo.getSalt());
 
-        if(encriptPw.equals(userBaseByUserId.getUserPw())){
+        if(encriptPw.equals(userInfo.getUserPw())){
             List<Map<String, Object>> claimsList = new ArrayList<>();
-            String token = jwtUtil.createToken(String.valueOf(userBaseByUserId.getIdx()), claimsList);
+            String token = jwtUtil.createToken(String.valueOf(userInfo.getIdx()), claimsList);
 
             httpSessionUtil.setAttribute("jwt", token);
             httpSessionUtil.setAttribute("loginIp", jsonUtil.toJsonStringByMap(ipUtil.getIp()));
@@ -109,11 +122,16 @@ public class UserSignService {
 
             Cookie cookie = new Cookie("JSESSIONID", request.getSession(false).getId());
             response.addCookie(cookie);
-
-            return request.getSession(false).getId();
         }else {
-            return "login-fail:password";
+            errorOutputDto.setDetailReason("패스워드가 일치하지 않습니다.");
+            errorOutputDto.setCode(412);
+            result.put("output", errorOutputDto);
+            return result;
         }
+
+        result.put("result", "S");
+        result.put("output", loginOutDto);
+        return result;
     }
 
     @Transactional

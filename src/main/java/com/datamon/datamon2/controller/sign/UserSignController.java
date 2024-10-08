@@ -1,7 +1,8 @@
 package com.datamon.datamon2.controller.sign;
 
-import com.datamon.datamon2.dto.input.user.LoginInuptDto;
+import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
 import com.datamon.datamon2.dto.output.test.Case1OutputDto;
 import com.datamon.datamon2.servcie.logic.UserSignService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -43,15 +43,27 @@ public class UserSignController {
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
     public ResponseEntity<?> login(@RequestBody LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response){
-        String result;
+        Map<String, Object> result;
+        LoginOutputDto resultData;
         try {
             result = userSignService.userLogin(loginInuptDto, request, response);
+            if(result.get("result").toString().equals("S")){
+                resultData = (LoginOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
