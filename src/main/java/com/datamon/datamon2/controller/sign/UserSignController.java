@@ -33,7 +33,7 @@ public class UserSignController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "로그인", description = "api 설명")
+    @Operation(summary = "로그인", description = "로그인 시 사용되는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공.",
                     content = @Content(schema = @Schema(implementation = LoginOutputDto.class))),
