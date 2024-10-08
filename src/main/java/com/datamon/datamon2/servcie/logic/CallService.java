@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CallService {
-    private final LpgeCodeService lpgeCodeService;
+    private LpgeCodeService lpgeCodeService;
     private JwtUtil jwtUtil;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
