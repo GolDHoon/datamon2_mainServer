@@ -27,11 +27,12 @@ public class WebConfigurer implements WebMvcConfigurer {
                 .toList();
         // 모든 client 접속 허가
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000"
-                                , "http://localhost:63344/"
-                                , "https://datamon2.xyz")
+//                .allowedOrigins("http://localhost:3000"
+//                                , "http://localhost:63344/"
+//                                , "https://datamon2.xyz")
+                .allowedOrigins("-")
                 .allowedOriginPatterns("*")
-                .allowedMethods("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
 
@@ -43,9 +44,22 @@ public class WebConfigurer implements WebMvcConfigurer {
                 .allowCredentials(true);
 
         registry.addMapping("/developer/checkServer")
-                .allowedOrigins("-")
+                .allowedOrigins("*")
                 .allowedOriginPatterns("*")
                 .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+
+        registry.addMapping("/swagger-ui/**")
+                .allowedOrigins("-")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+        registry.addMapping("/v3/api-docs/**")
+                .allowedOrigins("-")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
