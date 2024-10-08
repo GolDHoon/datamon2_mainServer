@@ -1,6 +1,5 @@
 package com.datamon.datamon2.interceptor;
 
-import com.datamon.datamon2.controller.UserSignController;
 import com.datamon.datamon2.servcie.logic.UserSignService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class PermissionCheckInterceptor implements HandlerInterceptor {
-    private static final Logger logger = LogManager.getLogger(UserSignController.class);
+    private static final Logger logger = LogManager.getLogger(PermissionCheckInterceptor.class);
     @Autowired
     private UserSignService userSignService;
 

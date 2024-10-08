@@ -2,6 +2,7 @@ package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.user.LoginInuptDto;
+import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.UserBaseDto;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
@@ -12,6 +13,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +46,9 @@ public class UserSignService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String userLogin(LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response) throws Exception{
+    public Map<String, Object> userLogin(LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result = new HashMap<>();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
         JsonUtil jsonUtil = new JsonUtil();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(true));
         IpUtil ipUtil = new IpUtil(request);
@@ -55,14 +59,20 @@ public class UserSignService {
                 })
                 .collect(Collectors.toList());
 
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(loginInuptDto.getCompanyId()).stream()
+        userBaseService.getUserBaseByUserId(loginInuptDto.getUserId());
+
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(loginInuptDto.getCompanyIdx()).stream()
                 .filter(dto-> companyCodes.contains(dto.getUserType()) || "USTY_MAST".equals(dto.getUserType()))
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .findFirst().orElse(new UserBaseDto());
 
         if(companyUser.getIdx() == null){
-            return "login-fail:companyId";
+            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
+            errorOutputDto.setCode(561);
+            result.put("result", "E");
+            result.put("output", errorOutputDto);
+            return result;
         }
 
         UserBaseDto userBaseByUserId = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId()).stream()

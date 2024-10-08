@@ -1,7 +1,15 @@
-package com.datamon.datamon2.controller;
+package com.datamon.datamon2.controller.sign;
 
 import com.datamon.datamon2.dto.input.user.LoginInuptDto;
+import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.test.Case1OutputDto;
 import com.datamon.datamon2.servcie.logic.UserSignService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
@@ -10,9 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
+@RequestMapping("/sign")
+@Tag(name = "sing", description = "로그인 및 세션관련 API")
 public class UserSignController {
-    private static final Logger logger = LogManager.getLogger(UserSignController.class);
+    private static final Logger logger = LogManager.getLogger(com.datamon.datamon2.controller.sign.UserSignController.class);
     private UserSignService userSignService;
 
     public UserSignController(UserSignService userSignService) {
@@ -20,6 +33,15 @@ public class UserSignController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "로그인", description = "api 설명")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공.",
+                    content = @Content(schema = @Schema(implementation = Case1OutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
     public ResponseEntity<?> login(@RequestBody LoginInuptDto loginInuptDto, HttpServletRequest request, HttpServletResponse response){
         String result;
         try {
