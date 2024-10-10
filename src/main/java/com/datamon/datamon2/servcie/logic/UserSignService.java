@@ -152,7 +152,7 @@ public class UserSignService {
         List<UserBaseDto> matchedUserList = userBaseService.getUserBaseByUserId(companyId);
 
         if(matchedUserList.size() == 0){
-            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
+            errorOutputDto.setDetailReason("유효한 url이 아닙니다. 관리자에게 문의해주세요.");
             errorOutputDto.setCode(412);
             result.put("output", errorOutputDto);
             return result;
