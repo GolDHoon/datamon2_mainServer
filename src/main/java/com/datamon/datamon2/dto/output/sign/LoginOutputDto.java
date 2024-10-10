@@ -7,4 +7,6 @@ import lombok.Data;
 public class LoginOutputDto {
     @Schema(description = "업체 데이터 ID")
     int companyIdx;
+    @Schema(description = "계정유형")
+    String userType;
 }

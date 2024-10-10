@@ -1,12 +1,15 @@
-package com.datamon.datamon2.servcie.logic;
+package com.datamon.datamon2.servcie.logic.custInfo;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
 import com.datamon.datamon2.dto.repository.CustomerInformationDto;
+import com.datamon.datamon2.servcie.logic.UserService;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
+import com.datamon.datamon2.servcie.repository.UserBaseService;
+import com.datamon.datamon2.servcie.repository.UserCdbtMappingService;
 import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
@@ -20,15 +23,29 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustInfoService {
+    private UserBaseService userBaseService;
     private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
+    private UserCdbtMappingService userCdbtMappingService;
     private JwtUtil jwtUtil;
 
-    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil) {
+    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil, UserBaseService userBaseService, UserBaseService userBaseService1) {
         this.customerInformationService = customerInformationService;
         this.customerBasicConsultationService = customerBasicConsultationService;
         this.jwtUtil = jwtUtil;
+        this.userBaseService = userBaseService1;
+    }
+
+    public Map<String, Object> getCustDBCodeList(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        userCdbtMappingService.getUserCdbtListByUserId(userId);
+
+        Map<String, Object> result = new HashMap<>();
+
+        return null;
     }
 
     @Transactional

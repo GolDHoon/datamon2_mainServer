@@ -1,4 +1,4 @@
-package com.datamon.datamon2.servcie.logic;
+package com.datamon.datamon2.servcie.logic.sign;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.sign.LoginInuptDto;
@@ -131,6 +131,7 @@ public class UserSignService {
         }
 
         loginOutDto.setCompanyIdx(companyId);
+        loginOutDto.setUserType(userInfo.getUserType());
         result.put("result", "S");
         result.put("output", loginOutDto);
         return result;
