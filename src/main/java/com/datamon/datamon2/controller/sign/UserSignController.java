@@ -70,7 +70,7 @@ public class UserSignController {
     @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "로그아웃 시 사용되는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공."),
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
@@ -91,7 +91,7 @@ public class UserSignController {
     @GetMapping("/getCompanyInfo")
     @Operation(summary = "업체정보 요청", description = "로그인 초기화면 구성 시 업체정보를 데이터를 반환해주는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공."),
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
