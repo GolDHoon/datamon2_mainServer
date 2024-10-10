@@ -3,8 +3,11 @@ package com.datamon.datamon2.servcie.logic.custInfo;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
+import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.repository.CustomerBasicConsultationDto;
 import com.datamon.datamon2.dto.repository.CustomerInformationDto;
+import com.datamon.datamon2.dto.repository.LpgeCodeDto;
+import com.datamon.datamon2.dto.repository.UserCdbtMappingDto;
 import com.datamon.datamon2.servcie.logic.UserService;
 import com.datamon.datamon2.servcie.repository.CustomerBasicConsultationService;
 import com.datamon.datamon2.servcie.repository.CustomerInformationService;
@@ -37,13 +40,32 @@ public class CustInfoService {
         this.userBaseService = userBaseService1;
     }
 
+    @Transactional
     public Map<String, Object> getCustDBCodeList(HttpServletRequest request) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        Map<String, Object> result = new HashMap<>();
+        List<GetCustDbCodeListOutputDto> outputDtoList = new ArrayList<>();
+
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        userCdbtMappingService.getUserCdbtListByUserId(userId);
+        List<String> userAndDbCodeMapping = userCdbtMappingService.getUserCdbtListByUserId(userId).stream()
+                .map(dto -> {
+                    return dto.getCdbtCode();
+                })
+                .collect(Collectors.toList());
 
-        Map<String, Object> result = new HashMap<>();
+        List<LpgeCodeDto> lpgeDbCodeList = CommonCodeCache.getLpgeCodes().stream()
+                .filter(code -> userAndDbCodeMapping.contains(code.getCodeFullName()))
+                .collect(Collectors.toList());
+
+        outputDtoList.add(new GetCustDbCodeListOutputDto());
+        outputDtoList.get(0).setCustDbType("CDBT_LPGE");
+        outputDtoList.get(0).setCustDbCodes(new ArrayList<>());
+        lpgeDbCodeList.forEach(code -> {
+            outputDtoList.get(0).getCustDbCodes().add(code.getCodeFullName());
+        });
+
+        result
 
         return null;
     }
