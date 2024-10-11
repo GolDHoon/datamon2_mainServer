@@ -10,5 +10,5 @@ public class GetCustDbCodeListOutputDto {
     @Schema(description = "고객DB유형")
     String custDbType;
     @Schema(description = "고객DB코드")
-    List<String> custDbCodes;
+    List<String> custDbCodeList;
 }
