@@ -10,7 +10,7 @@ public class ColumnInfo {
     @Schema(description = "칼럼 타입")
     String columnType;
     @Schema(description = "칼럼 이름")
-    String keyName;
+    String name;
     @Schema(description = "원본 칼럼 이름")
-    String originalKeyName;
+    String key;
 }

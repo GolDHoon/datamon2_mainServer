@@ -74,158 +74,82 @@ public class CustInfoService {
             ColumnInfo columnInfo = new ColumnInfo();
             columnInfo.setColumnType("custom");
             columnInfo.setFilterType("text");
-            columnInfo.setKeyName(key);
-            columnInfo.setOriginalKeyName(key);
+            columnInfo.setName(key);
+            columnInfo.setKey(key);
             getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
         });
 
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnType("basic");
         columnInfo.setFilterType("select");
-        columnInfo.setKeyName("상태");
-        columnInfo.setOriginalKeyName("cdbsCode");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("소스");
-        columnInfo.setOriginalKeyName("utmSource");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("매체");
-        columnInfo.setOriginalKeyName("utmMedium");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("캠페인");
-        columnInfo.setOriginalKeyName("utmCampaign");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("키워드");
-        columnInfo.setOriginalKeyName("utmTerm");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("콘텐츠");
-        columnInfo.setOriginalKeyName("utmContent");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("text");
-        columnInfo.setKeyName("ip");
-        columnInfo.setOriginalKeyName("ip");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("date");
-        columnInfo.setKeyName("생성일");
-        columnInfo.setOriginalKeyName("createDate");
-        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
-
-        columnInfo = new ColumnInfo();
-        columnInfo.setColumnType("basic");
-        columnInfo.setFilterType("date");
-        columnInfo.setKeyName("최종수정일");
-        columnInfo.setOriginalKeyName("modifyDate");
+        columnInfo.setName("상태");
+        columnInfo.setKey("cdbsCode");
         getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
 
         columnInfo = new ColumnInfo();
         columnInfo.setColumnType("crm");
         columnInfo.setFilterType("text");
-        columnInfo.setKeyName("메모");
-        columnInfo.setOriginalKeyName("memo");
+        columnInfo.setName("메모");
+        columnInfo.setKey("memo");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("소스");
+        columnInfo.setKey("utmSource");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("매체");
+        columnInfo.setKey("utmMedium");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("캠페인");
+        columnInfo.setKey("utmCampaign");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("키워드");
+        columnInfo.setKey("utmTerm");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("콘텐츠");
+        columnInfo.setKey("utmContent");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("ip");
+        columnInfo.setKey("ip");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("date");
+        columnInfo.setName("생성일");
+        columnInfo.setKey("createDate");
+        getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("date");
+        columnInfo.setName("최종수정일");
+        columnInfo.setKey("modifyDate");
         getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
 
         custInfoDtoList.forEach(dto -> {
-            List<RowInfo> rowInfoList = new ArrayList<>();
-
-            RowInfo rowInfo = new RowInfo();
-            rowInfo.setData(dto.getCdbsCode());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("상태");
-            rowInfo.setOriginalKeyName("cdbsCode");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getUtmSource());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("소스");
-            rowInfo.setOriginalKeyName("utmSource");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getUtmMedium());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("매체");
-            rowInfo.setOriginalKeyName("utmMedium");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getUtmCampaign());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("캠페인");
-            rowInfo.setOriginalKeyName("utmCampaign");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getUtmTerm());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("키워드");
-            rowInfo.setOriginalKeyName("utmTerm");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getUtmContent());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("콘텐츠");
-            rowInfo.setOriginalKeyName("utmContent");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getIp());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("ip");
-            rowInfo.setOriginalKeyName("ip");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getCreateDate());
-            rowInfo.setDataType("date");
-            rowInfo.setKeyName("생성일");
-            rowInfo.setOriginalKeyName("createDate");
-            rowInfoList.add(rowInfo);
-
-            rowInfo = new RowInfo();
-            rowInfo.setData(dto.getModifyDate());
-            rowInfo.setDataType("date");
-            rowInfo.setKeyName("최종수정일");
-            rowInfo.setOriginalKeyName("modifyDate");
-            rowInfoList.add(rowInfo);
-
-            EncryptionUtil encryptionUtil = new EncryptionUtil();
-            customerBasicConsultationService.getCustomerBasicConsultationByCustId(dto.getIdx())
-                    .forEach(customInfo -> {
-                        RowInfo tempRowInfo = new RowInfo();
-                        tempRowInfo.setData(encryptionUtil.AES256decrypt(customInfo.getValue()));
-                        tempRowInfo.setDataType("string");
-                        tempRowInfo.setKeyName(customInfo.getKey());
-                        tempRowInfo.setOriginalKeyName(customInfo.getKey());
-                        rowInfoList.add(tempRowInfo);
-                    });
-
             OutboundDto outbound = outboundService.getOutboundByCustId(dto.getIdx());
 
             if(outbound.getIdx() == null){
@@ -234,14 +158,73 @@ public class CustInfoService {
                 outboundService.save(outbound);
             }
 
-            rowInfo = new RowInfo();
-            rowInfo.setData(outbound.getMemo());
-            rowInfo.setDataType("string");
-            rowInfo.setKeyName("메모");
-            rowInfo.setOriginalKeyName("memo");
-            rowInfoList.add(rowInfo);
+            OutboundDto finalOutbound = outbound;
+            Map<String, Object> row = new HashMap<>();
+            getCustInfoListOutputDto.getColumnInfoList().forEach(column -> {
+                switch (column.getColumnType()){
+                    case "basic" : {
+                        switch (column.getKey()){
+                            case "cdbsCode" :{
+                                row.put(column.getKey(), dto.getCdbsCode());
+                                break;
+                            }
+                            case "utmSource" :{
+                                row.put(column.getKey(), dto.getUtmSource());
+                                break;
+                            }
+                            case "utmMedium" :{
+                                row.put(column.getKey(), dto.getUtmMedium());
+                                break;
+                            }
+                            case "utmCampaign" :{
+                                row.put(column.getKey(), dto.getUtmCampaign());
+                                break;
+                            }
+                            case "utmTerm" :{
+                                row.put(column.getKey(), dto.getUtmTerm());
+                                break;
+                            }
+                            case "utmContent" :{
+                                row.put(column.getKey(), dto.getUtmContent());
+                                break;
+                            }
+                            case "ip" :{
+                                row.put(column.getKey(), dto.getIp());
+                                break;
+                            }
+                            case "createDate" :{
+                                row.put(column.getKey(), dto.getCreateDate());
+                                break;
+                            }
+                            case "modifyDate" :{
+                                row.put(column.getKey(), dto.getModifyDate());
+                                break;
+                            }
+                            default:break;
+                        }
+                        break;
+                    }
+                    case "crm": {
+                        switch (column.getKey()){
+                            case "memo":{
+                                row.put(column.getKey(), finalOutbound.getMemo());
+                                break;
+                            }
+                            default:break;
+                        }
+                        break;
+                    }
+                    default:break;
+                }
+            });
 
-            getCustInfoListOutputDto.getDataList().add(rowInfoList);
+            EncryptionUtil encryptionUtil = new EncryptionUtil();
+            customerBasicConsultationService.getCustomerBasicConsultationByCustId(dto.getIdx())
+                    .forEach(customInfo -> {
+                        row.put(customInfo.getKey(), encryptionUtil.AES256decrypt(customInfo.getValue()));
+                    });
+
+            getCustInfoListOutputDto.getDataList().add(row);
         });
 
         result.put("result", "S");
