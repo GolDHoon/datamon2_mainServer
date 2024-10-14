@@ -51,12 +51,12 @@ public class CustInfoController {
             , @Parameter(description = "고객DB유형") @RequestParam String custDBType
             , @Parameter(description = "고객DB코드") @RequestParam String custDBCode) throws Exception{
         Map<String, Object> result;
-        List<GetCustInfoListOutputDto> resultData;
+        Object resultData;
         try {
             result = custInfoService.getCustInfoList(request, custDBType, custDBCode);
 
             if(result.get("result").toString().equals("S")){
-                resultData = (List) result.get("output");
+                resultData = result.get("output");
             }else{
                 ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
 

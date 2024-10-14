@@ -154,6 +154,9 @@ public class CustInfoService {
 
             if(outbound.getIdx() == null){
                 outbound = new OutboundDto();
+                outbound.setUserId(userId);
+                outbound.setCustId(dto.getIdx());
+                outbound.setTelColumn("");
                 outbound.createId();
                 outboundService.save(outbound);
             }
