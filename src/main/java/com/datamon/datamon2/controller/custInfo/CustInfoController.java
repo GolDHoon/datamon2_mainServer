@@ -1,12 +1,10 @@
 package com.datamon.datamon2.controller.custInfo;
 
-import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
+import com.datamon.datamon2.dto.input.custInfo.DeleteCustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
-import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
-import com.datamon.datamon2.dto.output.sign.LoginOutputDto;
 import com.datamon.datamon2.servcie.logic.custInfo.CustInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -109,24 +107,19 @@ public class CustInfoController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-//    @PostMapping("/list2")
-//    public ResponseEntity<?> getList2(HttpServletRequest request, HttpServletResponse response, @RequestBody CustInfoDto custInfoDto) throws Exception{
-//        Map<String, Object> result;
-//        try {
-//            result= custInfoService.getListByLpgeCode(custInfoDto);
-//        } catch (Exception e) {
-//            logger.error(e);
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-
-    @PostMapping("/unUseCustInfo")
-    public ResponseEntity<?> modifyCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
+    @PostMapping("/delete")
+    @Operation(summary = "고객정보 삭제", description = "요청한 고객정보를 삭제하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> deleteCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteCustInfoDto deleteCustInfoDto){
         String result;
         try {
-            result = custInfoService.modifyCustInfo(request, modifyCustInfoDto, "useYn");
+            result = custInfoService.deleteCustInfo(request, deleteCustInfoDto);
         } catch (Exception e) {
             logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -135,11 +128,19 @@ public class CustInfoController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("/deleteCustInfo")
-    public ResponseEntity<?> deleteCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
+    @PostMapping("/modify")
+    @Operation(summary = "고객정보 수정", description = "고객정보를 수정하는 API,\n※입력데이터에 대한 정의, 수정시 프론트쪽과 합의가 필요함.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> modifyCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
         String result;
         try {
-            result = custInfoService.modifyCustInfo(request, modifyCustInfoDto, "delYn");
+            result = custInfoService.modifyCustInfo(request, modifyCustInfoDto);
         } catch (Exception e) {
             logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);

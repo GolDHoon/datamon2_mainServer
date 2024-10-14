@@ -1,20 +1,17 @@
 package com.datamon.datamon2.servcie.logic.custInfo;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.input.custInfo.CustInfoDto;
+import com.datamon.datamon2.dto.input.custInfo.DeleteCustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.output.custInfo.ColumnInfo;
 import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
-import com.datamon.datamon2.dto.output.custInfo.RowInfo;
 import com.datamon.datamon2.dto.repository.*;
-import com.datamon.datamon2.servcie.logic.UserService;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.DateTimeUtil;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
-import com.mysql.cj.result.Row;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -227,6 +224,7 @@ public class CustInfoService {
                         row.put(customInfo.getKey(), encryptionUtil.AES256decrypt(customInfo.getValue()));
                     });
 
+            row.put("idx", dto.getIdx());
             getCustInfoListOutputDto.getDataList().add(row);
         });
 
@@ -271,97 +269,26 @@ public class CustInfoService {
     }
 
     @Transactional
-    public Map<String, Object> getListByLpgeCode(CustInfoDto custInfoDto) throws Exception{
-        List<CustomerInformationDto> customerInformationByLpgeCode = customerInformationService.getCustomerInformationByCdbtLowCode(custInfoDto.getLpgeCode());
-        
-        List<String> custIds = customerInformationByLpgeCode.stream()
-                .filter(dto -> !dto.getDelYn())
-                .map(CustomerInformationDto::getIdx)
-                .collect(Collectors.toList());
-
-        List<CustomerBasicConsultationDto> customerBasicConsultationBycustIdList = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(custIds);
-
-        List<String> keyList = customerBasicConsultationBycustIdList.stream()
-                .map(CustomerBasicConsultationDto::getKey)
-                .distinct()
-                .collect(Collectors.toList());
-
-        List<Map<String, Object>> rows = customerInformationByLpgeCode.stream()
-                .filter(dto -> !dto.getDelYn())
-                .map(dto -> {
-                    Map<String, Object> map = new HashMap<>();
-                    Boolean useYn = !dto.getUseYn();
-                    map.put("idx", dto.getIdx());
-                    map.put("cdbtLowCode", Optional.ofNullable(dto.getCdbtLowCode()).orElse(" "));
-                    map.put("품질", Optional.ofNullable(CommonCodeCache.getCdbqCodes().stream()
-                            .filter(code -> code.getCodeFullName().equals(dto.getCdbqCode()))
-                            .map(code -> code.getCodeValue())
-                            .findFirst().orElse(" ")).orElse(" "));
-                    map.put("품질변경사유", Optional.ofNullable(dto.getQualityChangeReason()).orElse(" "));
-                    map.put("상태", Optional.ofNullable(CommonCodeCache.getCdbsCodes().stream()
-                            .filter(code -> code.getCodeFullName().equals(dto.getCdbsCode()))
-                            .map(code -> code.getCodeValue())
-                            .findFirst().orElse(" ")).orElse(" "));
-                    map.put("상태변경사유", Optional.ofNullable(dto.getStatusChangeReason()).orElse(" "));
-                    map.put("source", Optional.ofNullable(dto.getUtmSource()).orElse(" "));
-                    map.put("medium", Optional.ofNullable(dto.getUtmMedium()).orElse(" "));
-                    map.put("campaign", Optional.ofNullable(dto.getUtmCampaign()).orElse(" "));
-                    map.put("term", Optional.ofNullable(dto.getUtmTerm()).orElse(" "));
-                    map.put("content", Optional.ofNullable(dto.getUtmContent()).orElse(" "));
-                    map.put("IP", dto.getIp());
-                    map.put("사용여부", useYn.toString());
-                    map.put("삭제여부", dto.getDelYn().toString());
-                    map.put("생성일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getCreateDate())).orElse(""));
-                    map.put("수정일", Optional.ofNullable(dateTimeUtil.LocalDateTimeToDateTimeStr(dto.getModifyDate())).orElse(""));
-
-                    List<String> tempKeyList = new ArrayList<>(keyList);
-
-                    Iterator<String> keyIterator = tempKeyList.iterator();
-                    EncryptionUtil encryptionUtil = new EncryptionUtil();
-
-                    while (keyIterator.hasNext()) {
-                        String key = keyIterator.next();
-
-                        boolean removed = customerBasicConsultationBycustIdList.stream()
-                                .filter(custCusultation -> Objects.equals(custCusultation.getCustId(), dto.getIdx()) && key.equals(custCusultation.getKey()))
-                                .peek(custCusultation -> map.put(custCusultation.getKey(), Optional.ofNullable(encryptionUtil.AES256decrypt(custCusultation.getValue())).orElse("")))
-                                .count() > 0; // just for triggering the terminal operation
-
-                        if (removed) {
-                            keyIterator.remove();
-                        }
-                    }
-
-                    if (!tempKeyList.isEmpty()) tempKeyList.forEach(key -> map.put(key, null))
-                            ;
-                    return map;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("keyList", keyList);
-        result.put("rows", rows);
-
-        return result;
-    }
-
-    @Transactional
-    public String modifyCustInfo(HttpServletRequest request, ModifyCustInfoDto modifyCustInfoDto, String mode) throws Exception{
+    public String deleteCustInfo(HttpServletRequest request, DeleteCustInfoDto deleteCustInfoDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        CustomerInformationDto customerInformationById = customerInformationService.getCustomerInformationById(modifyCustInfoDto.getIdx());
+        CustomerInformationDto customerInformationById = customerInformationService.getCustomerInformationById(deleteCustInfoDto.getCustInfoIdx());
 
-        if(mode.equals("useYn")){
-            customerInformationById.setUseYn(!modifyCustInfoDto.isValue());
-            customerInformationById.modify(userId);
-        }else if (mode.equals("delYn")){
-            customerInformationById.setDelYn(modifyCustInfoDto.isValue());
-            customerInformationById.delete(userId);
-        }
+        customerInformationById.setDelYn(true);
+        customerInformationById.delete(userId);
 
         customerInformationService.save(customerInformationById);
+        return "success";
+    }
+
+    @Transactional
+    public String modifyCustInfo(HttpServletRequest request, ModifyCustInfoDto modifyCustInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
         return "success";
     }
 }
