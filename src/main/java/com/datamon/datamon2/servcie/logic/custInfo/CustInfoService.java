@@ -258,7 +258,9 @@ public class CustInfoService {
         outputDtoList.get(0).setCustDbType("CDBT_LPGE");
         outputDtoList.get(0).setCustDbCodeList(new ArrayList<>());
         lpgeDbCodeList.forEach(code -> {
-            outputDtoList.get(0).getCustDbCodeList().add(code.getCodeFullName());
+            Map<String, String> dbCode = new HashMap<>();
+            dbCode.put(code.getCodeFullName(), code.getCodeValue());
+            outputDtoList.get(0).getCustDbCodeList().add(dbCode);
         });
 
         result.put("result", "S");
