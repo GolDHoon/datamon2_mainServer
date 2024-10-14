@@ -260,6 +260,7 @@ public class CustInfoService {
         lpgeDbCodeList.forEach(code -> {
             Map<String, String> dbCode = new HashMap<>();
             dbCode.put(code.getCodeFullName(), code.getCodeValue());
+            dbCode.put("key", code.getCodeFullName());
             outputDtoList.get(0).getCustDbCodeList().add(dbCode);
         });
 
