@@ -3,6 +3,7 @@ package com.datamon.datamon2.controller.custInfo;
 import com.datamon.datamon2.dto.input.custInfo.DeleteCustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
 import com.datamon.datamon2.servcie.logic.custInfo.CustInfoService;
@@ -110,42 +111,71 @@ public class CustInfoController {
     @PostMapping("/delete")
     @Operation(summary = "고객정보 삭제", description = "요청한 고객정보를 삭제하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
     public ResponseEntity<?> deleteCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteCustInfoDto deleteCustInfoDto){
-        String result;
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
         try {
             result = custInfoService.deleteCustInfo(request, deleteCustInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
             logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/modify")
     @Operation(summary = "고객정보 수정", description = "고객정보를 수정하는 API,\n※입력데이터에 대한 정의, 수정시 프론트쪽과 합의가 필요함.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
     public ResponseEntity<?> modifyCustInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody ModifyCustInfoDto modifyCustInfoDto){
-        String result;
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
         try {
             result = custInfoService.modifyCustInfo(request, modifyCustInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
             logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 }

@@ -3,6 +3,8 @@ package com.datamon.datamon2.servcie.logic.custInfo;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.custInfo.DeleteCustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
+import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.ColumnInfo;
 import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustInfoService {
+    private final OutboundHistoryService outboundHistoryService;
     private UserBaseService userBaseService;
     private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private CustomerInformationService customerInformationService;
@@ -29,13 +32,14 @@ public class CustInfoService {
     private UserCdbtMappingService userCdbtMappingService;
     private JwtUtil jwtUtil;
 
-    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil, UserBaseService userBaseService, UserBaseService userBaseService1, OutboundService outboundService, UserCdbtMappingService userCdbtMappingService) {
+    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil, UserBaseService userBaseService, UserBaseService userBaseService1, OutboundService outboundService, UserCdbtMappingService userCdbtMappingService, OutboundHistoryService outboundHistoryService) {
         this.customerInformationService = customerInformationService;
         this.customerBasicConsultationService = customerBasicConsultationService;
         this.jwtUtil = jwtUtil;
         this.userBaseService = userBaseService1;
         this.outboundService = outboundService;
         this.userCdbtMappingService = userCdbtMappingService;
+        this.outboundHistoryService = outboundHistoryService;
     }
 
     @Transactional
@@ -269,26 +273,139 @@ public class CustInfoService {
     }
 
     @Transactional
-    public String deleteCustInfo(HttpServletRequest request, DeleteCustInfoDto deleteCustInfoDto) throws Exception{
+    public Map<String, Object> deleteCustInfo(HttpServletRequest request, DeleteCustInfoDto deleteCustInfoDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        CustomerInformationDto customerInformationById = customerInformationService.getCustomerInformationById(deleteCustInfoDto.getCustInfoIdx());
+        CustomerInformationDto custInfo = customerInformationService.getCustomerInformationById(deleteCustInfoDto.getCustInfoIdx());
 
-        customerInformationById.setDelYn(true);
-        customerInformationById.delete(userId);
+        if(custInfo.getIdx() == null){
+            errorOutputDto.setCode(400);
+            errorOutputDto.setDetailReason("고객정보를 찾을 수 없습니다.");
+            result.put("output", errorOutputDto);
+            return result;
+        }
 
-        customerInformationService.save(customerInformationById);
-        return "success";
+        custInfo.setDelYn(true);
+        custInfo.delete(userId);
+
+        customerInformationService.save(custInfo);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("고객정보가 삭제되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
     }
 
     @Transactional
-    public String modifyCustInfo(HttpServletRequest request, ModifyCustInfoDto modifyCustInfoDto) throws Exception{
+    public Map<String, Object> modifyCustInfo(HttpServletRequest request, ModifyCustInfoDto modifyCustInfoDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+        CustomerInformationDto custInfo = customerInformationService.getCustomerInformationById(modifyCustInfoDto.getCustInfoIdx());
 
-        return "success";
+        if(custInfo.getIdx() == null){
+            errorOutputDto.setCode(400);
+            errorOutputDto.setDetailReason("고객정보를 찾을 수 없습니다.");
+            result.put("output", errorOutputDto);
+        }
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+        OutboundDto outbound = outboundService.getOutboundByCustId(modifyCustInfoDto.getCustInfoIdx());
+        List<CustomerBasicConsultationDto> customColumnDataList = customerBasicConsultationService.getCustomerBasicConsultationByCustId(modifyCustInfoDto.getCustInfoIdx());
+
+        modifyCustInfoDto.getDataList().forEach(map -> {
+            switch ((String) map.get("columnType")){
+                case "crm":{
+                    switch ((String) map.get("key")){
+                        case "memo" : {
+                            outbound.setMemo((String) map.get("value"));
+                            break;
+                        }
+                        default: break;
+                    }
+                    break;
+                }
+                case "basic":{
+                    switch ((String) map.get("key")){
+                        case "cdbsCode" :{
+                            custInfo.setCdbsCode((String) map.get("value"));
+                            break;
+                        }
+                        case "utmSource" :{
+                            custInfo.setUtmSource((String) map.get("value"));
+                            break;
+                        }
+                        case "utmMedium" :{
+                            custInfo.setUtmMedium((String) map.get("value"));
+                            break;
+                        }
+                        case "utmCampaign" :{
+                            custInfo.setUtmCampaign((String) map.get("value"));
+                            break;
+                        }
+                        case "utmTerm" :{
+                            custInfo.setUtmTerm((String) map.get("value"));
+                            break;
+                        }
+                        case "utmContent" :{
+                            custInfo.setUtmContent((String) map.get("value"));
+                            break;
+                        }
+                        case "ip" :{
+                            custInfo.setIp((String) map.get("value"));
+                            break;
+                        }
+                        default:break;
+                    }
+                    break;
+                }
+                case "custom":{
+                    customColumnDataList.stream()
+                            .filter(dto -> dto.getKey().equals((String) map.get("key")))
+                            .map(dto -> {
+                                dto.setValue(encryptionUtil.AES256encrypt((String) map.get("value")));
+                                return null;
+                            })
+                            .collect(Collectors.toList());
+                    break;
+                }
+                default: break;
+            }
+
+            customColumnDataList.forEach(dto -> {
+                customerBasicConsultationService.save(dto);
+            });
+
+            custInfo.modify(userId);
+            customerInformationService.save(custInfo);
+
+            outboundService.save(outbound);
+
+            OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
+            outboundHistoryDto.setHistory(outbound);
+            outboundHistoryDto.setCustDbStatusInfo(custInfo);
+            outboundHistoryDto.setSaveReason("고객정보목록-고객정보 수정");
+            outboundHistoryDto.createId();
+            outboundHistoryDto.create(userId);
+
+            outboundHistoryService.save(outboundHistoryDto);
+        });
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("고객정보가 삭제되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
     }
 }
