@@ -384,25 +384,25 @@ public class CustInfoService {
                 }
                 default: break;
             }
-
-            customColumnDataList.forEach(dto -> {
-                customerBasicConsultationService.save(dto);
-            });
-
-            custInfo.modify(userId);
-            customerInformationService.save(custInfo);
-
-            outboundService.save(outbound);
-
-            OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
-            outboundHistoryDto.setHistory(outbound);
-            outboundHistoryDto.setCustDbStatusInfo(custInfo);
-            outboundHistoryDto.setSaveReason("고객정보목록-고객정보 수정");
-            outboundHistoryDto.createId();
-            outboundHistoryDto.create(userId);
-
-            outboundHistoryService.save(outboundHistoryDto);
         });
+
+        customColumnDataList.forEach(dto -> {
+            customerBasicConsultationService.save(dto);
+        });
+
+        custInfo.modify(userId);
+        customerInformationService.save(custInfo);
+
+        outboundService.save(outbound);
+
+        OutboundHistoryDto outboundHistoryDto = new OutboundHistoryDto();
+        outboundHistoryDto.setHistory(outbound);
+        outboundHistoryDto.setCustDbStatusInfo(custInfo);
+        outboundHistoryDto.setSaveReason("고객정보목록-고객정보 수정");
+        outboundHistoryDto.createId();
+        outboundHistoryDto.create(userId);
+
+        outboundHistoryService.save(outboundHistoryDto);
 
         successOutputDto.setCode(200);
         successOutputDto.setMessage("고객정보가 삭제되었습니다.");
