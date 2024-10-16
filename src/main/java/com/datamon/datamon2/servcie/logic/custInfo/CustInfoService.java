@@ -171,7 +171,7 @@ public class CustInfoService {
                             case "cdbsCode" :{
                                 row.put(column.getKey(), CommonCodeCache.getCdbsCodes().stream()
                                                                         .filter(code -> code.getCodeFullName().equals(dto.getCdbsCode()))
-                                        .findFirst().get().getCodeValue());
+                                        .findFirst().orElse(new CdbsCodeDto()).getCodeValue());
                                 break;
                             }
                             case "utmSource" :{
