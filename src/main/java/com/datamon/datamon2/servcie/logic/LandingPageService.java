@@ -108,7 +108,6 @@ public class LandingPageService {
 
     @Transactional
     public String registerCustData(String ip, CustDataDto custDataDto) throws Exception{
-        System.out.println("안타냐?");
         boolean ipChecker = false;
         if(custDataDto.getInputMode().equals("local")){
             ip = "127.0.0.1";
@@ -121,9 +120,9 @@ public class LandingPageService {
 
         for(int i = 0; i < landingPageBlockedIpByLpgeCode.size(); i++){
             String regIp = "";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp1());
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp2());
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp3());
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp1())+".";
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp2())+".";
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp3())+".";
             regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp4());
             if(ip.equals(regIp)){
                 ipChecker = true;

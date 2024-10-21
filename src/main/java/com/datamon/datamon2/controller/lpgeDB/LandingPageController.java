@@ -78,7 +78,11 @@ public class LandingPageController {
         Map<String, String> result = new HashMap<>();
         String resultStr = "";
         try {
-            resultStr = landingPageService.registerCustData(request.getHeader("X-Forwarded-For"), custDataDto);
+            String clientIp = request.getHeader("X-Forwarded-For");
+            if(clientIp == null) {
+                clientIp = request.getRemoteAddr();
+            }
+            resultStr = landingPageService.registerCustData(clientIp, custDataDto);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
