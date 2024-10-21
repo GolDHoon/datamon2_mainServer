@@ -121,9 +121,9 @@ public class LandingPageService {
 
         for(int i = 0; i < landingPageBlockedIpByLpgeCode.size(); i++){
             String regIp = "";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp1())+".";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp2())+".";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp3())+".";
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp1());
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp2());
+            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp3());
             regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp4());
             if(ip.equals(regIp)){
                 ipChecker = true;
