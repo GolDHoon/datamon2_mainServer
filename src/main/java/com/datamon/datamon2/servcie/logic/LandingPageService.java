@@ -173,6 +173,8 @@ public class LandingPageService {
         Map<Integer, List<DbDuplicateDataProcessingDto>> groupedByKeyGroupNoDtoList = dbDuplicationDataProcessingService.getByDbCode(dbCode).stream()
                 .collect(Collectors.groupingBy(DbDuplicateDataProcessingDto::getKeyGroupNo));
         List<String> custIdxList = customerInformationService.getCustomerInformationByCdbtLowCode(dbCode).stream()
+                .filter(CustomerInformationDto::getUseYn)
+                .filter(cust -> !cust.getDelYn())
                 .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());
         Map<String, List<CustomerBasicConsultationDto>> keyList = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(custIdxList).stream()
