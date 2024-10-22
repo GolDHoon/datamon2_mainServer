@@ -1,4 +1,4 @@
-package com.datamon.datamon2.dto.input.user;
+package com.datamon.datamon2.dto.input.member;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

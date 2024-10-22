@@ -2,9 +2,9 @@ package com.datamon.datamon2.servcie.logic.member;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
-import com.datamon.datamon2.dto.input.user.CheckIdDuplicateDto;
-import com.datamon.datamon2.dto.input.user.CreateMemberUserDto;
-import com.datamon.datamon2.dto.input.user.DeleteMemberUserDto;
+import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
+import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
+import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
 import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.MemberInfomationDto;
@@ -18,7 +18,6 @@ import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,9 +1,17 @@
 package com.datamon.datamon2.controller.member;
 
+import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
+import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
+import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
-import com.datamon.datamon2.dto.input.user.*;
-import com.datamon.datamon2.servcie.logic.UserService;
+import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.servcie.logic.member.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
@@ -12,10 +20,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/member")
+@Tag(name = "직원계정정보", description = "직원계정정보 관련 API")
 public class MemberController {
     private static final Logger logger = LogManager.getLogger(MemberController.class);
 
@@ -26,6 +36,15 @@ public class MemberController {
     }
 
     @GetMapping("/list")
+    @Operation(summary = "직원계정정보 목록 API", description = "직원계정정보 목록을 출력해주는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
     public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response) throws Exception{
         Map<String, ?> result;
 
@@ -40,7 +59,17 @@ public class MemberController {
     }
 
     @PostMapping("/reqAccount")
-    public ResponseEntity<?> requestMemberAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberAccountDto memberAccountDto) throws Exception {
+    @Operation(summary = "직원계정 신청 API", description = "직원계정을 신청하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> requestMemberAccount(HttpServletRequest request, HttpServletResponse response
+            , @RequestBody MemberAccountDto memberAccountDto) throws Exception {
         String result;
         try {
             result = memberService.requestMemberAccount(memberAccountDto, request);
@@ -52,6 +81,15 @@ public class MemberController {
     }
 
     @PostMapping("/create")
+    @Operation(summary = "직원계정 생성 API", description = "직원계정을 생성하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
     public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateMemberUserDto createMemberUserDto) throws Exception {
         String result;
         try {
@@ -64,6 +102,15 @@ public class MemberController {
     }
 
     @PostMapping("/delete")
+    @Operation(summary = "직원계정 삭제 API", description = "직원계정을 삭제하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
     public ResponseEntity<?> deleteMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteMemberUserDto deleteMemberUserDto) throws Exception {
         String result;
         try {
@@ -76,6 +123,15 @@ public class MemberController {
     }
 
     @PostMapping("/checkIdDuplicate")
+    @Operation(summary = "직원계정 ID중복체크 API", description = "직원계정을 ID중복체크하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
     public ResponseEntity<?> checkIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
         String result;
         try {
