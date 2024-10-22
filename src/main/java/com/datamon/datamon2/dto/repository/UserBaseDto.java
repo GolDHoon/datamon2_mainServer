@@ -17,4 +17,5 @@ public class UserBaseDto extends DrivenCommonCheckUserDto implements Serializabl
     String userPw;
     String salt;
     String userType;
+    String userStatus;
 }

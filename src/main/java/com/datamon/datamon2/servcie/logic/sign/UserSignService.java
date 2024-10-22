@@ -58,7 +58,9 @@ public class UserSignService {
 
         result.put("result", "E");
 
-        List<UserBaseDto> matchedUserList = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId());
+        List<UserBaseDto> matchedUserList = userBaseService.getUserBaseByUserId(loginInuptDto.getUserId()).stream()
+                .filter(dto -> dto.getUserStatus().equals("ACST_ACTV"))
+                .collect(Collectors.toList());
 
         if(matchedUserList.size() == 0){
             errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
