@@ -1,4 +1,4 @@
-package com.datamon.datamon2.controller.lpgeDB;
+package com.datamon.datamon2.controller.lpgeCustInfoInput;
 
 import com.datamon.datamon2.dto.input.landingPage.CreateDto;
 import com.datamon.datamon2.dto.input.landingPage.CustDataDto;
@@ -92,5 +92,18 @@ public class LandingPageController {
             case "fail - Blocked IP" -> new ResponseEntity<>(result, HttpStatus.FORBIDDEN);
             default -> new ResponseEntity<>(result, HttpStatus.OK);
         };
+    }
+
+    @GetMapping("/getDuplRmList")
+    public ResponseEntity<?> getDuplicateRemovalPreprocessingList(@RequestParam String dbCode){
+        List<Object> result;
+        try {
+            result = landingPageService.getDuplicateRemovalPreprocessingList(dbCode);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

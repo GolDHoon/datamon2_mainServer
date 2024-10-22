@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Before;
 @Aspect
 public class SessionCheckAspect {
     @Before("execution(* com.datamon.datamon2.controller.*.*.*(..))" +
-            "&& !execution(* com.datamon.datamon2.controller.lpgeDB.LandingPageController.*(..))" +
+            "&& !execution(* com.datamon.datamon2.controller.lpgeCustInfoInput.LandingPageController.*(..))" +
             "&& !execution(* com.datamon.datamon2.controller.*.UserSignController.login(..))")
     public void sessionCheck(){
 

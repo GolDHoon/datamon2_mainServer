@@ -18,8 +18,8 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
+//    @Value("${jwt.expiration}")
+//    private long expiration;
 
     public String createToken(String id, List<Map<String,Object>> claimsList) throws Exception{
         Map<String, Object> claimsMap = new HashMap<>();
