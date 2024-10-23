@@ -1,9 +1,6 @@
 package com.datamon.datamon2.controller.member;
 
-import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
-import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
-import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
-import com.datamon.datamon2.dto.input.member.MemberAccountDto;
+import com.datamon.datamon2.dto.input.member.*;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.servcie.logic.member.MemberService;
@@ -63,7 +60,7 @@ public class MemberController {
     @Operation(summary = "직원계정 신청 API", description = "직원계정을 신청하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = List.class))),
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
@@ -141,21 +138,36 @@ public class MemberController {
     @PostMapping("/checkIdDuplicate")
     @Operation(summary = "직원계정 ID중복체크 API", description = "직원계정을 ID중복체크하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "200", description = "확인 완료.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
     public ResponseEntity<?> checkIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
-        String result;
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
         try {
             result = memberService.checkIdDuplicate(checkIdDuplicateDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
+            logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 }

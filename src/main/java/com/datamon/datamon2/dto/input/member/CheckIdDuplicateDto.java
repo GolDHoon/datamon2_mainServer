@@ -8,5 +8,5 @@ public class CheckIdDuplicateDto {
     @Schema(description = "유저 계정")
     String userId;
     @Schema(description = "업체 데이터 ID")
-    String companyId;
+    int companyId;
 }

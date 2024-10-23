@@ -198,34 +198,36 @@ public class MemberService {
     }
 
     @Transactional
-    public String checkIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(checkIdDuplicateDto.getCompanyId()).stream()
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .findFirst().orElse(new UserBaseDto());
+    public Map<String, Object> checkIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
 
-        if (companyUser.getIdx() == null){
-            return "checkId-fail:sessionError";
-        }
+        CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationById(checkIdDuplicateDto.getCompanyId());
 
-        CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(companyUser.getIdx());
-
-        List<Integer> memberIdxList = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyInfomationByUserId.getIdx()).stream()
-                .map(dto -> {
-                    return dto.getUserId();
-                })
+        List<Integer> memberIdxList = memberInfomationService.getMemberInfomationDtoListByCompanyId(checkIdDuplicateDto.getCompanyId()).stream()
+                .map(dto-> {return dto.getUserId();})
                 .collect(Collectors.toList());
 
         List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(memberIdxList).stream()
-                .filter(dto -> dto.getUserId().equals(checkIdDuplicateDto.getUserId()))
                 .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
+                .filter(user -> !user.getDelYn())
+                .filter(user -> user.getUserId().equals(checkIdDuplicateDto.getUserId()))
                 .collect(Collectors.toList());
 
         if(userList.size() != 0){
-            return "checkId-fail:idDuplication";
+            errorOutputDto.setCode(404);
+            errorOutputDto.setDetailReason("계정이 중복입니다..");
+            result.put("result", "S");
+            result.put("output", errorOutputDto);
+            return result;
         }else{
-            return "success";
+            successOutputDto.setCode(200);
+            successOutputDto.setMessage("사용가능한 계정입니다..");
+            result.put("result", "S");
+            result.put("output", successOutputDto);
+            return result;
         }
     }
 
