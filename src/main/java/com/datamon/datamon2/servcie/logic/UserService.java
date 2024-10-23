@@ -312,7 +312,8 @@ public class UserService {
 
     @Transactional
     public String checkMemberIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(checkIdDuplicateDto.getCompanyId()).stream()
+
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(String.valueOf(checkIdDuplicateDto.getCompanyId())).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .findFirst().orElse(new UserBaseDto());

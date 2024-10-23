@@ -57,7 +57,7 @@ public class MemberService {
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String salt = encryptionUtil.getSalt();
 
-        CompanyInfomationDto companyInfomationDto =companyInfomationService.getCompanyInfomationById(memberAccountDto.getCompanyId());
+        CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationById(memberAccountDto.getCompanyId());
         UserBaseDto companyUser = userBaseService.getUserBaseById(companyInfomationDto.getUserId());
 
         userBaseDto.setUserId(memberAccountDto.getUserId());
@@ -218,13 +218,12 @@ public class MemberService {
 
         if(userList.size() != 0){
             errorOutputDto.setCode(404);
-            errorOutputDto.setDetailReason("계정이 중복입니다..");
-            result.put("result", "S");
+            errorOutputDto.setDetailReason("계정이 중복입니다.");
             result.put("output", errorOutputDto);
             return result;
         }else{
             successOutputDto.setCode(200);
-            successOutputDto.setMessage("사용가능한 계정입니다..");
+            successOutputDto.setMessage("사용가능한 계정입니다.");
             result.put("result", "S");
             result.put("output", successOutputDto);
             return result;
