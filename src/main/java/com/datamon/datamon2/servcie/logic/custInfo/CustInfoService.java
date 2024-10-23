@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class CustInfoService {
     private final OutboundHistoryService outboundHistoryService;
     private UserBaseService userBaseService;
-    private DateTimeUtil dateTimeUtil = new DateTimeUtil();
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
     private OutboundService outboundService;

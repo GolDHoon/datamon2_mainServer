@@ -30,7 +30,7 @@ public class UserBaseEntity extends DrivenCommonCheckUserEntity implements Seria
     @Column(name = "user_type", nullable = false)
     private String userType;
 
-    @Column(name = "user_status", nullable = false)
+    @Column(name = "user_status")
     private String userStatus;
 
 }

@@ -5,6 +5,8 @@ import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
 import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
+import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.MemberInfomationDto;
@@ -45,7 +47,12 @@ public class MemberService {
     }
 
     @Transactional
-    public String requestMemberAccount(MemberAccountDto memberAccountDto, HttpServletRequest request) throws Exception{
+    public Map<String, Object> requestMemberAccount(MemberAccountDto memberAccountDto, HttpServletRequest request) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
         UserBaseDto userBaseDto = new UserBaseDto();
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String salt = encryptionUtil.getSalt();
@@ -83,10 +90,17 @@ public class MemberService {
         accountApprovalRequestDto.setRequestType("C");
         accountApprovalRequestDto.setUserId(saveUser.getIdx());
         accountApprovalRequestDto.setCompletionYn(false);
+        accountApprovalRequestDto.createIdx();
+        accountApprovalRequestDto.create(CommonCodeCache.getSystemIdIdx());
 
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
-        return "success";
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정신청이 완료되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
     }
 
     @Transactional

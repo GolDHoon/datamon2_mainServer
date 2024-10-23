@@ -5,6 +5,7 @@ import com.datamon.datamon2.entity.AccountApprovalRequestEntity;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * DTO for {@link AccountApprovalRequestEntity}
@@ -17,4 +18,8 @@ public class AccountApprovalRequestDto extends DrivenCommonUserDto implements Se
     String requestReason;
     String rejectionReason;
     Boolean completionYn;
+
+    public void createIdx (){
+        idx = UUID.randomUUID().toString().replaceAll("-", "");
+    }
 }

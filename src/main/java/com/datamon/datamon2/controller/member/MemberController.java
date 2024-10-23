@@ -5,6 +5,7 @@ import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
 import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.servcie.logic.member.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,14 +71,29 @@ public class MemberController {
     })
     public ResponseEntity<?> requestMemberAccount(HttpServletRequest request, HttpServletResponse response
             , @RequestBody MemberAccountDto memberAccountDto) throws Exception {
-        String result;
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
         try {
             result = memberService.requestMemberAccount(memberAccountDto, request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
+            logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/create")
