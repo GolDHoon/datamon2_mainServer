@@ -1,11 +1,19 @@
 package com.datamon.datamon2.controller.admin;
 
+import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
+import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.test.Case1InputDto;
 import com.datamon.datamon2.dto.input.user.*;
+import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
+import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
+import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
+import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
 import com.datamon.datamon2.dto.output.test.Case1OutputDto;
 import com.datamon.datamon2.dto.output.test.Case2OutputDto;
 import com.datamon.datamon2.servcie.logic.UserService;
+import com.datamon.datamon2.servcie.logic.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,76 +36,119 @@ import java.util.Map;
 @Tag(name = "admin", description = "admin계정 관련 API")
 public class AdminController {
     private static final Logger logger = LogManager.getLogger(AdminController.class);
-    private UserService userService;
+    private AdminService adminService;
 
-    @PostMapping("/approve/req")
-    @Operation(summary = "admin계정 신청", description = "admin계정의 신청에 사용되는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> requestApprove(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
-        Case2OutputDto case2OutputDto = new Case2OutputDto();
-        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
     }
-
-    @GetMapping("/approve/list")
-    @Operation(summary = "admin계정 등록신청 목록", description = "admin계정 등록신청 목록을 제공하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case1OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> getApproveList (HttpServletRequest request, HttpServletResponse response,
-                                              @Parameter(description = "입력값 설명 여기에 작성")
-                                              @RequestParam String input) {
-        Case1OutputDto case1OutputDto = new Case1OutputDto();
-        case1OutputDto.setResult("결과");
-
-        return new ResponseEntity<>(case1OutputDto, HttpStatus.OK);
-    }
-
-    @PostMapping("/approve/res")
-    @Operation(summary = "admin계정 신청 응답", description = "admin 계정 신청에 대한 응답 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> responseApprove(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
-        Case2OutputDto case2OutputDto = new Case2OutputDto();
-        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
-    }
-
-
 
     @GetMapping("/list")
-    @Operation(summary = "admin계정 목록", description = "admin계정 목록을 제공하는 API")
+    @Operation(summary = "admin계정정보 목록 API", description = "admin계정정보 목록을 출력해주는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case1OutputDto.class))),
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = GetAdminListOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getList (HttpServletRequest request, HttpServletResponse response,
-                                             @Parameter(description = "입력값 설명 여기에 작성")
-                                             @RequestParam String input) {
-        Case1OutputDto case1OutputDto = new Case1OutputDto();
-        case1OutputDto.setResult("결과");
+    public ResponseEntity<?> getAdminList(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result;
+        GetAdminListOutputDto resultData;
 
-        return new ResponseEntity<>(case1OutputDto, HttpStatus.OK);
+        try {
+            result = adminService.getAdminList(request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (GetAdminListOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/reqAccount")
+    @Operation(summary = "admin 계정 신청 API", description = "admin 계정을 신청하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> requestAdminAccount(HttpServletRequest request, HttpServletResponse response
+            , @RequestBody AdminAccountDto adminAccountDto) throws Exception {
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
+        try {
+            result = adminService.requestAdminAccount(adminAccountDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @GetMapping("/approval/list")
+    @Operation(summary = "admin 계정신청정보 목록 API", description = "admin계정신청정보 목록을 출력해주는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = GetRequestAdminAccountListOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> getRequestMemberAccountList(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result;
+        GetRequestAdminAccountListOutputDto resultData;
+
+        try {
+            result = adminService.getRequestAdminAccountList(request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (GetRequestAdminAccountListOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/modify/master")
@@ -145,93 +196,4 @@ public class AdminController {
         return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
     }
 
-//    @GetMapping("/list")
-//    public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response, @RequestParam("listType") String listType) throws Exception{
-//        Map<String, ?> result;
-//
-//        try {
-//            if(listType.equals("user")){
-//                result = userService.getListUser(request);
-//            }else {
-//                result = userService.getListCompany(request);
-//            }
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/createCompanyUser")
-//    public ResponseEntity<?> createCompanyUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateCompanyUserDto createCompanyUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = userService.createCompanyUser(request, createCompanyUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/deleteCompanyUser")
-//    public ResponseEntity<?> deleteCompanyUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteCompanyUserDto deleteCompanyUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = userService.deleteCompanyUser(request, deleteCompanyUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/createMemberUser")
-//    public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateMemberUserDto createMemberUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = userService.createMemberUser(request, createMemberUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/deleteMemberUser")
-//    public ResponseEntity<?> deleteCompanyUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteMemberUserDto deleteMemberUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = userService.deleteMemberUser(request, deleteMemberUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/checkMemberIdDuplicate")
-//    public ResponseEntity<?> checkMemberIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
-//        String result;
-//        try {
-//            result = userService.checkMemberIdDuplicate(checkIdDuplicateDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/checkCompanyIdDuplicate")
-//    public ResponseEntity<?> checkCompanyIdDuplicate(HttpServletRequest request, HttpServletResponse response, @RequestBody CheckIdDuplicateDto checkIdDuplicateDto) throws  Exception {
-//        String result;
-//        try {
-//            result = userService.checkCompanyIdDuplicate(checkIdDuplicateDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,5 +33,14 @@ public class CompanyInfomationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompanyInfomationDto save (CompanyInfomationDto companyInfomationDto){
         return companyInfomationMapper.toDto(companyInfomationRepository.save(companyInfomationMapper.toEntity(companyInfomationDto)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompanyInfomationDto> getCompanyInfomationAll(){
+        List<CompanyInfomationDto> result = new ArrayList<>();
+        companyInfomationRepository.findAll().forEach(entity -> {
+            result.add(companyInfomationMapper.toDto(entity));
+        });
+        return result;
     }
 }

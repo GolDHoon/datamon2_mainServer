@@ -310,6 +310,8 @@ public class MemberService {
                 .filter(user -> user.getUserStatus().equals("ACST_ACTV"))
                 .collect(Collectors.toList());
 
+        userList.sort(Comparator.comparing(UserBaseDto::getCreateDate).reversed());
+
         userList.forEach(user -> {
             Map<String, Object> row = new HashMap<>();
 
