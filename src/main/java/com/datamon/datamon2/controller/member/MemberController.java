@@ -108,47 +108,47 @@ public class MemberController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "직원계정 생성 API", description = "직원계정을 생성하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = List.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateMemberUserDto createMemberUserDto) throws Exception {
-        String result;
-        try {
-            result = memberService.createUser(request, createMemberUserDto);
-        } catch (Exception e) {
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "직원계정 삭제 API", description = "직원계정을 삭제하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = List.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> deleteMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteMemberUserDto deleteMemberUserDto) throws Exception {
-        String result;
-        try {
-            result = memberService.deleteMemberUser(request, deleteMemberUserDto);
-        } catch (Exception e) {
-            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
+//    @PostMapping("/create")
+//    @Operation(summary = "직원계정 생성 API", description = "직원계정을 생성하는 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+//                    content = @Content(schema = @Schema(implementation = List.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+//    })
+//    public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateMemberUserDto createMemberUserDto) throws Exception {
+//        String result;
+//        try {
+//            result = memberService.createUser(request, createMemberUserDto);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//    }
+//
+//    @PostMapping("/delete")
+//    @Operation(summary = "직원계정 삭제 API", description = "직원계정을 삭제하는 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+//                    content = @Content(schema = @Schema(implementation = List.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+//    })
+//    public ResponseEntity<?> deleteMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteMemberUserDto deleteMemberUserDto) throws Exception {
+//        String result;
+//        try {
+//            result = memberService.deleteMemberUser(request, deleteMemberUserDto);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//    }
 
     @PostMapping("/checkIdDuplicate")
     @Operation(summary = "직원계정 ID중복체크 API", description = "직원계정을 ID중복체크하는 API")

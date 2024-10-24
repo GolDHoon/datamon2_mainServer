@@ -151,49 +151,49 @@ public class AdminController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-    @PostMapping("/modify/master")
-    @Operation(summary = "admin계정 수정", description = "admin 계정을 마스터가 수정하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> modifyByMaster(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
-        Case2OutputDto case2OutputDto = new Case2OutputDto();
-        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
-    }
+//    @PostMapping("/modify/master")
+//    @Operation(summary = "admin계정 수정", description = "admin 계정을 마스터가 수정하는 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
+//                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+//    })
+//    public ResponseEntity<?> modifyByMaster(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
+//        Case2OutputDto case2OutputDto = new Case2OutputDto();
+//        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
+//    }
+//
+//    @PostMapping("/modify/admin")
+//    @Operation(summary = "admin계정 수정요청", description = "admin 계정을 admin 수정요청하는 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
+//                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+//    })
+//    public ResponseEntity<?> modifyByAdmin(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
+//        Case2OutputDto case2OutputDto = new Case2OutputDto();
+//        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
+//    }
 
-    @PostMapping("/modify/admin")
-    @Operation(summary = "admin계정 수정요청", description = "admin 계정을 admin 수정요청하는 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> modifyByAdmin(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
-        Case2OutputDto case2OutputDto = new Case2OutputDto();
-        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "admin 계정 삭제", description = "api 설명")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
-                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> delete(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
-        Case2OutputDto case2OutputDto = new Case2OutputDto();
-        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
-    }
+//    @PostMapping("/delete")
+//    @Operation(summary = "admin 계정 삭제", description = "api 설명")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공적으로 응답이 반환되었습니다.",
+//                    content = @Content(schema = @Schema(implementation = Case2OutputDto.class))),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+//    })
+//    public ResponseEntity<?> delete(HttpServletRequest request, HttpServletResponse response, @RequestBody Case1InputDto case1InputDto) throws Exception{
+//        Case2OutputDto case2OutputDto = new Case2OutputDto();
+//        return new ResponseEntity<>(case2OutputDto, HttpStatus.OK);
+//    }
 
 }
