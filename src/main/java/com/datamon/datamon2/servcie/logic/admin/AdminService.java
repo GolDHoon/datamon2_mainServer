@@ -9,10 +9,7 @@ import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
 import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
-import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
-import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
-import com.datamon.datamon2.dto.repository.MemberInfomationDto;
-import com.datamon.datamon2.dto.repository.UserBaseDto;
+import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.AccountApprovalRequestService;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
@@ -112,6 +109,13 @@ public class AdminService {
 
         columnInfo = new ColumnInfo();
         columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("업체유형");
+        columnInfo.setKey("userType");
+        getAdminListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
         columnInfo.setFilterType("text");
         columnInfo.setName("대표자명");
         columnInfo.setKey("ceo");
@@ -187,6 +191,9 @@ public class AdminService {
 
             row.put("idx", user.getIdx());
             row.put("userId", user.getUserId());
+            row.put("userType", CommonCodeCache.getUstyCodes().stream()
+                    .filter(code -> code.getCodeFullName().equals(user.getUserType()))
+                    .findFirst().orElse(new UstyCodeDto()).getCodeValue());
             row.put("createDate", user.getCreateDate());
             row.put("name", companyInfo.getName());
             row.put("ceo", companyInfo.getCeo());
@@ -245,6 +252,13 @@ public class AdminService {
         columnInfo.setFilterType("text");
         columnInfo.setName("업체명");
         columnInfo.setKey("name");
+        getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("유저유형");
+        columnInfo.setKey("userType");
         getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
 
         columnInfo = new ColumnInfo();
@@ -326,6 +340,9 @@ public class AdminService {
             row.put("requestReason", reqList.getRequestReason());
             row.put("rejectionReason", reqList.getRejectionReason());
             row.put("userId", userInfo.getUserId());
+            row.put("userType", CommonCodeCache.getUstyCodes().stream()
+                    .filter(code -> code.getCodeFullName().equals(userInfo.getUserType()))
+                    .findFirst().orElse(new UstyCodeDto()).getCodeValue());
             row.put("name", companyInfo.getName());
             row.put("ceo", companyInfo.getCeo());
             row.put("corporateNumber", companyInfo.getCorporateNumber());
