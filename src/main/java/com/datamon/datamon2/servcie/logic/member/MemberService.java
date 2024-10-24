@@ -5,8 +5,11 @@ import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
 import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
+import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
+import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
+import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
 import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
 import com.datamon.datamon2.dto.repository.MemberInfomationDto;
@@ -23,10 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -246,58 +246,212 @@ public class MemberService {
     }
 
     @Transactional
-    public Map<String, ?> getListUser(HttpServletRequest request) throws Exception{
+    public Map<String, Object> getMemberList(HttpServletRequest request) throws Exception{
         Map<String, Object> result = new HashMap<>();
-        List<Map<String, String>> rows = new ArrayList<>();
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        GetMemberListOutputDto getMemberListOutputDto = new GetMemberListOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        getMemberListOutputDto.setColumnInfoList(new ArrayList<>());
+        getMemberListOutputDto.setDataList(new ArrayList<>());
+        result.put("result", "E");
 
-        List<String> memberCodes = CommonCodeCache.getMemberCodes().stream()
-                .map(dto -> {
-                    return dto.getCodeFullName();
-                })
+        int companyId = Integer.parseInt(httpSessionUtil.getAttribute("companyId").toString());
+
+        ColumnInfo columnInfo = new ColumnInfo();
+
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("계정");
+        columnInfo.setKey("userId");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("담당자 명");
+        columnInfo.setKey("name");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("역할");
+        columnInfo.setKey("role");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("연락처");
+        columnInfo.setKey("contactPhone");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("이메일");
+        columnInfo.setKey("contactMail");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("date");
+        columnInfo.setName("생성일");
+        columnInfo.setKey("createDate");
+        getMemberListOutputDto.getColumnInfoList().add(columnInfo);
+
+        List<MemberInfomationDto> memberInfoList =  memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId);
+
+        List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(memberInfoList.stream()
+                .map(memberInfo -> {return memberInfo.getUserId();})
+                .collect(Collectors.toList())).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(user -> !user.getDelYn())
+                .filter(user -> user.getUserStatus().equals("ACST_ACTV"))
                 .collect(Collectors.toList());
 
-        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+        userList.forEach(user -> {
+            Map<String, Object> row = new HashMap<>();
 
-        UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
+            MemberInfomationDto memberInfo = memberInfoList.stream()
+                    .filter(member -> Objects.equals(member.getUserId(), user.getIdx()))
+                    .findFirst().orElse(new MemberInfomationDto());
 
-        int companyId = 0;
+            row.put("idx", user.getIdx());
+            row.put("userId", user.getUserId());
+            row.put("createDate", user.getCreateDate());
+            row.put("role", memberInfo.getRole());
+            row.put("name", memberInfo.getName());
+            row.put("contactPhone", memberInfo.getContactPhone());
+            row.put("contactMail", memberInfo.getContactMail());
 
-        if(memberCodes.contains(userBaseById.getUserType()) || "USTY_DEVL".equals(userBaseById.getUserType()) || "USTY_INME".equals(userBaseById.getUserType())){
-            MemberInfomationDto memberInfomationByUserId = memberInfomationService.getMemberInfomationByUserId(userId);
-            companyId = memberInfomationByUserId.getCompanyId();
-        }else {
-            CompanyInfomationDto companyInfomationByUserId = companyInfomationService.getCompanyInfomationByUserId(userId);
-            companyId = companyInfomationByUserId.getIdx();
-        }
-
-
-        memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId).forEach(dto -> {
-            Map<String, String> resultRow = new HashMap<>();
-            UserBaseDto userDto = userBaseService.getUserBaseById(dto.getUserId());
-
-            if(userDto.getUseYn() && !userDto.getDelYn()){
-                resultRow.put("ID", userDto.getUserId());
-                resultRow.put("담당자명", dto.getName());
-                resultRow.put("소속", dto.getRole());
-                resultRow.put("연락처", dto.getContactPhone());
-                resultRow.put("이메일", dto.getContactMail());
-
-                resultRow.put("최종수정일시", dateTimeUtil.LocalDateTimeToDateTimeStr(userDto.getModifyDate()));
-                resultRow.put("idx", String.valueOf(userDto.getIdx()));
-                rows.add(resultRow);
-            }
+            getMemberListOutputDto.getDataList().add(row);
         });
 
-        List<String> keyList = new ArrayList<>();
-        keyList.add("ID");
-        keyList.add("담당자명");
-        keyList.add("소속");
-        keyList.add("연락처");
-        keyList.add("이메일");
+        result.put("result", "S");
+        result.put("output", getMemberListOutputDto);
 
-        result.put("rows", (Object) rows);
-        result.put("keyList", (Object) keyList);
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> getRequestMemberAccountList(HttpServletRequest request) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        GetRequestMemberAccountListOutputDto getRequestMemberAccountListOutputDto = new GetRequestMemberAccountListOutputDto();
+        getRequestMemberAccountListOutputDto.setColumnInfoList(new ArrayList<>());
+        getRequestMemberAccountListOutputDto.setDataList(new ArrayList<>());
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        result.put("result", "E");
+
+        int companyId = Integer.parseInt(httpSessionUtil.getAttribute("companyId").toString());
+
+        List<MemberInfomationDto> memberInfoList = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId);
+
+        List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(memberInfoList.stream()
+                .map(member -> {return member.getUserId();})
+                .collect(Collectors.toList())).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(user -> !user.getDelYn())
+                .filter(user -> user.getUserStatus().equals("ACST_PEND"))
+                .collect(Collectors.toList());
+
+        List<AccountApprovalRequestDto> approvalRequestList = accountApprovalRequestService.getAccountApprovalRequestByUserIdList(userList.stream()
+                .map(user -> {return user.getIdx();})
+                .collect(Collectors.toList()));
+
+        approvalRequestList.sort(Comparator.comparing(AccountApprovalRequestDto::getCreateDate).reversed());
+
+        ColumnInfo columnInfo = new ColumnInfo();
+
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("계정");
+        columnInfo.setKey("userId");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("담당자 명");
+        columnInfo.setKey("name");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("요청구분");
+        columnInfo.setKey("requestType");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("완료여부");
+        columnInfo.setKey("completionYn");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("역할");
+        columnInfo.setKey("role");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("담당자 연락처");
+        columnInfo.setKey("contactPhone");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("담당자 메일");
+        columnInfo.setKey("contactMail");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("date");
+        columnInfo.setName("신청일");
+        columnInfo.setKey("createDate");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("date");
+        columnInfo.setName("처리일");
+        columnInfo.setKey("modifyDate");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        approvalRequestList.forEach(reqList -> {
+            Map<String, Object> row = new HashMap<>();
+            MemberInfomationDto memberInfo = memberInfoList.stream()
+                    .filter(member -> Objects.equals(member.getUserId(), reqList.getUserId()))
+                    .findFirst().orElse(new MemberInfomationDto());
+
+            UserBaseDto userInfo = userList.stream()
+                    .filter(user -> Objects.equals(user.getIdx(), reqList.getUserId()))
+                    .findFirst().orElse(new UserBaseDto());
+
+            row.put("idx", reqList.getIdx());
+            row.put("requestType", reqList.getRequestType().equals("C")?"신규":"수정");
+            row.put("completionYn", reqList.getCompletionYn()?"완료":"대기");
+            row.put("requestReason", reqList.getRequestReason());
+            row.put("rejectionReason", reqList.getRejectionReason());
+            row.put("userId", userInfo.getUserId());
+            row.put("name", memberInfo.getName());
+            row.put("role", memberInfo.getRole());
+            row.put("contactPhone", memberInfo.getContactPhone());
+            row.put("contactMail", memberInfo.getContactMail());
+            row.put("createDate", reqList.getCreateDate());
+            row.put("modifyDate", reqList.getCreateDate().equals(reqList.getModifyDate())?"":reqList.getModifyDate());
+            getRequestMemberAccountListOutputDto.getDataList().add(row);
+        });
+
+        result.put("result", "S");
+        result.put("output", getRequestMemberAccountListOutputDto);
 
         return result;
     }

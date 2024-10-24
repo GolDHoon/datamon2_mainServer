@@ -3,6 +3,8 @@ package com.datamon.datamon2.controller.member;
 import com.datamon.datamon2.dto.input.member.*;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
+import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
+import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
 import com.datamon.datamon2.servcie.logic.member.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,23 +39,36 @@ public class MemberController {
     @Operation(summary = "직원계정정보 목록 API", description = "직원계정정보 목록을 출력해주는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = List.class))),
+                    content = @Content(schema = @Schema(implementation = GetMemberListOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getList(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        Map<String, ?> result;
+    public ResponseEntity<?> getMemberList(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result;
+        GetMemberListOutputDto resultData;
 
         try {
-            result = memberService.getListUser(request);
+            result = memberService.getMemberList(request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (GetMemberListOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e);
             return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/reqAccount")
@@ -154,6 +169,42 @@ public class MemberController {
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @GetMapping("/approval/list")
+    @Operation(summary = "직원계정신청정보 목록 API", description = "직원계정신청정보 목록을 출력해주는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = GetRequestMemberAccountListOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> getRequestMemberAccountList(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result;
+        GetRequestMemberAccountListOutputDto resultData;
+
+        try {
+            result = memberService.getRequestMemberAccountList(request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (GetRequestMemberAccountListOutputDto) result.get("output");
             }else{
                 ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
 
