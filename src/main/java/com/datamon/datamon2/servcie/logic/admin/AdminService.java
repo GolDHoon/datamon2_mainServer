@@ -52,6 +52,7 @@ public class AdminService {
         userBaseDto.setUserId(adminAccountDto.getUserId());
         userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(adminAccountDto.getUserPw(), salt));
         userBaseDto.setSalt(salt);
+        userBaseDto.setUserType(adminAccountDto.getUserType());
         userBaseDto.setUserStatus("ACST_PEND");
         userBaseDto.create(CommonCodeCache.getSystemIdIdx());
         UserBaseDto saveUser = userBaseService.save(userBaseDto);
@@ -218,7 +219,7 @@ public class AdminService {
         List<CompanyInfomationDto> companyInfoList = companyInfomationService.getCompanyInfomationAll();
 
         List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(companyInfoList.stream()
-                        .map(member -> {return member.getUserId();})
+                        .map(company -> {return company.getUserId();})
                         .collect(Collectors.toList())).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(user -> !user.getDelYn())

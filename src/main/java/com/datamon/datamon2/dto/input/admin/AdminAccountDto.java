@@ -11,6 +11,8 @@ public class AdminAccountDto {
     String userPw;
     @Schema(description = "업체명")
     String name;
+    @Schema(description = "유저유형")
+    String userType;
     @Schema(description = "대표자명")
     String ceo;
     @Schema(description = "사업자등록번호")
