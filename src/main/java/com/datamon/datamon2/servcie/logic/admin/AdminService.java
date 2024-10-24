@@ -191,9 +191,25 @@ public class AdminService {
 
             row.put("idx", user.getIdx());
             row.put("userId", user.getUserId());
-            row.put("userType", CommonCodeCache.getUstyCodes().stream()
-                    .filter(code -> code.getCodeFullName().equals(user.getUserType()))
-                    .findFirst().orElse(new UstyCodeDto()).getCodeValue());
+            switch (user.getUserType()){
+                case "USTY_MAST": {
+                    row.put("userType", "마스터");
+                    break;
+                }
+                case "USTY_CLNT": {
+                    row.put("userType", "광고주");
+                    break;
+                }
+                case "USTY_ADAC": {
+                    row.put("userType", "광고대행사");
+                    break;
+                }
+                case "USTY_CRAC": {
+                    row.put("userType", "CRM");
+                    break;
+                }
+                default: break;
+            }
             row.put("createDate", user.getCreateDate());
             row.put("name", companyInfo.getName());
             row.put("ceo", companyInfo.getCeo());
@@ -340,9 +356,25 @@ public class AdminService {
             row.put("requestReason", reqList.getRequestReason());
             row.put("rejectionReason", reqList.getRejectionReason());
             row.put("userId", userInfo.getUserId());
-            row.put("userType", CommonCodeCache.getUstyCodes().stream()
-                    .filter(code -> code.getCodeFullName().equals(userInfo.getUserType()))
-                    .findFirst().orElse(new UstyCodeDto()).getCodeValue());
+            switch (userInfo.getUserType()){
+                case "USTY_MAST": {
+                    row.put("userType", "마스터");
+                    break;
+                }
+                case "USTY_CLNT": {
+                    row.put("userType", "광고주");
+                    break;
+                }
+                case "USTY_ADAC": {
+                    row.put("userType", "광고대행사");
+                    break;
+                }
+                case "USTY_CRAC": {
+                    row.put("userType", "CRM");
+                    break;
+                }
+                default: break;
+            }
             row.put("name", companyInfo.getName());
             row.put("ceo", companyInfo.getCeo());
             row.put("corporateNumber", companyInfo.getCorporateNumber());

@@ -80,6 +80,7 @@ public class MemberService {
         MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
         memberInfomationDto.setCompanyId(memberAccountDto.getCompanyId());
         memberInfomationDto.setUserId(saveUser.getIdx());
+        memberInfomationDto.setName(memberAccountDto.getName());
         memberInfomationDto.setRole(memberAccountDto.getRole());
         memberInfomationDto.setContactMail(memberAccountDto.getContactMail());
         memberInfomationDto.setContactPhone(memberAccountDto.getContactPhone());
