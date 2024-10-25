@@ -75,7 +75,7 @@ public class AdminController {
     @PostMapping("/reqAccount")
     @Operation(summary = "admin 계정 신청 API", description = "admin 계정을 신청하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
                     content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
@@ -148,7 +148,7 @@ public class AdminController {
     @PostMapping("/create")
     @Operation(summary = "admin계정 생성 API", description = "admin계정을 생성하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
                     content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
@@ -184,7 +184,7 @@ public class AdminController {
     @PostMapping("/modify")
     @Operation(summary = "admin계정 수정 API", description = "admin계정을 수정하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
                     content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
@@ -220,7 +220,7 @@ public class AdminController {
     @PostMapping("/delete")
     @Operation(summary = "admin계정 삭제 API", description = "admin계정을 삭제하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
                     content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
