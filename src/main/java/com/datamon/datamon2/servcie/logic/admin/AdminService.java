@@ -3,6 +3,7 @@ package com.datamon.datamon2.servcie.logic.admin;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
+import com.datamon.datamon2.dto.input.member.MebaerAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
@@ -508,6 +509,66 @@ public class AdminService {
 
         successOutputDto.setCode(200);
         successOutputDto.setMessage("계정이 삭제되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> approveAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+
+        accountApprovalRequestDto.setCompletionYn(true);
+        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestService.save(accountApprovalRequestDto);
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+
+        userBaseDto.setUserStatus("ACST_ACTV");
+        userBaseDto.create(userId);
+        userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 승인되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> rejectAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+
+        accountApprovalRequestDto.setCompletionYn(true);
+        accountApprovalRequestDto.setRequestReason(mebaerAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestService.save(accountApprovalRequestDto);
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+
+        userBaseDto.create(userId);
+        userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 반려되었습니다.");
         result.put("result", "S");
         result.put("output", successOutputDto);
 
