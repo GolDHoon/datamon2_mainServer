@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
+import com.datamon.datamon2.entity.AccountApprovalRequestEntity;
 import com.datamon.datamon2.mapper.repository.AccountApprovalRequestMapper;
 import com.datamon.datamon2.repository.jpa.AccountApprovalRequestRepository;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,10 @@ public class AccountApprovalRequestService {
         });
 
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public AccountApprovalRequestDto getAccountApprovalRequestById(String idx){
+        return accountApprovalRequestMapper.toDto(accountApprovalRequestRepository.findById(idx).orElse(new AccountApprovalRequestEntity()));
     }
 }

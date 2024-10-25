@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.logic.member;
 
 import com.datamon.datamon2.common.CommonCodeCache;
+import com.datamon.datamon2.dto.input.member.MebaerAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.MemberUserInfoDto;
@@ -101,26 +102,6 @@ public class MemberService {
         result.put("result", "S");
         result.put("output", successOutputDto);
         return result;
-    }
-
-    @Transactional
-    public String requestSendVerificationSms() throws Exception{
-        return "success";
-    }
-
-    @Transactional
-    public String requestSendVerificationMail() throws Exception{
-        return "success";
-    }
-
-    @Transactional
-    public String confirmSmsVerification() throws Exception{
-        return "success";
-    }
-
-    @Transactional
-    public String confirmMailVerification() throws Exception{
-        return "success";
     }
 
     @Transactional
@@ -494,5 +475,85 @@ public class MemberService {
         result.put("output", successOutputDto);
 
         return result;
+    }
+
+    @Transactional
+    public Map<String, Object> approveAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+
+        accountApprovalRequestDto.setCompletionYn(true);
+        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestService.save(accountApprovalRequestDto);
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+
+        userBaseDto.setUserStatus("ACST_ACTV");
+        userBaseDto.create(userId);
+        userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 승인되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> rejectAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+
+        accountApprovalRequestDto.setCompletionYn(true);
+        accountApprovalRequestDto.setRequestReason(mebaerAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestService.save(accountApprovalRequestDto);
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+
+        userBaseDto.create(userId);
+        userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 반려되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public String requestSendVerificationSms() throws Exception{
+        return "success";
+    }
+
+    @Transactional
+    public String requestSendVerificationMail() throws Exception{
+        return "success";
+    }
+
+    @Transactional
+    public String confirmSmsVerification() throws Exception{
+        return "success";
+    }
+
+    @Transactional
+    public String confirmMailVerification() throws Exception{
+        return "success";
     }
 }
