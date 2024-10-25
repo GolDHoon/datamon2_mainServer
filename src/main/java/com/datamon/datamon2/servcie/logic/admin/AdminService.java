@@ -2,19 +2,21 @@ package com.datamon.datamon2.servcie.logic.admin;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
+import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
-import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
-import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
+import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
 import com.datamon.datamon2.dto.repository.*;
+import com.datamon.datamon2.servcie.logic.CommonService;
 import com.datamon.datamon2.servcie.repository.AccountApprovalRequestService;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
+import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +26,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
+    private final CommonService commonService;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
     private AccountApprovalRequestService accountApprovalRequestService;
+    private JwtUtil jwtUtil;
 
-    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService) {
+    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService, JwtUtil jwtUtil, CommonService commonService) {
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
         this.accountApprovalRequestService = accountApprovalRequestService;
+        this.jwtUtil = jwtUtil;
+        this.commonService = commonService;
     }
 
     @Transactional
@@ -389,6 +395,121 @@ public class AdminService {
 
         result.put("result", "S");
         result.put("output", getRequestAdminAccountListOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> createAdminUser (HttpServletRequest request, AdminUserInfoDto adminUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        List<String> companyUserTypeList = new ArrayList<>();
+        companyUserTypeList.add("USTY_MAST");
+        companyUserTypeList.add("USTY_CLNT");
+        companyUserTypeList.add("USTY_ADAC");
+        companyUserTypeList.add("USTY_CRAC");
+
+        if(!userBaseService.getUserBaseByUserTypeList(companyUserTypeList).stream()
+                .filter(user -> user.getUserId().equals(adminUserInfoDto.getUserId()))
+                .collect(Collectors.toList()).isEmpty()) {
+            errorOutputDto.setCode(404);
+            errorOutputDto.setDetailReason("중복된 계정입니다.");
+            result.put("output", errorOutputDto);
+
+            return result;
+        }
+
+        String salt = encryptionUtil.getSalt();
+
+        UserBaseDto userBaseDto = new UserBaseDto();
+        userBaseDto.setUserId(adminUserInfoDto.getUserId());
+        userBaseDto.setSalt(salt);
+        userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(adminUserInfoDto.getUserPw(), salt));
+        userBaseDto.setUserType(adminUserInfoDto.getUserType());
+        userBaseDto.setUserStatus("ACST_ACTV");
+        userBaseDto.create(userId);
+
+        UserBaseDto userInfo = userBaseService.save(userBaseDto);
+
+        CompanyInfomationDto companyInfomationDto = new CompanyInfomationDto();
+        companyInfomationDto.setUserId(userInfo.getIdx());
+        companyInfomationDto.setName(adminUserInfoDto.getName());
+        companyInfomationDto.setCeo(adminUserInfoDto.getCeo());
+        companyInfomationDto.setCorporateNumber(adminUserInfoDto.getCorporateNumber());
+        companyInfomationDto.setCorporateAddress(adminUserInfoDto.getCorporateAddress());
+        companyInfomationDto.setCorporateMail(adminUserInfoDto.getCorporateMail());
+        companyInfomationDto.setBusinessStatus(adminUserInfoDto.getBusinessStatus());
+        companyInfomationDto.setBusinessItem(adminUserInfoDto.getBusinessItem());
+
+        companyInfomationService.save(companyInfomationDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 생성되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> modifyAdminUser (HttpServletRequest request, AdminUserInfoDto adminUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userInfo = userBaseService.getUserBaseById(adminUserInfoDto.getIdx());
+        CompanyInfomationDto companyInfoDto = companyInfomationService.getCompanyInfomationByUserId(userInfo.getIdx());
+
+        companyInfoDto.setName(adminUserInfoDto.getName());
+        companyInfoDto.setCeo(adminUserInfoDto.getCeo());
+        companyInfoDto.setCorporateNumber(adminUserInfoDto.getCorporateNumber());
+        companyInfoDto.setCorporateAddress(adminUserInfoDto.getCorporateAddress());
+        companyInfoDto.setCorporateMail(adminUserInfoDto.getCorporateMail());
+        companyInfoDto.setBusinessStatus(adminUserInfoDto.getBusinessStatus());
+        companyInfoDto.setBusinessItem(adminUserInfoDto.getBusinessItem());
+
+        companyInfomationService.save(companyInfoDto);
+        userInfo.modify(userId);
+        userBaseService.save(userInfo);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 수정되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> deleteAdminUser (HttpServletRequest request, AdminUserInfoDto adminUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(adminUserInfoDto.getIdx());
+        userBaseDto.delete(userId);
+        userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 삭제되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
 
         return result;
     }
