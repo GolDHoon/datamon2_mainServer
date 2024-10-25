@@ -2,8 +2,7 @@ package com.datamon.datamon2.servcie.logic;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
-import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
-import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
+import com.datamon.datamon2.dto.input.member.MemberUserInfoDto;
 import com.datamon.datamon2.dto.input.user.*;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
@@ -223,7 +222,7 @@ public class UserService {
     }
 
     @Transactional
-    public String createMemberUser(HttpServletRequest request, CreateMemberUserDto createMemberUserDto) throws Exception{
+    public String createMemberUser(HttpServletRequest request, MemberUserInfoDto memberUserInfoDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
@@ -232,7 +231,7 @@ public class UserService {
 
         UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
 
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(createMemberUserDto.getCompanyId()).stream()
+        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(memberUserInfoDto.getCompanyId()).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .findFirst().orElse(new UserBaseDto());
@@ -248,7 +247,7 @@ public class UserService {
         List<UserBaseDto> userBaseByIdxList = userBaseService.getUserBaseByIdxList(memberList).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
-                .filter(dto -> dto.getUserId().equals(createMemberUserDto.getUserId()))
+                .filter(dto -> dto.getUserId().equals(memberUserInfoDto.getUserId()))
                 .collect(Collectors.toList());
 
         if(userBaseByIdxList.size() != 0){
@@ -256,9 +255,9 @@ public class UserService {
         }
 
         UserBaseDto userBaseDto = new UserBaseDto();
-        userBaseDto.setUserId(createMemberUserDto.getUserId());
+        userBaseDto.setUserId(memberUserInfoDto.getUserId());
         String salt = encryptionUtil.getSalt();
-        String encryptPw = encryptionUtil.getSHA256WithSalt(createMemberUserDto.getPw(), salt);
+        String encryptPw = encryptionUtil.getSHA256WithSalt(memberUserInfoDto.getPw(), salt);
         userBaseDto.setSalt(salt);
         userBaseDto.setUserPw(encryptPw);
         switch (userBaseById.getUserType()){
@@ -285,10 +284,10 @@ public class UserService {
         MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
         memberInfomationDto.setCompanyId(companyInfo.getIdx());
         memberInfomationDto.setUserId(save.getIdx());
-        memberInfomationDto.setName(createMemberUserDto.getName());
-        memberInfomationDto.setRole(createMemberUserDto.getRole());
-        memberInfomationDto.setContactMail(createMemberUserDto.getMail());
-        memberInfomationDto.setContactPhone(createMemberUserDto.getContactPhone());
+        memberInfomationDto.setName(memberUserInfoDto.getName());
+        memberInfomationDto.setRole(memberUserInfoDto.getRole());
+        memberInfomationDto.setContactMail(memberUserInfoDto.getMail());
+        memberInfomationDto.setContactPhone(memberUserInfoDto.getContactPhone());
 
         memberInfomationService.save(memberInfomationDto);
 

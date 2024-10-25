@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -108,47 +107,113 @@ public class MemberController {
         return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
-//    @PostMapping("/create")
-//    @Operation(summary = "직원계정 생성 API", description = "직원계정을 생성하는 API")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-//                    content = @Content(schema = @Schema(implementation = List.class))),
-//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-//    })
-//    public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateMemberUserDto createMemberUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = memberService.createUser(request, createMemberUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/delete")
-//    @Operation(summary = "직원계정 삭제 API", description = "직원계정을 삭제하는 API")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-//                    content = @Content(schema = @Schema(implementation = List.class))),
-//            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-//            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-//                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-//    })
-//    public ResponseEntity<?> deleteMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody DeleteMemberUserDto deleteMemberUserDto) throws Exception {
-//        String result;
-//        try {
-//            result = memberService.deleteMemberUser(request, deleteMemberUserDto);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
+    @PostMapping("/create")
+    @Operation(summary = "직원계정 생성 API", description = "직원계정을 생성하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> createMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberUserInfoDto memberUserInfoDto) throws Exception {
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
+        try {
+            result = memberService.createMemberUser(request, memberUserInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/modify")
+    @Operation(summary = "직원계정 수정 API", description = "직원계정을 수정하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> modifyMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberUserInfoDto memberUserInfoDto) throws Exception {
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
+        try {
+            result = memberService.modifyMemberUser(request, memberUserInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "직원계정 삭제 API", description = "직원계정을 삭제하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> deleteMemberUser(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberUserInfoDto memberUserInfoDto) throws Exception {
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+
+        try {
+            result = memberService.deleteMemberUser(request, memberUserInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
 
     @PostMapping("/checkIdDuplicate")
     @Operation(summary = "직원계정 ID중복체크 API", description = "직원계정을 ID중복체크하는 API")

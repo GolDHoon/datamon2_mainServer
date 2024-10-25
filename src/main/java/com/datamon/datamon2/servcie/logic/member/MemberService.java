@@ -3,8 +3,7 @@ package com.datamon.datamon2.servcie.logic.member;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
-import com.datamon.datamon2.dto.input.member.CreateMemberUserDto;
-import com.datamon.datamon2.dto.input.member.DeleteMemberUserDto;
+import com.datamon.datamon2.dto.input.member.MemberUserInfoDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
@@ -125,80 +124,6 @@ public class MemberService {
     }
 
     @Transactional
-    public String createUser(HttpServletRequest request, CreateMemberUserDto createMemberUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
-
-        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
-
-        EncryptionUtil encryptionUtil = new EncryptionUtil();
-
-        UserBaseDto userBaseById = userBaseService.getUserBaseById(userId);
-
-        UserBaseDto companyUser = userBaseService.getUserBaseByUserId(createMemberUserDto.getCompanyId()).stream()
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .findFirst().orElse(new UserBaseDto());
-        CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(companyUser.getIdx());
-
-        List<MemberInfomationDto> memberInfomationDtoListByCompanyId = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyInfo.getIdx());
-        List<Integer> memberList = memberInfomationDtoListByCompanyId.stream()
-                .map(dto -> {
-                    return dto.getUserId();
-                })
-                .collect(Collectors.toList());
-
-        List<UserBaseDto> userBaseByIdxList = userBaseService.getUserBaseByIdxList(memberList).stream()
-                .filter(UserBaseDto::getUseYn)
-                .filter(dto -> !dto.getDelYn())
-                .filter(dto -> dto.getUserId().equals(createMemberUserDto.getUserId()))
-                .collect(Collectors.toList());
-
-        if(userBaseByIdxList.size() != 0){
-            return "createMember-fail:idDuplication";
-        }
-
-        UserBaseDto userBaseDto = new UserBaseDto();
-        userBaseDto.setUserId(createMemberUserDto.getUserId());
-        String salt = encryptionUtil.getSalt();
-        String encryptPw = encryptionUtil.getSHA256WithSalt(createMemberUserDto.getPw(), salt);
-        userBaseDto.setSalt(salt);
-        userBaseDto.setUserPw(encryptPw);
-        switch (userBaseById.getUserType()){
-            case "USTY_MAST":
-                userBaseDto.setUserType("USTY_INME");
-                break;
-            case "USTY_CLNT":
-                userBaseDto.setUserType("USTY_CLME");
-                break;
-            case "USTY_ADAC":
-                userBaseDto.setUserType("USTY_AAME");
-                break;
-            case "USTY_CRAC":
-                userBaseDto.setUserType("USTY_CAME");
-                break;
-            default:
-                userBaseDto.setUserType(userBaseById.getUserType());
-                break;
-        }
-        userBaseDto.setUserStatus("ACST_ACTV");
-        userBaseDto.create(userId);
-
-        UserBaseDto save = userBaseService.save(userBaseDto);
-
-        MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
-        memberInfomationDto.setCompanyId(companyInfo.getIdx());
-        memberInfomationDto.setUserId(save.getIdx());
-        memberInfomationDto.setName(createMemberUserDto.getName());
-        memberInfomationDto.setRole(createMemberUserDto.getRole());
-        memberInfomationDto.setContactMail(createMemberUserDto.getMail());
-        memberInfomationDto.setContactPhone(createMemberUserDto.getContactPhone());
-
-        memberInfomationService.save(memberInfomationDto);
-
-        return "success";
-    }
-
-    @Transactional
     public Map<String, Object> checkIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -229,21 +154,6 @@ public class MemberService {
             result.put("output", successOutputDto);
             return result;
         }
-    }
-
-    @Transactional
-    public String deleteMemberUser(HttpServletRequest request, DeleteMemberUserDto deleteMemberUserDto) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
-
-        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
-
-        UserBaseDto userBaseById = userBaseService.getUserBaseById(deleteMemberUserDto.getIdx());
-        userBaseById.setDelYn(true);
-        userBaseById.delete(userId);
-
-        userBaseService.save(userBaseById);
-
-        return "success";
     }
 
     @Transactional
@@ -455,6 +365,133 @@ public class MemberService {
 
         result.put("result", "S");
         result.put("output", getRequestMemberAccountListOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> createMemberUser(HttpServletRequest request, MemberUserInfoDto memberUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        CompanyInfomationDto companyInfo = companyInfomationService.getCompanyInfomationByUserId(userId);
+        UserBaseDto companyUser =  userBaseService.getUserBaseById(userId);
+
+        if(!userBaseService.getUserBaseByUserId(memberUserInfoDto.getUserId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(user -> !user.getDelYn())
+                .filter(user -> Objects.equals(memberInfomationService.getMemberInfomationByUserId(user.getIdx()).getCompanyId(), companyInfo.getIdx()))
+                .collect(Collectors.toList()).isEmpty()){
+            errorOutputDto.setCode(404);
+            errorOutputDto.setDetailReason("중복된 계정입니다.");
+            result.put("output", errorOutputDto);
+
+            return result;
+        }
+
+        UserBaseDto userBaseDto = new UserBaseDto();
+        String salt = encryptionUtil.getSalt();
+
+        userBaseDto.setUserId(memberUserInfoDto.getUserId());
+        userBaseDto.setSalt(salt);
+        userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(memberUserInfoDto.getPw(), salt));
+        userBaseDto.setUserStatus("ACST_ACTV");
+        switch (companyUser.getUserType()){
+            case "USTY_MAST":
+                userBaseDto.setUserType("USTY_INME");
+                break;
+            case "USTY_CLNT":
+                userBaseDto.setUserType("USTY_CLME");
+                break;
+            case "USTY_ADAC":
+                userBaseDto.setUserType("USTY_AAME");
+                break;
+            case "USTY_CRAC":
+                userBaseDto.setUserType("USTY_CAME");
+                break;
+            default:
+                break;
+        }
+        userBaseDto.create(userId);
+
+        UserBaseDto save = userBaseService.save(userBaseDto);
+
+        MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
+        memberInfomationDto.setName(memberUserInfoDto.getName());
+        memberInfomationDto.setUserId(save.getIdx());
+        memberInfomationDto.setRole(memberUserInfoDto.getRole());
+        memberInfomationDto.setCompanyId(companyInfo.getIdx());
+        memberInfomationDto.setContactMail(memberUserInfoDto.getMail());
+        memberInfomationDto.setContactPhone(memberUserInfoDto.getContactPhone());
+
+        memberInfomationService.save(memberInfomationDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 생성되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> modifyMemberUser(HttpServletRequest request, MemberUserInfoDto memberUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(memberUserInfoDto.getIdx());
+
+        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(memberUserInfoDto.getIdx());
+        memberInfomationDto.setName(memberUserInfoDto.getName());
+        memberInfomationDto.setRole(memberUserInfoDto.getRole());
+        memberInfomationDto.setContactMail(memberUserInfoDto.getMail());
+        memberInfomationDto.setContactPhone(memberUserInfoDto.getContactPhone());
+
+        memberInfomationService.save(memberInfomationDto);
+
+        userBaseDto.modify(userId);
+        UserBaseDto save = userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 수정되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> deleteMemberUser(HttpServletRequest request, MemberUserInfoDto memberUserInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseById = userBaseService.getUserBaseById(memberUserInfoDto.getIdx());
+        userBaseById.setDelYn(true);
+        userBaseById.delete(userId);
+
+        userBaseService.save(userBaseById);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("계정이 삭제되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
 
         return result;
     }
