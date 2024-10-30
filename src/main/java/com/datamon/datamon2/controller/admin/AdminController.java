@@ -41,7 +41,7 @@ public class AdminController {
     @PostMapping("/checkIdDuplicate")
     @Operation(summary = "admin 계정 ID중복체크 API", description = "admin 계정을 ID중복체크하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 확인 성공.",
                     content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
@@ -77,7 +77,7 @@ public class AdminController {
     @GetMapping("/search/brm")
     @Operation(summary = "admin 계정Id 검색 API", description = "사업자등록번호로 admin 계정Id 검색해주는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+            @ApiResponse(responseCode = "200", description = "데이터 확인 성공.",
                     content = @Content(schema = @Schema(implementation = SearchCompanyInfoByBRMOutputDto.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
