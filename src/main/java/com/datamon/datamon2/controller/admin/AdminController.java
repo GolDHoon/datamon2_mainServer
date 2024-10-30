@@ -4,7 +4,6 @@ import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
 import com.datamon.datamon2.dto.input.admin.AdminAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
-import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.admin.SearchCompanyInfoByBRMOutputDto;
