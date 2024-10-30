@@ -3,15 +3,15 @@ package com.datamon.datamon2.servcie.logic.admin;
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
-import com.datamon.datamon2.dto.input.member.MebaerAccountRequestProcessingDto;
+import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
+import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
+import com.datamon.datamon2.dto.output.admin.SearchCompanyInfoByBRMOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
-import com.datamon.datamon2.dto.output.sign.CompanyInfoDto;
 import com.datamon.datamon2.dto.repository.*;
-import com.datamon.datamon2.servcie.logic.CommonService;
 import com.datamon.datamon2.servcie.repository.AccountApprovalRequestService;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
@@ -27,18 +27,72 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
-    private final CommonService commonService;
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
     private AccountApprovalRequestService accountApprovalRequestService;
     private JwtUtil jwtUtil;
 
-    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService, JwtUtil jwtUtil, CommonService commonService) {
+    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService, JwtUtil jwtUtil) {
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
         this.accountApprovalRequestService = accountApprovalRequestService;
         this.jwtUtil = jwtUtil;
-        this.commonService = commonService;
+    }
+
+    @Transactional
+    public Map<String, Object> checkIdDuplicate(CheckIdDuplicateDto checkIdDuplicateDto) throws Exception{
+        Map<String, Object> result = new HashMap<>();
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        result.put("result", "E");
+
+        List<String> companyCode = new ArrayList<>();
+        companyCode.add("USTY_MAST");
+        companyCode.add("USTY_CLNT");
+        companyCode.add("USTY_ADAC");
+        companyCode.add("USTY_CRAC");
+
+        List<UserBaseDto> userList = userBaseService.getUserBaseByUserId(checkIdDuplicateDto.getUserId()).stream()
+                .filter(UserBaseDto::getUseYn)
+                .filter(user -> !user.getDelYn())
+                .filter(user -> companyCode.contains(user.getUserType()))
+                .toList();
+
+        if(!userList.isEmpty()){
+            errorOutputDto.setCode(404);
+            errorOutputDto.setDetailReason("계정이 중복입니다.");
+            result.put("output", errorOutputDto);
+        }else{
+            successOutputDto.setCode(200);
+            successOutputDto.setMessage("사용가능한 계정입니다.");
+            result.put("result", "S");
+            result.put("output", successOutputDto);
+        }
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> searchCompanyInfoByBRM(String corporateNumber) throws Exception{
+        Map<String, Object> result = new HashMap<>();
+        SearchCompanyInfoByBRMOutputDto searchCompanyInfoByBRMOutputDto = new SearchCompanyInfoByBRMOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        result.put("result", "E");
+
+        CompanyInfomationDto companyInfoDto = companyInfomationService.getCompanyByCorporateNumber(corporateNumber);
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(companyInfoDto.getUserId());
+
+        if(userBaseDto.getDelYn() || !userBaseDto.getUseYn()){
+            errorOutputDto.setDetailReason("업체ID를 찾을 수 없습니다.");
+            errorOutputDto.setCode(404);
+            result.put("output", errorOutputDto);
+            return result;
+        }
+
+        searchCompanyInfoByBRMOutputDto.setCompanyId(userBaseDto.getUserId());
+        result.put("output", searchCompanyInfoByBRMOutputDto);
+        result.put("result", "S");
+        return result;
     }
 
     @Transactional
@@ -180,14 +234,13 @@ public class AdminService {
         List<CompanyInfomationDto> companyInfoList = companyInfomationService.getCompanyInfomationAll();
 
         List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(companyInfoList.stream()
-                        .map(companyInfo -> {return companyInfo.getUserId();})
+                        .map(CompanyInfomationDto::getUserId)
                         .collect(Collectors.toList())).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(user -> !user.getDelYn())
                 .filter(user -> user.getUserStatus().equals("ACST_ACTV"))
-                .collect(Collectors.toList());
-
-        userList.sort(Comparator.comparing(UserBaseDto::getCreateDate).reversed());
+                .sorted(Comparator.comparing(UserBaseDto::getCreateDate).reversed())
+                .toList();
 
         userList.forEach(user -> {
             Map<String, Object> row = new HashMap<>();
@@ -249,15 +302,15 @@ public class AdminService {
         List<CompanyInfomationDto> companyInfoList = companyInfomationService.getCompanyInfomationAll();
 
         List<UserBaseDto> userList = userBaseService.getUserBaseByIdxList(companyInfoList.stream()
-                        .map(company -> {return company.getUserId();})
+                        .map(CompanyInfomationDto::getUserId)
                         .collect(Collectors.toList())).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(user -> !user.getDelYn())
                 .filter(user -> user.getUserStatus().equals("ACST_PEND"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<AccountApprovalRequestDto> approvalRequestList = accountApprovalRequestService.getAccountApprovalRequestByUserIdList(userList.stream()
-                .map(user -> {return user.getIdx();})
+                .map(UserBaseDto::getIdx)
                 .collect(Collectors.toList()));
 
         approvalRequestList.sort(Comparator.comparing(AccountApprovalRequestDto::getCreateDate).reversed());
@@ -418,15 +471,14 @@ public class AdminService {
         companyUserTypeList.add("USTY_ADAC");
         companyUserTypeList.add("USTY_CRAC");
 
-        if(!userBaseService.getUserBaseByUserTypeList(companyUserTypeList).stream()
-                .filter(user -> user.getUserId().equals(adminUserInfoDto.getUserId()))
-                .collect(Collectors.toList()).isEmpty()) {
-            errorOutputDto.setCode(404);
-            errorOutputDto.setDetailReason("중복된 계정입니다.");
-            result.put("output", errorOutputDto);
+        if(userBaseService.getUserBaseByUserTypeList(companyUserTypeList).stream()
+            .anyMatch(user -> user.getUserId().equals(adminUserInfoDto.getUserId()))) {
+                errorOutputDto.setCode(404);
+                errorOutputDto.setDetailReason("중복된 계정입니다.");
+                result.put("output", errorOutputDto);
 
-            return result;
-        }
+                return result;
+            }
 
         String salt = encryptionUtil.getSalt();
 
@@ -516,7 +568,7 @@ public class AdminService {
     }
 
     @Transactional
-    public Map<String, Object> approveAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> approveAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -525,7 +577,7 @@ public class AdminService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
         accountApprovalRequestDto.create(userId);
@@ -546,7 +598,7 @@ public class AdminService {
     }
 
     @Transactional
-    public Map<String, Object> rejectAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> rejectAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -555,10 +607,10 @@ public class AdminService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.setRequestReason(mebaerAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.setRequestReason(memberAccountRequestProcessingDto.getRejectionReason());
         accountApprovalRequestDto.create(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 

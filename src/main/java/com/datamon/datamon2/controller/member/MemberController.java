@@ -297,12 +297,12 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> approveAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception {
+    public ResponseEntity<?> approveAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception {
         Map<String, Object> result;
         SuccessOutputDto resultData;
 
         try {
-            result = memberService.approveAccount(request, mebaerAccountRequestProcessingDto);
+            result = memberService.approveAccount(request, memberAccountRequestProcessingDto);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");
@@ -333,12 +333,12 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> rejectAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception {
+    public ResponseEntity<?> rejectAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception {
         Map<String, Object> result;
         SuccessOutputDto resultData;
 
         try {
-            result = memberService.rejectAccount(request, mebaerAccountRequestProcessingDto);
+            result = memberService.rejectAccount(request, memberAccountRequestProcessingDto);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");

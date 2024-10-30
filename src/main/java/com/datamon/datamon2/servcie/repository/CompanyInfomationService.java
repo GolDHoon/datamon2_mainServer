@@ -1,6 +1,7 @@
 package com.datamon.datamon2.servcie.repository;
 
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
+import com.datamon.datamon2.entity.CompanyInfomationEntity;
 import com.datamon.datamon2.mapper.repository.CompanyInfomationMapper;
 import com.datamon.datamon2.repository.jpa.CompanyInfomationRepository;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,11 @@ public class CompanyInfomationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompanyInfomationDto save (CompanyInfomationDto companyInfomationDto){
         return companyInfomationMapper.toDto(companyInfomationRepository.save(companyInfomationMapper.toEntity(companyInfomationDto)));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CompanyInfomationDto getCompanyByCorporateNumber(String corporateNumber){
+        return companyInfomationMapper.toDto(companyInfomationRepository.findByCorporateNumber(corporateNumber).orElse(new CompanyInfomationEntity()));
     }
 
     @Transactional(readOnly = true)

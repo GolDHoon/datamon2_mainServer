@@ -1,7 +1,7 @@
 package com.datamon.datamon2.servcie.logic.member;
 
 import com.datamon.datamon2.common.CommonCodeCache;
-import com.datamon.datamon2.dto.input.member.MebaerAccountRequestProcessingDto;
+import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountDto;
 import com.datamon.datamon2.dto.input.member.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.MemberUserInfoDto;
@@ -478,7 +478,7 @@ public class MemberService {
     }
 
     @Transactional
-    public Map<String, Object> approveAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> approveAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -487,7 +487,7 @@ public class MemberService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
         accountApprovalRequestDto.create(userId);
@@ -508,7 +508,7 @@ public class MemberService {
     }
 
     @Transactional
-    public Map<String, Object> rejectAccount(HttpServletRequest request, MebaerAccountRequestProcessingDto mebaerAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> rejectAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -517,10 +517,10 @@ public class MemberService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(mebaerAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.setRequestReason(mebaerAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.setRequestReason(memberAccountRequestProcessingDto.getRejectionReason());
         accountApprovalRequestDto.create(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 

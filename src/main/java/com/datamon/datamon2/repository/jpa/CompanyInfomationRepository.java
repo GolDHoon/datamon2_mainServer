@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CompanyInfomationRepository extends JpaRepository<CompanyInfomationEntity, Integer> {
     Optional<CompanyInfomationEntity> findByUserId(int UserId);
+    Optional<CompanyInfomationEntity> findByCorporateNumber(String corporateNumber);
 }
