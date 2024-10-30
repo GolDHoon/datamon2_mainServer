@@ -254,6 +254,7 @@ public class MemberService {
                 .collect(Collectors.toList()));
 
         approvalRequestList.sort(Comparator.comparing(AccountApprovalRequestDto::getCreateDate).reversed());
+        approvalRequestList.sort((a, b) -> Boolean.compare(a.getCompletionYn(), b.getCompletionYn()));
 
         ColumnInfo columnInfo = new ColumnInfo();
 
@@ -275,6 +276,20 @@ public class MemberService {
         columnInfo.setFilterType("select");
         columnInfo.setName("요청구분");
         columnInfo.setKey("requestType");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("신청사유");
+        columnInfo.setKey("requestReason");
+        getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("반려사유");
+        columnInfo.setKey("rejectionReason");
         getRequestMemberAccountListOutputDto.getColumnInfoList().add(columnInfo);
 
         columnInfo = new ColumnInfo();
@@ -490,7 +505,7 @@ public class MemberService {
         AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestDto.modify(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
@@ -520,8 +535,8 @@ public class MemberService {
         AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.setRequestReason(memberAccountRequestProcessingDto.getRejectionReason());
-        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestDto.setRejectionReason(memberAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.modify(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);

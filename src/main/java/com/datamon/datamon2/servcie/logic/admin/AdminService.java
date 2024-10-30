@@ -2,6 +2,7 @@ package com.datamon.datamon2.servcie.logic.admin;
 
 import com.datamon.datamon2.common.CommonCodeCache;
 import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
+import com.datamon.datamon2.dto.input.admin.AdminAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
@@ -339,6 +340,34 @@ public class AdminService {
 
         columnInfo = new ColumnInfo();
         columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("요청구분");
+        columnInfo.setKey("requestType");
+        getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("신청사유");
+        columnInfo.setKey("requestReason");
+        getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("text");
+        columnInfo.setName("반려사유");
+        columnInfo.setKey("rejectionReason");
+        getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
+        columnInfo.setFilterType("select");
+        columnInfo.setName("완료여부");
+        columnInfo.setKey("completionYn");
+        getRequestAdminAccountListOutputDto.getColumnInfoList().add(columnInfo);
+
+        columnInfo = new ColumnInfo();
+        columnInfo.setColumnType("basic");
         columnInfo.setFilterType("text");
         columnInfo.setName("대표자명");
         columnInfo.setKey("ceo");
@@ -568,7 +597,7 @@ public class AdminService {
     }
 
     @Transactional
-    public Map<String, Object> approveAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> approveAccount(HttpServletRequest request, AdminAccountRequestProcessingDto adminAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -577,10 +606,10 @@ public class AdminService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(adminAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestDto.modify(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
@@ -598,7 +627,7 @@ public class AdminService {
     }
 
     @Transactional
-    public Map<String, Object> rejectAccount(HttpServletRequest request, MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception{
+    public Map<String, Object> rejectAccount(HttpServletRequest request, AdminAccountRequestProcessingDto adminAccountRequestProcessingDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
@@ -607,11 +636,11 @@ public class AdminService {
 
         int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
 
-        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(memberAccountRequestProcessingDto.getIdx());
+        AccountApprovalRequestDto accountApprovalRequestDto = accountApprovalRequestService.getAccountApprovalRequestById(adminAccountRequestProcessingDto.getIdx());
 
         accountApprovalRequestDto.setCompletionYn(true);
-        accountApprovalRequestDto.setRequestReason(memberAccountRequestProcessingDto.getRejectionReason());
-        accountApprovalRequestDto.create(userId);
+        accountApprovalRequestDto.setRejectionReason(adminAccountRequestProcessingDto.getRejectionReason());
+        accountApprovalRequestDto.modify(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);

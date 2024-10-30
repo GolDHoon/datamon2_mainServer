@@ -1,6 +1,7 @@
 package com.datamon.datamon2.controller.admin;
 
 import com.datamon.datamon2.dto.input.admin.AdminAccountDto;
+import com.datamon.datamon2.dto.input.admin.AdminAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
@@ -339,12 +340,12 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> approveAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception {
+    public ResponseEntity<?> approveAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody AdminAccountRequestProcessingDto adminAccountRequestProcessingDto) throws Exception {
         Map<String, Object> result;
         SuccessOutputDto resultData;
 
         try {
-            result = adminService.approveAccount(request, memberAccountRequestProcessingDto);
+            result = adminService.approveAccount(request, adminAccountRequestProcessingDto);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");
@@ -375,12 +376,12 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> rejectAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberAccountRequestProcessingDto memberAccountRequestProcessingDto) throws Exception {
+    public ResponseEntity<?> rejectAccount(HttpServletRequest request, HttpServletResponse response, @RequestBody AdminAccountRequestProcessingDto adminAccountRequestProcessingDto) throws Exception {
         Map<String, Object> result;
         SuccessOutputDto resultData;
 
         try {
-            result = adminService.rejectAccount(request, memberAccountRequestProcessingDto);
+            result = adminService.rejectAccount(request, adminAccountRequestProcessingDto);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");
