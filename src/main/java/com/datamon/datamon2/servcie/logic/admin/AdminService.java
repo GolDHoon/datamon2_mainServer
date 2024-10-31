@@ -7,6 +7,7 @@ import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.input.member.MemberAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
+import com.datamon.datamon2.dto.output.admin.GetAdminOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.admin.SearchCompanyInfoByBRMOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
@@ -38,6 +39,33 @@ public class AdminService {
         this.companyInfomationService = companyInfomationService;
         this.accountApprovalRequestService = accountApprovalRequestService;
         this.jwtUtil = jwtUtil;
+    }
+
+    @Transactional
+    public Map<String, Object> getAdmin(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        Map<String, Object> result = new HashMap<>();
+        GetAdminOutputDto getAdminOutputDto = new GetAdminOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+        CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(userId);
+
+        getAdminOutputDto.setUserId(userBaseDto.getUserId());
+        getAdminOutputDto.setName(companyInfomationDto.getName());
+        getAdminOutputDto.setCeo(companyInfomationDto.getCeo());
+        getAdminOutputDto.setCorporateNumber(companyInfomationDto.getCorporateNumber());
+        getAdminOutputDto.setCorporateAddress(companyInfomationDto.getCorporateAddress());
+        getAdminOutputDto.setCorporateMail(companyInfomationDto.getCorporateMail());
+        getAdminOutputDto.setBusinessStatus(companyInfomationDto.getBusinessStatus());
+        getAdminOutputDto.setBusinessItem(companyInfomationDto.getBusinessItem());
+
+        result.put("output", getAdminOutputDto);
+        result.put("result", "S");
+        return result;
     }
 
     @Transactional
@@ -97,26 +125,43 @@ public class AdminService {
     }
 
     @Transactional
-    public Map<String, Object> requestAdminAccount(AdminAccountDto adminAccountDto) throws Exception{
+    public Map<String, Object> requestAdminAccount(HttpServletRequest request, AdminAccountDto adminAccountDto) throws Exception{
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
         Map<String, Object> result = new HashMap<>();
         result.put("result", "E");
 
-        UserBaseDto userBaseDto = new UserBaseDto();
+        UserBaseDto userBaseDto = null;
+        if(adminAccountDto.getRequestType().equals("C")){
+            userBaseDto = new UserBaseDto();
+        }else{
+            HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+            int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+            userBaseDto = userBaseService.getUserBaseById(userId);
+        }
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String salt = encryptionUtil.getSalt();
 
-
-        userBaseDto.setUserId(adminAccountDto.getUserId());
-        userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(adminAccountDto.getUserPw(), salt));
-        userBaseDto.setSalt(salt);
-        userBaseDto.setUserType(adminAccountDto.getUserType());
+        UserBaseDto saveUser = null;
         userBaseDto.setUserStatus("ACST_PEND");
-        userBaseDto.create(CommonCodeCache.getSystemIdIdx());
-        UserBaseDto saveUser = userBaseService.save(userBaseDto);
+        if(adminAccountDto.getRequestType().equals("C")){
+            userBaseDto.setUserId(adminAccountDto.getUserId());
+            userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(adminAccountDto.getUserPw(), salt));
+            userBaseDto.setSalt(salt);
+            userBaseDto.setUserType(adminAccountDto.getUserType());
+            userBaseDto.create(CommonCodeCache.getSystemIdIdx());
+            saveUser = userBaseService.save(userBaseDto);
+        }else{
+            userBaseDto.modify(userBaseDto.getIdx());
+            saveUser = userBaseService.save(userBaseDto);
+        }
 
-        CompanyInfomationDto companyInfomationDto = new CompanyInfomationDto();
+        CompanyInfomationDto companyInfomationDto = null;
+        if(adminAccountDto.getRequestType().equals("C")){
+            companyInfomationDto = new CompanyInfomationDto();
+        }else{
+            companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(saveUser.getIdx());
+        }
         companyInfomationDto.setUserId(saveUser.getIdx());
         companyInfomationDto.setName(adminAccountDto.getName());
         companyInfomationDto.setCeo(adminAccountDto.getCeo());
@@ -129,17 +174,24 @@ public class AdminService {
 
         AccountApprovalRequestDto accountApprovalRequestDto = new AccountApprovalRequestDto();
         accountApprovalRequestDto.setRequestReason(adminAccountDto.getRequestReason());
-        accountApprovalRequestDto.setRequestType("C");
+        accountApprovalRequestDto.setRequestType(adminAccountDto.getRequestType());
         accountApprovalRequestDto.setUserId(saveUser.getIdx());
         accountApprovalRequestDto.setCompletionYn(false);
         accountApprovalRequestDto.createIdx();
-        accountApprovalRequestDto.create(CommonCodeCache.getSystemIdIdx());
+        if(adminAccountDto.getRequestType().equals("C")){
+            accountApprovalRequestDto.create(CommonCodeCache.getSystemIdIdx());
+        }else{
+            accountApprovalRequestDto.create(saveUser.getIdx());
+        }
 
         accountApprovalRequestService.save(accountApprovalRequestDto);
-
-
+        
         successOutputDto.setCode(200);
-        successOutputDto.setMessage("계정신청이 완료되었습니다.");
+        if(adminAccountDto.getRequestType().equals("C")){
+            successOutputDto.setMessage("계정신청이 완료되었습니다.");
+        }else{
+            successOutputDto.setMessage("계정수정신청이 완료되었습니다.");
+        }
         result.put("result", "S");
         result.put("output", successOutputDto);
         return result;

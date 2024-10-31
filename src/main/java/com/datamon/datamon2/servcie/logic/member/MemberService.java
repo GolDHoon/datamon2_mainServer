@@ -9,6 +9,7 @@ import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.member.GetMemberListOutputDto;
+import com.datamon.datamon2.dto.output.member.GetMemberOutputDto;
 import com.datamon.datamon2.dto.output.member.GetRequestMemberAccountListOutputDto;
 import com.datamon.datamon2.dto.repository.AccountApprovalRequestDto;
 import com.datamon.datamon2.dto.repository.CompanyInfomationDto;
@@ -47,37 +48,78 @@ public class MemberService {
     }
 
     @Transactional
+    public Map<String, Object> getMember(HttpServletRequest request) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        GetMemberOutputDto getMemberOutputDto = new GetMemberOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(userId);
+
+        getMemberOutputDto.setUserId(userBaseDto.getUserId());
+        getMemberOutputDto.setName(memberInfomationDto.getName());
+        getMemberOutputDto.setRole(memberInfomationDto.getRole());
+        getMemberOutputDto.setContactPhone(memberInfomationDto.getContactPhone());
+        getMemberOutputDto.setContactMail(memberInfomationDto.getContactMail());
+
+        result.put("result", "S");
+        result.put("output", getMemberOutputDto);
+        return result;
+    }
+
+    @Transactional
     public Map<String, Object> requestMemberAccount(MemberAccountDto memberAccountDto, HttpServletRequest request) throws Exception{
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
         ErrorOutputDto errorOutputDto = new ErrorOutputDto();
         Map<String, Object> result = new HashMap<>();
         result.put("result", "E");
 
-        UserBaseDto userBaseDto = new UserBaseDto();
         EncryptionUtil encryptionUtil = new EncryptionUtil();
         String salt = encryptionUtil.getSalt();
 
         CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationById(memberAccountDto.getCompanyId());
         UserBaseDto companyUser = userBaseService.getUserBaseById(companyInfomationDto.getUserId());
 
-        userBaseDto.setUserId(memberAccountDto.getUserId());
-        userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(memberAccountDto.getUserPw(), salt));
-        userBaseDto.setSalt(salt);
-
-        switch (companyUser.getUserType()){
-            case "USTY_MAST": userBaseDto.setUserType("USTY_INME"); break;
-            case "USTY_CLNT": userBaseDto.setUserType("USTY_CLME"); break;
-            case "USTY_ADAC": userBaseDto.setUserType("USTY_AAME"); break;
-            case "USTY_CRAC": userBaseDto.setUserType("USTY_CAME"); break;
-            default: break;
+        UserBaseDto userBaseDto = null;
+        if(memberAccountDto.getRequestType().equals("C")){
+            userBaseDto = new UserBaseDto();
+        }else{
+            HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+            int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+            userBaseDto = userBaseService.getUserBaseById(userId);
         }
 
         userBaseDto.setUserStatus("ACST_PEND");
-        userBaseDto.create(CommonCodeCache.getSystemIdIdx());
+        if(memberAccountDto.getRequestType().equals("C")){
+            userBaseDto.setUserId(memberAccountDto.getUserId());
+            userBaseDto.setUserPw(encryptionUtil.getSHA256WithSalt(memberAccountDto.getUserPw(), salt));
+            userBaseDto.setSalt(salt);
+
+            switch (companyUser.getUserType()){
+                case "USTY_MAST": userBaseDto.setUserType("USTY_INME"); break;
+                case "USTY_CLNT": userBaseDto.setUserType("USTY_CLME"); break;
+                case "USTY_ADAC": userBaseDto.setUserType("USTY_AAME"); break;
+                case "USTY_CRAC": userBaseDto.setUserType("USTY_CAME"); break;
+                default: break;
+            }
+
+            userBaseDto.create(CommonCodeCache.getSystemIdIdx());
+        }else {
+            userBaseDto.modify(userBaseDto.getIdx());
+        }
 
         UserBaseDto saveUser = userBaseService.save(userBaseDto);
 
-        MemberInfomationDto memberInfomationDto = new MemberInfomationDto();
+        MemberInfomationDto memberInfomationDto = null;
+        if(memberAccountDto.getRequestType().equals("C")){
+            memberInfomationDto = new MemberInfomationDto();
+        }else{
+            memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(saveUser.getIdx());
+        }
         memberInfomationDto.setCompanyId(memberAccountDto.getCompanyId());
         memberInfomationDto.setUserId(saveUser.getIdx());
         memberInfomationDto.setName(memberAccountDto.getName());
@@ -88,17 +130,25 @@ public class MemberService {
 
         AccountApprovalRequestDto accountApprovalRequestDto = new AccountApprovalRequestDto();
         accountApprovalRequestDto.setRequestReason(memberAccountDto.getRequestReason());
-        accountApprovalRequestDto.setRequestType("C");
+        accountApprovalRequestDto.setRequestType(memberAccountDto.getRequestType());
         accountApprovalRequestDto.setUserId(saveUser.getIdx());
         accountApprovalRequestDto.setCompletionYn(false);
         accountApprovalRequestDto.createIdx();
-        accountApprovalRequestDto.create(CommonCodeCache.getSystemIdIdx());
+        if(memberAccountDto.getRequestType().equals("C")){
+            accountApprovalRequestDto.create(CommonCodeCache.getSystemIdIdx());
+        }else{
+            accountApprovalRequestDto.create(saveUser.getIdx());
+        }
 
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
 
         successOutputDto.setCode(200);
-        successOutputDto.setMessage("계정신청이 완료되었습니다.");
+        if(memberAccountDto.getRequestType().equals("C")){
+            successOutputDto.setMessage("계정신청이 완료되었습니다.");
+        }else{
+            successOutputDto.setMessage("계정수정신청이 완료되었습니다.");
+        }
         result.put("result", "S");
         result.put("output", successOutputDto);
         return result;

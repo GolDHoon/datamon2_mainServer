@@ -5,6 +5,7 @@ import com.datamon.datamon2.dto.input.admin.AdminAccountRequestProcessingDto;
 import com.datamon.datamon2.dto.input.admin.AdminUserInfoDto;
 import com.datamon.datamon2.dto.input.admin.CheckIdDuplicateDto;
 import com.datamon.datamon2.dto.output.admin.GetAdminListOutputDto;
+import com.datamon.datamon2.dto.output.admin.GetAdminOutputDto;
 import com.datamon.datamon2.dto.output.admin.GetRequestAdminAccountListOutputDto;
 import com.datamon.datamon2.dto.output.admin.SearchCompanyInfoByBRMOutputDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
@@ -36,6 +37,42 @@ public class AdminController {
 
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
+    }
+
+    @GetMapping("/")
+    @Operation(summary = "admin계정정보 API", description = "admin계정정보를 출력해주는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
+                    content = @Content(schema = @Schema(implementation = GetAdminOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> getAdmin(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Map<String, Object> result;
+        GetAdminOutputDto resultData;
+
+        try {
+            result = adminService.getAdmin(request);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (GetAdminOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return new ResponseEntity<>("fail - serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/checkIdDuplicate")
@@ -164,7 +201,7 @@ public class AdminController {
         SuccessOutputDto resultData;
 
         try {
-            result = adminService.requestAdminAccount(adminAccountDto);
+            result = adminService.requestAdminAccount(request, adminAccountDto);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (SuccessOutputDto) result.get("output");

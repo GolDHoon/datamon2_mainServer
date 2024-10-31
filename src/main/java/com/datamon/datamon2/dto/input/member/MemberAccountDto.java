@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class MemberAccountDto {
+    @Schema(description = "신청구분")
+    String requestType;
     @Schema(description = "유저 ID")
     String userId;
     @Schema(description = "유저 PW")
