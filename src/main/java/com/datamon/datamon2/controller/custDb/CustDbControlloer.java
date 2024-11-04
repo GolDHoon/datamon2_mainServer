@@ -1,9 +1,6 @@
 package com.datamon.datamon2.controller.custDb;
 
-import com.datamon.datamon2.dto.input.custDb.BlockedIpCopyDto;
-import com.datamon.datamon2.dto.input.custDb.BlockedIpInfoDto;
-import com.datamon.datamon2.dto.input.custDb.BlockedKeywordInfoDto;
-import com.datamon.datamon2.dto.input.custDb.LpgeCodeCreateDto;
+import com.datamon.datamon2.dto.input.custDb.*;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.custDb.BlockedIpCopyOutputDto;
@@ -38,6 +35,146 @@ public class CustDbControlloer {
 
     public CustDbControlloer(CustDbService custDbService) {
         this.custDbService = custDbService;
+    }
+
+    @PostMapping("/pageInfo/save")
+    @Operation(summary = "랜딩페이지 정보 저장 API", description = "랜딩페이지 정보를 저장하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> saveLandingPageInfo(HttpServletRequest request, HttpServletResponse response, @RequestBody LandingPageInfoDto landingPageInfoDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.saveLandingPageInfo(landingPageInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/duplCheck/delete")
+    @Operation(summary = "중복체크 정보 삭제 API", description = "중복체크 정보를 삭제하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> deleteDuplCheck(HttpServletRequest request, HttpServletResponse response, @RequestBody DuplColumnDto duplColumnDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.deleteDuplCheck(request, duplColumnDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/duplCheck/modify")
+    @Operation(summary = "중복체크 정보 수정 API", description = "중복체크 정보를 수정하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> modifyDuplCheck(HttpServletRequest request, HttpServletResponse response, @RequestBody DuplColumnDto duplColumnDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.modifyDuplCheck(request, duplColumnDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/duplCheck/create")
+    @Operation(summary = "중복체크 정보 등록 API", description = "중복체크 정보를 등록하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> createDuplCheck(HttpServletRequest request, HttpServletResponse response, @RequestBody DuplColumnDto duplColumnDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.createDuplCheck(request, duplColumnDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/blockedKeyword/create")

@@ -1,9 +1,6 @@
 package com.datamon.datamon2.servcie.logic.custDb;
 
-import com.datamon.datamon2.dto.input.custDb.BlockedIpCopyDto;
-import com.datamon.datamon2.dto.input.custDb.BlockedIpInfoDto;
-import com.datamon.datamon2.dto.input.custDb.BlockedKeywordInfoDto;
-import com.datamon.datamon2.dto.input.custDb.LpgeCodeCreateDto;
+import com.datamon.datamon2.dto.input.custDb.*;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
@@ -19,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +45,144 @@ public class CustDbService {
         this.landingPageInfomationService = landingPageInfomationService;
         this.memberInfomationService = memberInfomationService;
         this.userBaseService = userBaseService;
+    }
+
+    @Transactional
+    public Map<String, Object> saveLandingPageInfo(LandingPageInfoDto landingPageInfoDto) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        LandingPageInfomationDto landingPageInfomationDto = landingPageInfomationService.getLandingPageInfomationByLpgeCode(landingPageInfoDto.getDbCode());
+        landingPageInfomationDto.setHead(landingPageInfoDto.getHead());
+        landingPageInfomationDto.setBody(landingPageInfoDto.getBody());
+        landingPageInfomationDto.setTitle(landingPageInfoDto.getTitle());
+        landingPageInfomationDto.setDescription(landingPageInfoDto.getDescription());
+        landingPageInfomationDto.setLpgeCode(landingPageInfoDto.getDbCode());
+
+        landingPageInfomationService.save(landingPageInfomationDto);
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> deleteDuplCheck(HttpServletRequest request, DuplColumnDto duplColumnDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        dbDuplicationDataProcessingService.getByDbCode(duplColumnDto.getDbCode()).stream()
+                .filter(dupl -> dupl.getKeyGroupNo() == duplColumnDto.getKeyGroup())
+                .forEach(dupl -> {
+                    dbDuplicationDataProcessingService.deleteDbDuplicateDataProcessingById(dupl.getIdx());
+                });
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> modifyDuplCheck(HttpServletRequest request, DuplColumnDto duplColumnDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        List<DbDuplicateDataProcessingDto> dbDuplicateDataProcessingDtoList = dbDuplicationDataProcessingService.getByDbCode(duplColumnDto.getDbCode()).stream()
+                .filter(dupl -> dupl.getKeyGroupNo() == duplColumnDto.getKeyGroup())
+                .toList();
+
+        duplColumnDto.getKeyList().forEach(key -> {
+            List<String> keyCheck = dbDuplicateDataProcessingDtoList.stream()
+                    .map(dto -> dto.getKey())
+                    .toList();
+
+            if(!keyCheck.contains(key)){
+                DbDuplicateDataProcessingDto dbDuplicateDataProcessingDto = new DbDuplicateDataProcessingDto();
+                dbDuplicateDataProcessingDto.setDbCode(duplColumnDto.getDbCode());
+                dbDuplicateDataProcessingDto.setDbType("CDBT_LPGE");
+                dbDuplicateDataProcessingDto.setKeyGroupNo(duplColumnDto.getKeyGroup());
+                dbDuplicateDataProcessingDto.setKey(key);
+                dbDuplicateDataProcessingDto.setPreprocessingYn(duplColumnDto.isPreprocessingYn());
+                dbDuplicateDataProcessingDto.setPostprocessingYn(duplColumnDto.isPostprocessingYn());
+
+                dbDuplicateDataProcessingDto.create(userId);
+                dbDuplicationDataProcessingService.save(dbDuplicateDataProcessingDto);
+            }
+        });
+
+        dbDuplicateDataProcessingDtoList.forEach(dto -> {
+            AtomicBoolean checker = new AtomicBoolean(true);
+            duplColumnDto.getKeyList().forEach(key -> {
+                if(dto.getKey().equals(key)){
+
+                    DbDuplicateDataProcessingDto dbDuplicateDataProcessingDto = dbDuplicateDataProcessingDtoList.stream()
+                            .filter(dupl -> dupl.getKey().equals(key))
+                            .findFirst().orElse(new DbDuplicateDataProcessingDto());
+
+                    dbDuplicateDataProcessingDto.setDbCode(duplColumnDto.getDbCode());
+                    dbDuplicateDataProcessingDto.setDbType("CDBT_LPGE");
+                    dbDuplicateDataProcessingDto.setKeyGroupNo(duplColumnDto.getKeyGroup());
+                    dbDuplicateDataProcessingDto.setKey(key);
+                    dbDuplicateDataProcessingDto.setPreprocessingYn(duplColumnDto.isPreprocessingYn());
+                    dbDuplicateDataProcessingDto.setPostprocessingYn(duplColumnDto.isPostprocessingYn());
+
+                    dbDuplicateDataProcessingDto.modify(userId);
+                    dbDuplicationDataProcessingService.save(dbDuplicateDataProcessingDto);
+                    checker.set(false);
+                }
+            });
+            if(checker.get()){
+                dbDuplicationDataProcessingService.deleteDbDuplicateDataProcessingById(dto.getIdx());
+            }
+        });
+
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> createDuplCheck(HttpServletRequest request, DuplColumnDto duplColumnDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        int keyGroup = dbDuplicationDataProcessingService.getByDbCode(duplColumnDto.getDbCode()).stream()
+                        .map(dupl -> dupl.getKeyGroupNo())
+                        .distinct()
+                        .max(Integer::compareTo).orElse(0)+1;
+
+        duplColumnDto.getKeyList().forEach(key -> {
+            DbDuplicateDataProcessingDto dbDuplicateDataProcessingDto = new DbDuplicateDataProcessingDto();
+            dbDuplicateDataProcessingDto.setDbCode(duplColumnDto.getDbCode());
+            dbDuplicateDataProcessingDto.setDbType("CDBT_LPGE");
+            dbDuplicateDataProcessingDto.setKeyGroupNo(keyGroup);
+            dbDuplicateDataProcessingDto.setKey(key);
+            dbDuplicateDataProcessingDto.setPreprocessingYn(duplColumnDto.isPreprocessingYn());
+            dbDuplicateDataProcessingDto.setPostprocessingYn(duplColumnDto.isPostprocessingYn());
+
+            dbDuplicateDataProcessingDto.create(userId);
+            dbDuplicationDataProcessingService.save(dbDuplicateDataProcessingDto);
+        });
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
     }
 
     @Transactional
@@ -221,18 +357,16 @@ public class CustDbService {
         List<Map<String, Object>> duplRemoverList = new ArrayList<>();
         groupedByKeyGroupNo.forEach((key, value) -> {
             Map<String, Object> duplRemover = new HashMap<>();
-            duplRemover.put("ketGroup", key);
+            duplRemover.put("keyGroup", key);
             List<DbDuplicateDataProcessingDto> DbDuplicateDataProcessingDtoList =  value.stream()
                 .filter(dupl -> Objects.equals(dupl.getKeyGroupNo(), key))
                 .toList();
 
-            List<Map<String, Object>> duplRemoverInfoList = new ArrayList<>();
+            List<String> duplRemoverInfoList = new ArrayList<>();
             DbDuplicateDataProcessingDtoList.forEach(Info -> {
-                Map<String, Object> duplRemoverInfo = new HashMap<>();
-                duplRemoverInfo.put("column", Info.getKey());
-                duplRemoverInfo.put("postPrc", Info.getPostprocessingYn());
-                duplRemoverInfo.put("prePrc", Info.getPreprocessingYn());
-                duplRemoverInfoList.add(duplRemoverInfo);
+                duplRemover.put("postPrc", Info.getPostprocessingYn());
+                duplRemover.put("prePrc", Info.getPreprocessingYn());
+                duplRemoverInfoList.add(Info.getKey());
             });
             duplRemover.put("infoList", duplRemoverInfoList);
             duplRemoverList.add(duplRemover);
@@ -278,10 +412,10 @@ public class CustDbService {
 
         //랜딩페이지 정보
         LandingPageInfomationDto landingPageInfomationDto = landingPageInfomationService.getLandingPageInfomationByLpgeCode(lpgeCodeDto.getCodeFullName());
-        getLpgeCodeInfoOutputDto.getLandingInfo().put("head", landingPageInfomationDto.getHead());
-        getLpgeCodeInfoOutputDto.getLandingInfo().put("body", landingPageInfomationDto.getBody());
-        getLpgeCodeInfoOutputDto.getLandingInfo().put("title", landingPageInfomationDto.getTitle());
-        getLpgeCodeInfoOutputDto.getLandingInfo().put("description", landingPageInfomationDto.getDescription());
+        getLpgeCodeInfoOutputDto.getLandingInfo().put("head", landingPageInfomationDto.getHead()==null?"":landingPageInfomationDto.getHead());
+        getLpgeCodeInfoOutputDto.getLandingInfo().put("body", landingPageInfomationDto.getBody()==null?"":landingPageInfomationDto.getBody());
+        getLpgeCodeInfoOutputDto.getLandingInfo().put("title", landingPageInfomationDto.getTitle()==null?"":landingPageInfomationDto.getTitle());
+        getLpgeCodeInfoOutputDto.getLandingInfo().put("description", landingPageInfomationDto.getDescription()==null?"":landingPageInfomationDto.getDescription());
 
         //랜딩페이지 매핑 정보
         List<MemberInfomationDto> memberInfomationDtoList = memberInfomationService.getMemberInfomationDtoListByCompanyId(companyId);
