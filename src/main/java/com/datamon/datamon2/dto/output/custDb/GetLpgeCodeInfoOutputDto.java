@@ -11,6 +11,8 @@ import java.util.Map;
 public class GetLpgeCodeInfoOutputDto {
     @Schema(description = "코드명")
     String code;
+    @Schema(description = "url")
+    String url;
     @Schema(description = "중복제거칼럼 정보")
     Map<String, Object> duplColumnInfo;
     @Schema(description = "차단 IP 목록")

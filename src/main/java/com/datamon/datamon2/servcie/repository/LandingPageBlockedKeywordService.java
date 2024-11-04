@@ -33,4 +33,9 @@ public class LandingPageBlockedKeywordService {
     public LandingPageBlockedKeywordDto saveLandingPageBlockedKeyword(LandingPageBlockedKeywordDto landingPageBlockedKeywordDto){
         return landingPageBlockedKeywordMapper.toDto(landingPageBlockedKeywordRepository.save(landingPageBlockedKeywordMapper.toEntity(landingPageBlockedKeywordDto)));
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteLandingPageBlockedKeywordById(Integer id) {
+        landingPageBlockedKeywordRepository.deleteById(id);
+    }
 }

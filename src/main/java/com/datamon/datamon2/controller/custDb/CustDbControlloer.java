@@ -2,6 +2,7 @@ package com.datamon.datamon2.controller.custDb;
 
 import com.datamon.datamon2.dto.input.custDb.BlockedIpCopyDto;
 import com.datamon.datamon2.dto.input.custDb.BlockedIpInfoDto;
+import com.datamon.datamon2.dto.input.custDb.BlockedKeywordInfoDto;
 import com.datamon.datamon2.dto.input.custDb.LpgeCodeCreateDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
@@ -37,6 +38,76 @@ public class CustDbControlloer {
 
     public CustDbControlloer(CustDbService custDbService) {
         this.custDbService = custDbService;
+    }
+
+    @PostMapping("/blockedKeyword/create")
+    @Operation(summary = "차단키워드 등록 API", description = "차단키워드를 등록하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> createBlockedKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody BlockedKeywordInfoDto blockedKeywordInfoDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.createBlockedKeyword(request, blockedKeywordInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
+    }
+
+    @PostMapping("/blockedKeyword/delete")
+    @Operation(summary = "차단키워드 삭제 API", description = "차단키워드를 삭제하는 API.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "데이터 처리 성공.",
+                    content = @Content(schema = @Schema(implementation = SuccessOutputDto.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
+    })
+    public ResponseEntity<?> deleteBlockedKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody BlockedKeywordInfoDto blockedKeywordInfoDto) throws Exception{
+        Map<String, Object> result;
+        SuccessOutputDto resultData;
+        try {
+            result = custDbService.deleteBlockedKeyword(blockedKeywordInfoDto);
+
+            if(result.get("result").toString().equals("S")){
+                resultData = (SuccessOutputDto) result.get("output");
+            }else{
+                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
+
+                if(errorOutputDto.getCode() < 500){
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }else{
+                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resultData, HttpStatus.OK);
     }
 
     @PostMapping("/blockedIp/copy")

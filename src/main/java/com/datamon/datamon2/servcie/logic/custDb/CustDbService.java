@@ -2,6 +2,7 @@ package com.datamon.datamon2.servcie.logic.custDb;
 
 import com.datamon.datamon2.dto.input.custDb.BlockedIpCopyDto;
 import com.datamon.datamon2.dto.input.custDb.BlockedIpInfoDto;
+import com.datamon.datamon2.dto.input.custDb.BlockedKeywordInfoDto;
 import com.datamon.datamon2.dto.input.custDb.LpgeCodeCreateDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
@@ -11,7 +12,6 @@ import com.datamon.datamon2.dto.output.custDb.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custDb.GetLpgeCodeInfoOutputDto;
 import com.datamon.datamon2.dto.output.custDb.GetLpgeDbListOutputDto;
 import com.datamon.datamon2.dto.repository.*;
-import com.datamon.datamon2.servcie.logic.member.MemberService;
 import com.datamon.datamon2.servcie.repository.*;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
@@ -47,6 +47,48 @@ public class CustDbService {
         this.landingPageInfomationService = landingPageInfomationService;
         this.memberInfomationService = memberInfomationService;
         this.userBaseService = userBaseService;
+    }
+
+    @Transactional
+    public Map<String, Object> createBlockedKeyword(HttpServletRequest request, BlockedKeywordInfoDto blockedKeywordInfoDto) throws Exception{
+        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
+
+        LandingPageBlockedKeywordDto landingPageBlockedKeywordDto = new LandingPageBlockedKeywordDto();
+        landingPageBlockedKeywordDto.setLpgeCode(blockedKeywordInfoDto.getDbCode());
+        landingPageBlockedKeywordDto.setKeyword(blockedKeywordInfoDto.getKeyword());
+
+        landingPageBlockedKeywordDto.create(userId);
+        landingPageBlockedKeywordService.saveLandingPageBlockedKeyword(landingPageBlockedKeywordDto);
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> deleteBlockedKeyword(BlockedKeywordInfoDto blockedKeywordInfoDto) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        List<LandingPageBlockedKeywordDto> keywordList = landingPageBlockedKeywordService.getLandingPageBlockedKeywordByLpgeCode(blockedKeywordInfoDto.getDbCode()).stream()
+                .filter(keyword -> keyword.getKeyword().equals(blockedKeywordInfoDto.getKeyword()))
+                .toList();
+
+        keywordList.forEach(keyword -> {
+            landingPageBlockedKeywordService.deleteLandingPageBlockedKeywordById(keyword.getIdx());
+        });
+
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+        return result;
     }
 
     @Transactional
@@ -168,6 +210,7 @@ public class CustDbService {
 
         LpgeCodeDto lpgeCodeDto = lpgeCodeService.getLpgeCodeFindById(idx);
         getLpgeCodeInfoOutputDto.setCode(lpgeCodeDto.getCodeFullName());
+        getLpgeCodeInfoOutputDto.setUrl(lpgeCodeDto.getCodeValue());
 
         //중복제거 정보
         Map<String, Object> duplRemoverData = new HashMap<>();
