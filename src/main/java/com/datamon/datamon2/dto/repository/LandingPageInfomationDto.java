@@ -10,7 +10,10 @@ import java.io.Serializable;
  */
 @Data
 public class LandingPageInfomationDto implements Serializable {
-    Integer idx;
+    Integer id;
     String lpgeCode;
-    String subTitle;
+    String head;
+    String body;
+    String title;
+    String description;
 }

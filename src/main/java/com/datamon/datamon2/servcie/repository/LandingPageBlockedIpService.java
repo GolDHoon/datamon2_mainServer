@@ -34,4 +34,8 @@ public class LandingPageBlockedIpService {
         return landingPageBlockedIpMapper.toDto(landingPageBlockedIpRepository.save(landingPageBlockedIpMapper.toEntity(landingPageBlockedIpDto)));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteLandingPageBlockedIpById(Integer id) {
+        landingPageBlockedIpRepository.deleteById(id);
+    }
 }

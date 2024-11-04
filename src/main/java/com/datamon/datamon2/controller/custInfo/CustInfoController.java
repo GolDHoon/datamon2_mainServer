@@ -4,7 +4,6 @@ import com.datamon.datamon2.dto.input.custInfo.DeleteCustInfoDto;
 import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
-import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
 import com.datamon.datamon2.servcie.logic.custInfo.CustInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -56,41 +54,6 @@ public class CustInfoController {
 
             if(result.get("result").toString().equals("S")){
                 resultData = result.get("output");
-            }else{
-                ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
-
-                if(errorOutputDto.getCode() < 500){
-                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.INTERNAL_SERVER_ERROR);
-                }else{
-                    return new ResponseEntity<>(errorOutputDto.getDetailReason(), HttpStatus.BAD_REQUEST);
-                }
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>("serverEror", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(resultData, HttpStatus.OK);
-    }
-
-    @GetMapping("/custDBCode/list")
-    @Operation(summary = "고객DB 목록 API", description = "요청한 유저의 보유 고객DB코드 목록을 출력해주는 API \n※출력데이터는 array 형태로 출력된다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "데이터 출력 성공.",
-                    content = @Content(schema = @Schema(implementation = GetCustDbCodeListOutputDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
-                    content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
-    })
-    public ResponseEntity<?> getCustDBCodeList(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        Map<String, Object> result;
-        List<GetCustDbCodeListOutputDto> resultData;
-        try {
-            result = custInfoService.getCustDBCodeList(request);
-
-            if(result.get("result").toString().equals("S")){
-                resultData = (List) result.get("output");
             }else{
                 ErrorOutputDto errorOutputDto = (ErrorOutputDto) result.get("output");
 

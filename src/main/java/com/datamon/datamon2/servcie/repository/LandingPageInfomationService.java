@@ -19,13 +19,7 @@ public class LandingPageInfomationService {
     }
 
     @Transactional(readOnly = true)
-    public LandingPageInfomationDto getLandingPageInfomationByLpgeCode (String lpgeCode){
+    public LandingPageInfomationDto getLandingPageInfomationByLpgeCode(String lpgeCode){
         return landingPageInfomationMapper.toDto(landingPageInfomationRepository.findByLpgeCode(lpgeCode).orElse(new LandingPageInfomationEntity()));
     }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public LandingPageInfomationDto save(LandingPageInfomationDto landingPageInfomationDto){
-        return landingPageInfomationMapper.toDto(landingPageInfomationRepository.save(landingPageInfomationMapper.toEntity(landingPageInfomationDto)));
-    }
-
 }

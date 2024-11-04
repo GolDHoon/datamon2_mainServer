@@ -6,7 +6,6 @@ import com.datamon.datamon2.dto.input.custInfo.ModifyCustInfoDto;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
-import com.datamon.datamon2.dto.output.custInfo.GetCustDbCodeListOutputDto;
 import com.datamon.datamon2.dto.output.custInfo.GetCustInfoListOutputDto;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.*;
@@ -23,20 +22,16 @@ import java.util.stream.Collectors;
 @Service
 public class CustInfoService {
     private final OutboundHistoryService outboundHistoryService;
-    private UserBaseService userBaseService;
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
     private OutboundService outboundService;
-    private UserCdbtMappingService userCdbtMappingService;
     private JwtUtil jwtUtil;
 
-    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil, UserBaseService userBaseService, UserBaseService userBaseService1, OutboundService outboundService, UserCdbtMappingService userCdbtMappingService, OutboundHistoryService outboundHistoryService) {
+    public CustInfoService(CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, JwtUtil jwtUtil, OutboundService outboundService, OutboundHistoryService outboundHistoryService) {
         this.customerInformationService = customerInformationService;
         this.customerBasicConsultationService = customerBasicConsultationService;
         this.jwtUtil = jwtUtil;
-        this.userBaseService = userBaseService1;
         this.outboundService = outboundService;
-        this.userCdbtMappingService = userCdbtMappingService;
         this.outboundHistoryService = outboundHistoryService;
     }
 
@@ -54,20 +49,16 @@ public class CustInfoService {
                 .filter(CustomerInformationDto::getUseYn)
                 .filter(dto -> !dto.getDelYn())
                 .sorted(Comparator.comparing(CustomerInformationDto::getCreateDate).reversed())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> custInfoIdxList = custInfoDtoList.stream()
-                .map(dto -> {
-                    return dto.getIdx();
-                })
+                .map(CustomerInformationDto::getIdx)
                 .collect(Collectors.toList());
 
         List<String> customCustInfoKeyList = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(custInfoIdxList).stream()
-                .map(dto -> {
-                    return dto.getKey();
-                })
+                .map(CustomerBasicConsultationDto::getKey)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         customCustInfoKeyList.forEach(key -> {
             ColumnInfo columnInfo = new ColumnInfo();
@@ -239,40 +230,6 @@ public class CustInfoService {
     }
 
     @Transactional
-    public Map<String, Object> getCustDBCodeList(HttpServletRequest request) throws Exception{
-        HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
-        Map<String, Object> result = new HashMap<>();
-        List<GetCustDbCodeListOutputDto> outputDtoList = new ArrayList<>();
-
-        int userId = jwtUtil.getUserId(httpSessionUtil.getAttribute("jwt").toString());
-
-        List<String> userAndDbCodeMapping = userCdbtMappingService.getUserCdbtListByUserId(userId).stream()
-                .map(dto -> {
-                    return dto.getCdbtLowCode();
-                })
-                .collect(Collectors.toList());
-
-        List<LpgeCodeDto> lpgeDbCodeList = CommonCodeCache.getLpgeCodes().stream()
-                .filter(code -> userAndDbCodeMapping.contains(code.getCodeFullName()))
-                .collect(Collectors.toList());
-
-        outputDtoList.add(new GetCustDbCodeListOutputDto());
-        outputDtoList.get(0).setCustDbType("CDBT_LPGE");
-        outputDtoList.get(0).setCustDbCodeList(new ArrayList<>());
-        lpgeDbCodeList.forEach(code -> {
-            Map<String, String> dbCode = new HashMap<>();
-            dbCode.put(code.getCodeFullName(), code.getCodeValue());
-            dbCode.put("key", code.getCodeFullName());
-            outputDtoList.get(0).getCustDbCodeList().add(dbCode);
-        });
-
-        result.put("result", "S");
-        result.put("output", outputDtoList);
-
-        return result;
-    }
-
-    @Transactional
     public Map<String, Object> deleteCustInfo(HttpServletRequest request, DeleteCustInfoDto deleteCustInfoDto) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
         SuccessOutputDto successOutputDto = new SuccessOutputDto();
@@ -376,8 +333,7 @@ public class CustInfoService {
                             .map(dto -> {
                                 dto.setValue(encryptionUtil.AES256encrypt((String) map.get("value")));
                                 return null;
-                            })
-                            .collect(Collectors.toList());
+                            });
                     break;
                 }
                 default: break;

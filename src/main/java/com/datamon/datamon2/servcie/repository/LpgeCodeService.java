@@ -41,6 +41,11 @@ public class LpgeCodeService {
     }
 
     @Transactional(readOnly = true)
+    public LpgeCodeDto getLpgeCodeFindById(int idx){
+        return lpgeCodeMapper.toDto(lpgeCodeRepository.findById(idx).orElse(new LpgeCodeEntity()));
+    }
+
+    @Transactional(readOnly = true)
     public LpgeCodeDto getLpgeCodeByCodeFullName(String codeFullName){
         return lpgeCodeMapper.toDto(lpgeCodeRepository.findByCodeFullName(codeFullName).orElse(new LpgeCodeEntity()));
     }

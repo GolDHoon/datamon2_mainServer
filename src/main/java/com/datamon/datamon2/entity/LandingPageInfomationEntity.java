@@ -12,12 +12,21 @@ public class LandingPageInfomationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idx", nullable = false)
-    private Integer idx;
+    private Integer id;
 
     @Column(name = "lpge_code")
     private String lpgeCode;
 
-    @Column(name = "sub_title", nullable = false)
-    private String subTitle;
+    @Column(name = "head")
+    private String head;
+
+    @Column(name = "body")
+    private String body;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "description")
+    private String description;
 
 }
