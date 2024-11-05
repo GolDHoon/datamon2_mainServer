@@ -13,31 +13,44 @@ import com.datamon.datamon2.dto.output.admin.SearchCompanyInfoByBRMOutputDto;
 import com.datamon.datamon2.dto.output.common.ColumnInfo;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
 import com.datamon.datamon2.dto.output.common.SuccessOutputDto;
+import com.datamon.datamon2.dto.output.member.VerificationInfo;
 import com.datamon.datamon2.dto.repository.*;
 import com.datamon.datamon2.servcie.repository.AccountApprovalRequestService;
 import com.datamon.datamon2.servcie.repository.CompanyInfomationService;
+import com.datamon.datamon2.servcie.repository.EmailVerificationService;
 import com.datamon.datamon2.servcie.repository.UserBaseService;
 import com.datamon.datamon2.util.EncryptionUtil;
 import com.datamon.datamon2.util.HttpSessionUtil;
 import com.datamon.datamon2.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class AdminService {
     private UserBaseService userBaseService;
     private CompanyInfomationService companyInfomationService;
     private AccountApprovalRequestService accountApprovalRequestService;
+    private EmailVerificationService emailVerificationService;
     private JwtUtil jwtUtil;
 
-    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService, JwtUtil jwtUtil) {
+    private RestTemplate restTemplate = new RestTemplate();
+
+    public AdminService(UserBaseService userBaseService, CompanyInfomationService companyInfomationService, AccountApprovalRequestService accountApprovalRequestService, EmailVerificationService emailVerificationService, JwtUtil jwtUtil) {
         this.userBaseService = userBaseService;
         this.companyInfomationService = companyInfomationService;
         this.accountApprovalRequestService = accountApprovalRequestService;
+        this.emailVerificationService = emailVerificationService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -706,5 +719,93 @@ public class AdminService {
         result.put("output", successOutputDto);
 
         return result;
+    }
+
+    @Transactional
+    public Map<String, Object> requestSendVerificationMail(String email) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        EmailVerificationDto emailVerificationDto = new EmailVerificationDto();
+        emailVerificationDto.setVerificationCode(generateVerificationCode("string", 16));
+        emailVerificationDto.create(CommonCodeCache.getSystemIdIdx());
+
+        EmailVerificationDto save = emailVerificationService.save(emailVerificationDto);
+
+        String body = "데이터몬 인증코드입니다.\n";
+        body = body + "인증번호 [" + save.getVerificationCode() + "]\n";
+        body = body + "이 메일은 회신이 불가합니다.";
+
+        // 외부 API 요청을 위한 데이터 설정
+        String url = "https://driven-notification.xyz/mail/send";
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("receiver_email", email);
+        requestBody.put("subject", "[데이터몬]데이터몬 회원가입 인증메일입니다.");
+        requestBody.put("body", body);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage(save.getIdx());
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> confirmMailVerification(VerificationInfo verificationInfo) throws Exception{
+        SuccessOutputDto successOutputDto = new SuccessOutputDto();
+        ErrorOutputDto errorOutputDto = new ErrorOutputDto();
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", "E");
+
+        EmailVerificationDto emailVerificationDto = emailVerificationService.getEmailVerificationById(verificationInfo.getIdx());
+
+        if(emailVerificationDto.getIdx() == null){
+            errorOutputDto.setCode(500);
+            errorOutputDto.setDetailReason("인증에 실패하였습니다.");
+            result.put("output", errorOutputDto);
+            return result;
+        }
+
+        if(emailVerificationDto.getVerificationCode().equals(verificationInfo.getVerificationCode())){
+            emailVerificationService.delete(emailVerificationDto.getIdx());
+        }else{
+            errorOutputDto.setCode(500);
+            errorOutputDto.setDetailReason("인증에 실패하였습니다.");
+            result.put("output", errorOutputDto);
+            return result;
+        }
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("인증이 완료되었습니다.");
+        result.put("result", "S");
+        result.put("output", successOutputDto);
+
+        return result;
+    }
+
+    private String generateVerificationCode(String mode, int length) {
+        String characters;
+        if(mode.equals("string")){
+            characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        }else{
+            characters = "0123456789";
+        }
+        SecureRandom random = new SecureRandom();
+
+        // 특정 길이 만큼 무작위 문자열 생성
+        return IntStream.range(0, length)
+                .map(i -> random.nextInt(characters.length()))
+                .mapToObj(randomIndex -> String.valueOf(characters.charAt(randomIndex)))
+                .collect(Collectors.joining());
     }
 }
