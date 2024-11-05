@@ -303,7 +303,6 @@ public class MemberService {
                 .collect(Collectors.toList())).stream()
                 .filter(UserBaseDto::getUseYn)
                 .filter(user -> !user.getDelYn())
-                .filter(user -> user.getUserStatus().equals("ACST_PEND"))
                 .collect(Collectors.toList());
 
         List<AccountApprovalRequestDto> approvalRequestList = accountApprovalRequestService.getAccountApprovalRequestByUserIdList(userList.stream()
@@ -566,10 +565,44 @@ public class MemberService {
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(userId);
+        CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationById(memberInfomationDto.getCompanyId());
+        UserBaseDto companyUser = userBaseService.getUserBaseById(companyInfomationDto.getUserId());
 
         userBaseDto.setUserStatus("ACST_ACTV");
-        userBaseDto.create(userId);
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            userBaseDto.create(userId);
+        }else{
+            userBaseDto.modify(userId);
+        }
         userBaseService.save(userBaseDto);
+
+        String body = "회원가입 요청이 완료되었습니다.\n";
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            String url = "https://datamon2.xyz/" + companyUser.getUserId() + "/login";
+            body = body + "url : <a href=" + url + ">" + url + "</a>\n";
+            body = body + "이 메일은 회신이 불가합니다.";
+        }else{
+            body = "회원정보 수정요청이 완료되었습니다.";
+        }
+
+        // 외부 API 요청을 위한 데이터 설정
+        String url = "https://driven-notification.xyz/mail/send";
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("receiver_email", memberInfomationDto.getContactMail());
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            requestBody.put("subject", "[데이터몬] 회원가입이 완료되었습니다.");
+        }else{
+            requestBody.put("subject", "[데이터몬] 회원정보 수정요청이 완료되었습니다.");
+        }
+        requestBody.put("body", body);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         successOutputDto.setCode(200);
         successOutputDto.setMessage("요청이 승인되었습니다.");
@@ -594,12 +627,44 @@ public class MemberService {
         accountApprovalRequestDto.setCompletionYn(true);
         accountApprovalRequestDto.setRejectionReason(memberAccountRequestProcessingDto.getRejectionReason());
         accountApprovalRequestDto.modify(userId);
-        accountApprovalRequestService.save(accountApprovalRequestDto);
+        AccountApprovalRequestDto saveReq = accountApprovalRequestService.save(accountApprovalRequestDto);
 
         UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
 
-        userBaseDto.create(userId);
-        userBaseService.save(userBaseDto);
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            userBaseDto.create(userId);
+        }else{
+            userBaseDto.modify(userId);
+        }
+        UserBaseDto save = userBaseService.save(userBaseDto);
+
+        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(save.getIdx());
+
+        String body = "회원가입 요청이 반려되었습니다.\n";
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            body = body + "반려사유 : " + saveReq.getRejectionReason() + "\n";
+        }else{
+            body = "회원정보 수정요청이 반려되었습니다.";
+            body = body + "반려사유 : " + saveReq.getRejectionReason() + "\n";
+        }
+
+        // 외부 API 요청을 위한 데이터 설정
+        String url = "https://driven-notification.xyz/mail/send";
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("receiver_email", memberInfomationDto.getContactMail());
+        if(accountApprovalRequestDto.getRequestType().equals("C")){
+            requestBody.put("subject", "[데이터몬] 회원가입이 반려되었습니다.");
+        }else{
+            requestBody.put("subject", "[데이터몬] 회원정보 수정요청이 반려되었습니다.");
+        }
+        requestBody.put("body", body);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         successOutputDto.setCode(200);
         successOutputDto.setMessage("요청이 반려되었습니다.");
@@ -669,7 +734,7 @@ public class MemberService {
         String url = "https://driven-notification.xyz/mail/send";
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("receiver_email", email);
-        requestBody.put("subject", "[데이터몬]데이터몬 회원가입 인증메일입니다.");
+        requestBody.put("subject", "[데이터몬] 회원가입 인증메일입니다.");
         requestBody.put("body", body);
 
         HttpHeaders headers = new HttpHeaders();
