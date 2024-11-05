@@ -42,4 +42,14 @@ public class CustomerInformationService {
         return customerInformationMapper.toDto(customerInformationRepository.findById(idx).orElse(new CustomerInformationEntity()));
     }
 
+    @Transactional(readOnly = true)
+    public List<CustomerInformationDto> getCustomerInformationByCdbtLowCodeList(List<String> cdbtLowCodeList){
+        List<CustomerInformationDto> result = new ArrayList<>();
+
+        customerInformationRepository.findByCdbtLowCodeIn(cdbtLowCodeList).forEach(entity -> {
+            result.add(customerInformationMapper.toDto(entity));
+        });
+
+        return result;
+    }
 }

@@ -1,8 +1,7 @@
-package com.datamon.datamon2.controller.performance;
+package com.datamon.datamon2.controller.home;
 
-
-import com.datamon.datamon2.controller.home.HomeController;
 import com.datamon.datamon2.dto.output.common.ErrorOutputDto;
+import com.datamon.datamon2.dto.output.performance.PerformanceOutputDto;
 import com.datamon.datamon2.servcie.logic.performance.PerformanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,17 +24,17 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/performance")
-public class PerformanceController {
-    private static final Logger logger = LogManager.getLogger(PerformanceController.class);
+@RequestMapping("/home")
+public class HomeController {
+    private static final Logger logger = LogManager.getLogger(HomeController.class);
     private PerformanceService performanceService;
 
-    public PerformanceController(PerformanceService performanceService) {
+    public HomeController(PerformanceService performanceService) {
         this.performanceService = performanceService;
     }
 
-    @GetMapping("/collection")
-    @Operation(summary = "실적 수집통계 조회 API", description = "실적 수집통계를 조회하는 API.")
+    @GetMapping("/performance")
+    @Operation(summary = "home 수집통계 조회 API", description = "home 수집통계를 조회하는 API.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "데이터 출력 성공."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
@@ -43,13 +42,11 @@ public class PerformanceController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorOutputDto.class)))
     })
-    public ResponseEntity<?> getCollectionPerformanceData(HttpServletRequest request, HttpServletResponse response,
-                                                          @Parameter(description = "DB코드")
-                                                          @RequestParam String dbCode) throws Exception{
+    public ResponseEntity<?> getCollectionPerformanceData(HttpServletRequest request, HttpServletResponse response) throws Exception{
         Map<String, Object> result;
         List<Map<String, Object>> resultData;
         try {
-            result = performanceService.getCollectionPerformanceData(request, dbCode);
+            result = performanceService.getCollectionPerformanceData(request, null);
 
             if(result.get("result").toString().equals("S")){
                 resultData = (List<Map<String, Object>>) result.get("output");

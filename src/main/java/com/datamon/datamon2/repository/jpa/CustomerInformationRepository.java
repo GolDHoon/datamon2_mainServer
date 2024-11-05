@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface CustomerInformationRepository extends JpaRepository<CustomerInformationEntity, String> {
     List<CustomerInformationEntity> findByCdbtLowCode(String cdbtLowCode);
+    List<CustomerInformationEntity> findByCdbtLowCodeIn(List<String> cdbtLowCodeList);
 }
