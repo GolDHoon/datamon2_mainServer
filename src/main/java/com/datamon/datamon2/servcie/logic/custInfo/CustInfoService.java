@@ -35,6 +35,7 @@ public class CustInfoService {
         this.outboundHistoryService = outboundHistoryService;
     }
 
+
     @Transactional
     public Map<String, Object> getCustInfoList(HttpServletRequest request, String custDBType, String custDBCode) throws Exception{
         HttpSessionUtil httpSessionUtil = new HttpSessionUtil(request.getSession(false));
@@ -139,6 +140,8 @@ public class CustInfoService {
         columnInfo.setKey("modifyDate");
         getCustInfoListOutputDto.getColumnInfoList().add(columnInfo);
 
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
         custInfoDtoList.forEach(dto -> {
             OutboundDto outbound = outboundService.getOutboundByCustId(dto.getIdx());
 
@@ -153,6 +156,7 @@ public class CustInfoService {
 
             OutboundDto finalOutbound = outbound;
             Map<String, Object> row = new HashMap<>();
+
             getCustInfoListOutputDto.getColumnInfoList().forEach(column -> {
                 switch (column.getColumnType()){
                     case "basic" : {
@@ -213,7 +217,6 @@ public class CustInfoService {
                 }
             });
 
-            EncryptionUtil encryptionUtil = new EncryptionUtil();
             customerBasicConsultationService.getCustomerBasicConsultationByCustId(dto.getIdx())
                     .forEach(customInfo -> {
                         row.put(customInfo.getKey(), encryptionUtil.AES256decrypt(customInfo.getValue()));
@@ -222,6 +225,10 @@ public class CustInfoService {
             row.put("idx", dto.getIdx());
             getCustInfoListOutputDto.getDataList().add(row);
         });
+
+        custInfoDtoList.clear();
+        custInfoIdxList.clear();
+        customCustInfoKeyList.clear();
 
         result.put("result", "S");
         result.put("output", getCustInfoListOutputDto);
