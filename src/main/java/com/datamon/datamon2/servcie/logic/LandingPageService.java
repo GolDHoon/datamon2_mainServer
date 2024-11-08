@@ -110,9 +110,9 @@ public class LandingPageService {
     }
 
     @Transactional
-    public String registerCustData(String ip, CustDataDto custDataDto) throws Exception{
+    public String registerCustData(String ip, CustDataDto custDataDto) throws Exception {
         boolean ipChecker = false;
-        if(custDataDto.getInputMode().equals("local")){
+        if("local".equals(custDataDto.getInputMode())){
             ip = "127.0.0.1";
         }
 
@@ -121,14 +121,15 @@ public class LandingPageService {
                 .filter(dto -> !dto.getDelYn())
                 .toList();
 
-        for(int i = 0; i < landingPageBlockedIpByLpgeCode.size(); i++){
-            String regIp = "";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp1())+".";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp2())+".";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp3())+".";
-            regIp = regIp + String.valueOf(landingPageBlockedIpByLpgeCode.get(i).getIp4());
-            if(ip.equals(regIp)){
+        for (LandingPageBlockedIpDto blockedIp : landingPageBlockedIpByLpgeCode) {
+            String regIp = String.format("%d.%d.%d.%d",
+                    blockedIp.getIp1(),
+                    blockedIp.getIp2(),
+                    blockedIp.getIp3(),
+                    blockedIp.getIp4());
+            if (ip.equals(regIp)) {
                 ipChecker = true;
+                break;
             }
         }
 
@@ -136,6 +137,53 @@ public class LandingPageService {
             return "fail - Blocked IP";
         }
 
+        EncryptionUtil encryptionUtil = new EncryptionUtil();
+
+        List<DbDuplicateDataProcessingDto> duplCheckDataList = dbDuplicationDataProcessingService.getByDbCode(custDataDto.getLpgeCode()).stream()
+                .filter(DbDuplicateDataProcessingDto::getPreprocessingYn)
+                .toList();
+
+        Map<Integer, List<DbDuplicateDataProcessingDto>> groupedByKeyGroupNo = duplCheckDataList.stream()
+                .collect(Collectors.groupingBy(DbDuplicateDataProcessingDto::getKeyGroupNo));
+
+        List<String> custIdList = customerInformationService.getCustomerInformationByCdbtLowCode(custDataDto.getLpgeCode()).stream()
+                .filter(CustomerInformationDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .map(CustomerInformationDto::getIdx)
+                .toList();
+
+        List<CustomerBasicConsultationDto> custConsultationData = customerBasicConsultationService.getCustomerBasicConsultationByCustIdList(custIdList);
+
+        boolean dupleChecker = false; // 중복 체크를 위한 플래그
+
+        // KeyGroupNo를 기준으로 DTO들을 그룹화하여 중복 체크 로직 수행
+        for (Map.Entry<Integer, List<DbDuplicateDataProcessingDto>> entry : groupedByKeyGroupNo.entrySet()) {
+            List<DbDuplicateDataProcessingDto> groupedDtos = entry.getValue();
+
+            for (DbDuplicateDataProcessingDto dto : groupedDtos) {
+                String key = dto.getKey();
+                Optional<String> valueOpt = custDataDto.getData().stream()
+                        .filter(map -> map.get("key").equals(key))
+                        .map(map -> map.get("value"))
+                        .findFirst();
+
+                if (valueOpt.isPresent()) {
+                    String value = encryptionUtil.AES256encrypt(valueOpt.get());
+                    dupleChecker = custConsultationData.stream()
+                            .anyMatch(consultation ->
+                                    consultation.getKey().equals(key) &&
+                                            consultation.getValue().equals(value));
+                    if (dupleChecker) break;
+                }
+            }
+            if (dupleChecker) break;
+        }
+
+        if (dupleChecker) {
+            return "fail - Duplicate data found";
+        }
+
+        // 나머지 코드
         CustomerInformationDto customerInformationDto = new CustomerInformationDto();
         customerInformationDto.setCdbtLowCode(custDataDto.getLpgeCode());
         TableIndexDto tableIndexByOptionName = tableIndexService.getTableIndexByOptionName(custDataDto.getLpgeCode());
@@ -155,8 +203,7 @@ public class LandingPageService {
         tableIndexByOptionName.setIndex(tableIndexByOptionName.getIndex()+1L);
         tableIndexService.save(tableIndexByOptionName);
 
-        EncryptionUtil encryptionUtil = new EncryptionUtil();
-        custDataDto.getData().forEach(map->{
+        custDataDto.getData().forEach(map -> {
             CustomerBasicConsultationDto customerBasicConsultationDto = new CustomerBasicConsultationDto();
 
             customerBasicConsultationDto.setCustId(newCustomerInformationDto.getIdx());
@@ -169,6 +216,7 @@ public class LandingPageService {
         return "success";
     }
 
+    @Transactional
     public List<Object> getDuplicateRemovalPreprocessingList(String dbCode){
         Map<Integer, List<DbDuplicateDataProcessingDto>> groupedByKeyGroupNoDtoList = dbDuplicationDataProcessingService.getByDbCode(dbCode).stream()
                 .collect(Collectors.groupingBy(DbDuplicateDataProcessingDto::getKeyGroupNo));
