@@ -226,10 +226,6 @@ public class CustInfoService {
             getCustInfoListOutputDto.getDataList().add(row);
         });
 
-        custInfoDtoList.clear();
-        custInfoIdxList.clear();
-        customCustInfoKeyList.clear();
-
         result.put("result", "S");
         result.put("output", getCustInfoListOutputDto);
 
