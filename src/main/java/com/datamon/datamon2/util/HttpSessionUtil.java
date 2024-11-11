@@ -7,7 +7,7 @@ public class HttpSessionUtil {
 
     public HttpSessionUtil(HttpSession session) {
         this.session = session;
-        session.setMaxInactiveInterval(-1);
+        session.setMaxInactiveInterval(86400);
     }
 
     public void setSession(HttpSession session){
