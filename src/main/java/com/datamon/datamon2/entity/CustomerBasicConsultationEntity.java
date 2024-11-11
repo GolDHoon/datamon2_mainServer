@@ -20,7 +20,7 @@ public class CustomerBasicConsultationEntity extends DrivenCommonUserEntity impl
     @Column(name = "cust_id", nullable = false)
     private String custId;
 
-    @Column(name = "`key`", nullable = false, length = 100)
+    @Column(name = "cust_key", nullable = false, length = 100)
     private String key;
 
     @Column(name = "value", nullable = false, length = 5000)
