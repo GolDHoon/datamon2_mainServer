@@ -32,8 +32,9 @@ public class CustDbService {
     private CustomerInformationService customerInformationService;
     private CustomerBasicConsultationService customerBasicConsultationService;
     private LandingPageInfomationService landingPageInfomationService;
+    private TableIndexService tableIndexService;
 
-    public CustDbService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, DbDuplicationDataProcessingService dbDuplicationDataProcessingService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, LandingPageInfomationService landingPageInfomationService, MemberInfomationService memberInfomationService, UserBaseService userBaseService) {
+    public CustDbService(JwtUtil jwtUtil, UserCdbtMappingService userCdbtMappingService, LpgeCodeService lpgeCodeService, LandingPageBlockedIpService landingPageBlockedIpService, LandingPageBlockedKeywordService landingPageBlockedKeywordService, DbDuplicationDataProcessingService dbDuplicationDataProcessingService, CustomerInformationService customerInformationService, CustomerBasicConsultationService customerBasicConsultationService, LandingPageInfomationService landingPageInfomationService, MemberInfomationService memberInfomationService, UserBaseService userBaseService, TableIndexService tableIndexService) {
         this.jwtUtil = jwtUtil;
         this.userCdbtMappingService = userCdbtMappingService;
         this.lpgeCodeService = lpgeCodeService;
@@ -45,6 +46,7 @@ public class CustDbService {
         this.landingPageInfomationService = landingPageInfomationService;
         this.memberInfomationService = memberInfomationService;
         this.userBaseService = userBaseService;
+        this.tableIndexService = tableIndexService;
     }
 
     @Transactional
@@ -479,6 +481,15 @@ public class CustDbService {
         userCdbtMappingDto.setUserId(userId);
         userCdbtMappingDto.setCdbtCode("LPGE");
         userCdbtMappingService.save(userCdbtMappingDto);
+
+        TableIndexDto tableIndexDto = new TableIndexDto();
+
+        tableIndexDto.setIndex(0L);
+        tableIndexDto.setTableName("TB_CUSTOMER_INFORMATION");
+        tableIndexDto.setIndex(1L);
+        tableIndexDto.setOptionName(saveCode.getCodeFullName());
+
+        tableIndexService.save(tableIndexDto);
 
         successOutputDto.setCode(200);
         successOutputDto.setMessage("랜딩페이지 정보가 생성되었습니다.");
