@@ -376,13 +376,15 @@ public class CustDbService {
         getLpgeCodeInfoOutputDto.getDuplColumnInfo().put("duplRemover", duplRemoverList);
 
         Set<String> keySet = new HashSet<>();
-        customerInformationService.getCustomerInformationByCdbtLowCode(lpgeCodeDto.getCodeFullName()).forEach(custInfo -> {
+        customerInformationService.getCustomerInformationByCdbtLowCode(lpgeCodeDto.getCodeFullName()).stream()
+                .filter(CustomerInformationDto::getUseYn)
+                .filter(dto -> !dto.getDelYn())
+                .forEach(custInfo -> {
             customerBasicConsultationService.getCustomerBasicConsultationByCustId(custInfo.getIdx()).forEach(customCustInfo -> {
                 keySet.add(customCustInfo.getKey());
             });
         });
 
-        // 필요하다면 다시 List로 변환
         List<String> keyList = new ArrayList<>(keySet);
         getLpgeCodeInfoOutputDto.getDuplColumnInfo().put("keyList", keyList);
 
