@@ -686,6 +686,9 @@ public class AdminService {
         UserBaseDto save = userBaseService.save(userBaseDto);
         CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(save.getIdx());
 
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 승인되었습니다.");
+
         String body = "회원가입 요청이 완료되었습니다.\n";
         if(accountApprovalRequestDto.getRequestType().equals("C")){
             String url = "https://datamon2.xyz/" + userBaseDto.getUserId() + "/login";
@@ -711,10 +714,12 @@ public class AdminService {
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        try{
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        } catch (Exception e) {
+            successOutputDto.setMessage("요청이 승인되었지만 승인완료 이메일이 발송되지 않았습니다.");
+        }
 
-        successOutputDto.setCode(200);
-        successOutputDto.setMessage("요청이 승인되었습니다.");
         result.put("result", "S");
         result.put("output", successOutputDto);
 
@@ -748,6 +753,9 @@ public class AdminService {
         UserBaseDto save = userBaseService.save(userBaseDto);
         CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationByUserId(save.getIdx());
 
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 반려되었습니다.");
+
         String body = "회원가입 요청이 반려되었습니다.\n";
         if(accountApprovalRequestDto.getRequestType().equals("C")){
             body = body + "반려사유 : " + saveReq.getRejectionReason() + "\n";
@@ -772,10 +780,11 @@ public class AdminService {
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-
-        successOutputDto.setCode(200);
-        successOutputDto.setMessage("요청이 반려되었습니다.");
+        try{
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        } catch (Exception e) {
+            successOutputDto.setMessage("요청이 반려되었지만 반려 이메일이 발송되지 않았습니다.");
+        }
         result.put("result", "S");
         result.put("output", successOutputDto);
 

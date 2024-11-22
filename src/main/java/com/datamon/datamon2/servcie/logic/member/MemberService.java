@@ -564,8 +564,8 @@ public class MemberService {
         accountApprovalRequestDto.modify(userId);
         accountApprovalRequestService.save(accountApprovalRequestDto);
 
-        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
-        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(userId);
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(accountApprovalRequestDto.getUserId());
+        MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(accountApprovalRequestDto.getUserId());
         CompanyInfomationDto companyInfomationDto = companyInfomationService.getCompanyInfomationById(memberInfomationDto.getCompanyId());
         UserBaseDto companyUser = userBaseService.getUserBaseById(companyInfomationDto.getUserId());
 
@@ -576,6 +576,9 @@ public class MemberService {
             userBaseDto.modify(userId);
         }
         userBaseService.save(userBaseDto);
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 승인되었습니다.");
 
         String body = "회원가입 요청이 완료되었습니다.\n";
         if(accountApprovalRequestDto.getRequestType().equals("C")){
@@ -602,10 +605,12 @@ public class MemberService {
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        try{
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        } catch (Exception e) {
+            successOutputDto.setMessage("요청이 승인되었지만 승인완료 이메일이 발송되지 않았습니다.");
+        }
 
-        successOutputDto.setCode(200);
-        successOutputDto.setMessage("요청이 승인되었습니다.");
         result.put("result", "S");
         result.put("output", successOutputDto);
 
@@ -629,7 +634,7 @@ public class MemberService {
         accountApprovalRequestDto.modify(userId);
         AccountApprovalRequestDto saveReq = accountApprovalRequestService.save(accountApprovalRequestDto);
 
-        UserBaseDto userBaseDto = userBaseService.getUserBaseById(userId);
+        UserBaseDto userBaseDto = userBaseService.getUserBaseById(accountApprovalRequestDto.getUserId());
 
         if(accountApprovalRequestDto.getRequestType().equals("C")){
             userBaseDto.create(userId);
@@ -639,6 +644,9 @@ public class MemberService {
         UserBaseDto save = userBaseService.save(userBaseDto);
 
         MemberInfomationDto memberInfomationDto = memberInfomationService.getMemberInfomationByUserId(save.getIdx());
+
+        successOutputDto.setCode(200);
+        successOutputDto.setMessage("요청이 반려되었습니다.");
 
         String body = "회원가입 요청이 반려되었습니다.\n";
         if(accountApprovalRequestDto.getRequestType().equals("C")){
@@ -664,10 +672,12 @@ public class MemberService {
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        try{
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        } catch (Exception e) {
+            successOutputDto.setMessage("요청이 반려되었지만 반려 이메일이 발송되지 않았습니다.");
+        }
 
-        successOutputDto.setCode(200);
-        successOutputDto.setMessage("요청이 반려되었습니다.");
         result.put("result", "S");
         result.put("output", successOutputDto);
 
